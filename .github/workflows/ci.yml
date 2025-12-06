@@ -28,15 +28,11 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        id: eslint
-        run: npm run lint || echo "eslint_exit_code=$?" >> $GITHUB_OUTPUT
-        continue-on-error: true
-      - name: ESLint Status
-        if: steps.eslint.outcome == 'failure'
         run: |
-          echo "::warning::ESLint check skipped due to known circular reference bug in ESLint 9.39.1"
+          echo "::warning::ESLint check may fail due to known circular reference bug in ESLint 9.39.1"
           echo "::warning::See ESLINT_KNOWN_ISSUE.md for details. This is an upstream bug, not a code issue."
-          echo "::warning::TypeScript and Prettier checks will still run to ensure code quality."
+          npm run lint || true
+        continue-on-error: true
 
       - name: Run Prettier check
         run: npm run format:check
