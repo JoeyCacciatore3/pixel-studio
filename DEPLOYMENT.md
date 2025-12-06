@@ -1,6 +1,38 @@
 # Deployment Guide
 
-This project can be deployed to production using several methods. The recommended approach is **Vercel** for Next.js applications.
+This project can be deployed to production using several methods. The recommended approach is **GitHub Pages** (free, automatic) or **Vercel** for Next.js applications.
+
+## Option 1: GitHub Pages (Recommended - Free & Automatic)
+
+Your site will be automatically deployed to GitHub Pages whenever you push to the `master` branch.
+
+### Setup (One-time)
+
+1. Go to your repository: `https://github.com/JoeyCacciatore3/pixel-studio`
+2. Click **Settings** → **Pages**
+3. Under **Source**, select:
+   - **Source**: GitHub Actions
+4. The deployment workflow will run automatically on the next push
+
+### Your Site URL
+
+After the first deployment, your site will be available at:
+
+- `https://joeycacciatore3.github.io/pixel-studio/`
+
+### Automatic Deployments
+
+- Every push to `master` branch = Automatic deployment
+- Deployments happen via GitHub Actions
+- Build logs available in the **Actions** tab
+
+### Manual Deployment
+
+You can also trigger a deployment manually:
+
+1. Go to **Actions** tab in your repository
+2. Select "Deploy to GitHub Pages" workflow
+3. Click "Run workflow"
 
 ## Option 1: Vercel (Recommended - Easiest)
 
