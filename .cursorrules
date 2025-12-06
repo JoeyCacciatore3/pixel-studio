@@ -1,0 +1,206 @@
+# Pixel Studio - Cursor IDE Rules
+
+## MCP Agent Mandate (MANDATORY)
+
+**ALWAYS use MCP agents before writing code or making decisions. NEVER guess or use mock/placeholder code.**
+
+### Required Agent Usage
+- **context7**: Library documentation (Next.js, TypeScript, React) - Use for API references, code examples, best practices
+- **brave-search**: Web search for examples, solutions, troubleshooting
+- **firecrawl-mcp**: Scrape documentation and web content when direct access needed
+- **sentry**: Error tracking and production debugging
+- **github**: Repository operations and code history
+- **coding-agent**: Code assistance and refactoring
+- **playwright**: Browser automation and testing
+
+### Rules
+- **MUST use agents** when troubleshooting, debugging, or implementing features
+- **MUST verify** all code patterns and APIs through agents before implementation
+- **NEVER guess** implementation details - always consult agents first
+- **NEVER use** mock/placeholder code - get accurate implementations from agents
+- **ALWAYS verify** MCP-provided code against project standards before using
+
+## Core Development Rules
+
+### TypeScript
+- Prefer interfaces over types for object shapes
+- Avoid enums; use const objects or maps
+- Use `type` only for unions, intersections, or utility types
+- Always use explicit return types for exported functions
+- Use `unknown` instead of `any` when type is truly unknown
+- Use `function` keyword for pure functions and components
+- Omit semicolons (Prettier configured)
+- Use single quotes for strings
+- Prefer named exports over default exports
+
+### React/Next.js
+- Use functional components with TypeScript interfaces for props
+- Minimize `'use client'` directives - only when absolutely necessary
+- Prefer Server Components; use client components sparingly
+- Minimize `useEffect`; prefer React Server Components and Next.js data fetching
+- Use `useState` only for local component state
+- Always include dependency arrays in `useEffect`
+- Use `useRef` for DOM references and mutable values
+- Implement error boundaries using `error.tsx` and `global-error.tsx`
+
+### Code Style
+- Use trailing commas in multi-line objects/arrays
+- Structure component files: exported component, subcomponents, helpers, static content, types
+- Extract complex logic into custom hooks
+- Use try-catch blocks for async operations
+- Log errors with console.error, not console.log
+
+## Project Architecture
+
+### Module Pattern (IIFE)
+Core logic uses IIFE modules for encapsulation:
+- Modules export a public API object
+- Internal state and functions are private
+- Pattern: `src/lib/app.ts`, `src/lib/canvas.ts`, `src/lib/history.ts`
+
+```typescript
+const ModuleName = (function () {
+  let privateState: StateType
+  function privateFunction(): void {}
+  return { publicMethod: privateFunction }
+})()
+export default ModuleName
+```
+
+### Tool System
+- Tools implement the `Tool` interface from `src/lib/types.ts`
+- Tools are registered via `PixelStudio.registerTool()`
+- Tools are imported in `src/lib/tools/index.ts` to auto-register
+- Each tool has: `init`, `onPointerDown`, `onPointerMove`, `onPointerUp`
+
+### File Organization
+```
+src/
+├── app/              # Next.js App Router pages (Server Components by default)
+├── components/       # React client components ('use client')
+├── lib/             # Core application logic (IIFE modules)
+│   ├── tools/       # Tool implementations
+│   └── types.ts     # TypeScript type definitions
+└── test/            # Test utilities
+```
+
+## Quality Standards
+
+### Error Handling
+- Prioritize error handling at the beginning of functions
+- Use early returns for error conditions
+- Place the happy path last in functions
+- Use guard clauses for preconditions
+- Always handle edge cases and null/undefined checks
+
+### Performance
+- Minimize client-side JavaScript; favor server components
+- Use dynamic imports for non-critical components: `next/dynamic`
+- Optimize images: WebP format, size data, lazy loading
+- Avoid unnecessary re-renders; use `React.memo` when appropriate
+- Use `useCallback` and `useMemo` judiciously (only when profiling shows benefit)
+- Always use requestAnimationFrame for canvas updates when possible
+- Clear canvas properly before redrawing
+- Use offscreen canvas for complex operations
+
+### Accessibility
+- Use semantic HTML elements
+- Include proper ARIA labels where needed
+- Ensure keyboard navigation works
+- Maintain proper focus management
+
+### Security
+- Never expose API keys or secrets in client code
+- Validate and sanitize user inputs
+- Use Next.js security headers
+- Follow OWASP best practices
+
+### Testing
+- Write tests for all new features
+- Test edge cases and error conditions
+- Aim for good test coverage (target: >80%)
+- Use Vitest for unit and integration tests
+- Use React Testing Library for component tests
+
+## Naming Conventions
+
+### Files and Directories
+- Use lowercase with dashes for directories: `components/auth-wizard`
+- Use PascalCase for component files: `Canvas.tsx`, `Toolbar.tsx`
+- Use camelCase for utility files: `colorUtils.ts`, `toolHelpers.ts`
+- Use kebab-case for config files: `next.config.js`, `eslint.config.mjs`
+
+### Variables and Functions
+- Use camelCase for variables and functions
+- Use PascalCase for components and types/interfaces
+- Use UPPER_SNAKE_CASE for constants
+- Prefix booleans with `is`, `has`, `should`, `can`: `isLoading`, `hasError`
+
+## Import Organization
+
+### Import Order
+1. External dependencies (React, Next.js, etc.)
+2. Internal modules (`@/lib/*`, `@/components/*`)
+3. Types (use `import type` for type-only imports)
+4. Relative imports
+
+## Documentation
+
+### Code Comments
+- Add JSDoc comments for exported functions
+- Explain "why" not "what" in comments
+- Keep comments up-to-date with code changes
+- Remove commented-out code before committing
+
+## Workflow
+
+### Before Committing
+1. Run `npm run type-check` - TypeScript validation
+2. Run `npm run lint` - ESLint checks
+3. Run `npm run format:check` - Prettier validation
+4. Run `npm run test` - Test suite
+5. Ensure all checks pass before committing
+
+### Code Review Checklist
+- [ ] TypeScript types are correct and strict
+- [ ] No `any` types (use `unknown` if needed)
+- [ ] Error handling is implemented
+- [ ] Tests are written and passing
+- [ ] Code follows project conventions
+- [ ] Documentation is updated
+- [ ] No console.log statements (use console.error/warn if needed)
+- [ ] MCP agents were consulted for implementation details
+
+### Commit Messages
+Follow conventional commit format:
+- `feat(scope): description` - New features
+- `fix(scope): description` - Bug fixes
+- `docs(scope): description` - Documentation
+- `style(scope): description` - Formatting
+- `refactor(scope): description` - Code refactoring
+- `test(scope): description` - Tests
+- `chore(scope): description` - Maintenance
+
+## Canvas-Specific Guidelines
+
+### Canvas Operations
+- Always use requestAnimationFrame for canvas updates when possible
+- Clear canvas properly before redrawing
+- Use offscreen canvas for complex operations
+- Optimize canvas operations for performance
+- Handle canvas resize and zoom properly
+
+### Tool Implementation
+- Tools must implement the `Tool` interface
+- Tools should be stateless where possible
+- Use the provided state and elements from initialization
+- Handle pointer events correctly (capture/release)
+- Clean up resources in tool lifecycle
+
+## When in Doubt
+- **ALWAYS consult MCP agents first** - never guess
+- Follow existing code patterns in the project
+- Use MCP agents to research best practices
+- Ask for clarification rather than guessing
+- Prioritize code clarity over cleverness
+- Write code that your future self will understand
