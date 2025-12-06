@@ -157,8 +157,11 @@ jobs:
 
       - name: Check for high/critical vulnerabilities
         run: |
-          if npm audit --audit-level=high --dry-run 2>&1 | grep -q "found"; then
+          # Check for high/critical vulnerabilities
+          # npm audit returns exit code 1 if vulnerabilities are found
+          if ! npm audit --audit-level=high --dry-run > /dev/null 2>&1; then
             echo "::error::High or critical vulnerabilities found. Please run 'npm audit' and fix issues."
+            npm audit --audit-level=high
             exit 1
           fi
           echo "No high or critical vulnerabilities found"
