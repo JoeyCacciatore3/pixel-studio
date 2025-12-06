@@ -8,11 +8,7 @@ import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { createStabilizer } from './stabilizer';
-import {
-  getPressure,
-  calculateBrushSize,
-  calculateSpacing,
-} from './brushHelpers';
+import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelpers';
 
 (function () {
   let toolState: SmudgeToolState | null = null;
@@ -147,8 +143,12 @@ import {
 
           // Blend with last color
           data[idx] = Math.round(data[idx]! * (1 - blend) + toolState.lastColor[0]! * blend);
-          data[idx + 1] = Math.round(data[idx + 1]! * (1 - blend) + toolState.lastColor[1]! * blend);
-          data[idx + 2] = Math.round(data[idx + 2]! * (1 - blend) + toolState.lastColor[2]! * blend);
+          data[idx + 1] = Math.round(
+            data[idx + 1]! * (1 - blend) + toolState.lastColor[1]! * blend
+          );
+          data[idx + 2] = Math.round(
+            data[idx + 2]! * (1 - blend) + toolState.lastColor[2]! * blend
+          );
 
           // Update last color (weighted average)
           toolState.lastColor[0] = Math.round(toolState.lastColor[0]! * 0.7 + data[idx]! * 0.3);

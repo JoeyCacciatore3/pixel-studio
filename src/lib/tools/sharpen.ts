@@ -8,11 +8,7 @@ import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { createStabilizer } from './stabilizer';
-import {
-  getPressure,
-  calculateBrushSize,
-  calculateSpacing,
-} from './brushHelpers';
+import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelpers';
 
 (function () {
   let toolState: DrawingToolState | null = null;
@@ -113,16 +109,17 @@ import {
     const endX = Math.min(width - 1, Math.floor(x + radius));
     const endY = Math.min(height - 1, Math.floor(y + radius));
 
-    const imageData = ctx.getImageData(startX - 1, startY - 1, endX - startX + 2, endY - startY + 2);
+    const imageData = ctx.getImageData(
+      startX - 1,
+      startY - 1,
+      endX - startX + 2,
+      endY - startY + 2
+    );
     const data = imageData.data;
     const tempData = new Uint8ClampedArray(data);
 
     // Unsharp mask kernel
-    const kernel = [
-      0, -1, 0,
-      -1, 5, -1,
-      0, -1, 0
-    ];
+    const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
 
     for (let py = 1; py < endY - startY + 1; py++) {
       for (let px = 1; px < endX - startX + 1; px++) {
@@ -131,7 +128,9 @@ import {
         const dist = Math.sqrt(Math.pow(cx - x, 2) + Math.pow(cy - y, 2));
 
         if (dist <= radius) {
-          let r = 0, g = 0, b = 0;
+          let r = 0,
+            g = 0,
+            b = 0;
           for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
               const idx = ((py + ky) * (endX - startX + 2) + (px + kx)) * 4;

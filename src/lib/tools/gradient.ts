@@ -64,7 +64,10 @@ import { hexToRgbaArray } from '../colorUtils';
     const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
     const startColor = hexToRgbaArray(state.currentColor, state.currentAlpha);
 
-    gradient.addColorStop(0, `rgba(${startColor[0]}, ${startColor[1]}, ${startColor[2]}, ${startColor[3]})`);
+    gradient.addColorStop(
+      0,
+      `rgba(${startColor[0]}, ${startColor[1]}, ${startColor[2]}, ${startColor[3]})`
+    );
     gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
 
     ctx.fillStyle = gradient;

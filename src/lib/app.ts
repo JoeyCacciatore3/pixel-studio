@@ -18,7 +18,11 @@ const PixelStudio = (function () {
   /**
    * Initialize the application
    */
-  function init(appState: AppState, canvasElements: CanvasElements, enableLayers: boolean = true): void {
+  function init(
+    appState: AppState,
+    canvasElements: CanvasElements,
+    enableLayers: boolean = true
+  ): void {
     state = appState;
     elements = canvasElements;
 

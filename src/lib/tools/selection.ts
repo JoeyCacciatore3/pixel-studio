@@ -86,7 +86,11 @@ import { createRectangularMask, combineSelections } from './selectionHelpers';
   function updateSelection(x: number, y: number): void {
     if (!toolState) return;
     const state = toolState.state;
-    if (!state.selection || state.selection.startX === undefined || state.selection.startY === undefined) {
+    if (
+      !state.selection ||
+      state.selection.startX === undefined ||
+      state.selection.startY === undefined
+    ) {
       return;
     }
 

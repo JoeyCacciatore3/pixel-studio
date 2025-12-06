@@ -220,7 +220,13 @@ import {
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  function eraseLineWithSpacing(x1: number, y1: number, x2: number, y2: number, e: PointerEvent): void {
+  function eraseLineWithSpacing(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    e: PointerEvent
+  ): void {
     if (!toolState) return;
 
     const state = toolState.state;

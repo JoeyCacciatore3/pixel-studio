@@ -6,9 +6,7 @@ interface CanvasErrorBoundaryProps {
   children: React.ReactNode;
 }
 
-export default function CanvasErrorBoundary({
-  children,
-}: CanvasErrorBoundaryProps) {
+export default function CanvasErrorBoundary({ children }: CanvasErrorBoundaryProps) {
   return (
     <ErrorBoundary
       fallback={
@@ -16,13 +14,10 @@ export default function CanvasErrorBoundary({
           <div className="canvas-error-content">
             <h2>Canvas Error</h2>
             <p>
-              The canvas encountered an error and could not be displayed. Please
-              refresh the page to try again.
+              The canvas encountered an error and could not be displayed. Please refresh the page to
+              try again.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="canvas-error-button"
-            >
+            <button onClick={() => window.location.reload()} className="canvas-error-button">
               Refresh Page
             </button>
           </div>

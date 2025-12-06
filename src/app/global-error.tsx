@@ -14,8 +14,8 @@ export default function GlobalError({
           <div className="global-error-content">
             <h1>Something went wrong!</h1>
             <p>
-              A critical error occurred. Please refresh the page or contact
-              support if the problem persists.
+              A critical error occurred. Please refresh the page or contact support if the problem
+              persists.
             </p>
             <button onClick={reset} className="error-reset-button">
               Try Again

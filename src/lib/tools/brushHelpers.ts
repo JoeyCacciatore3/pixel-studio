@@ -94,7 +94,12 @@ export function calculateSpacing(brushSize: number, spacingPercent: number): num
 /**
  * Apply jitter to coordinates
  */
-export function applyJitter(x: number, y: number, jitterPercent: number, brushSize: number): { x: number; y: number } {
+export function applyJitter(
+  x: number,
+  y: number,
+  jitterPercent: number,
+  brushSize: number
+): { x: number; y: number } {
   if (jitterPercent === 0) {
     return { x, y };
   }

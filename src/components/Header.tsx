@@ -82,7 +82,14 @@ export default function Header() {
     <header className="header">
       <div className="logo">
         <div className="logo-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2.5"
+          >
             <path d="M12 19l7-7 3 3-7 7-3-3z" />
             <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
             <path d="M2 2l7.586 7.586" />
@@ -98,7 +105,14 @@ export default function Header() {
           id="undoBtn"
           title="Undo (Ctrl+Z)"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M3 7v6h6M21 17a9 9 0 11-2.636-6.364L21 7" />
           </svg>
           Undo
@@ -110,25 +124,53 @@ export default function Header() {
           id="redoBtn"
           title="Redo (Ctrl+Shift+Z)"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M21 7v6h-6M3 17a9 9 0 112.636-6.364L3 7" />
           </svg>
           Redo
         </button>
         <button className="header-btn" onClick={handleClear} id="clearBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
           </svg>
           Clear
         </button>
         <button className="header-btn" onClick={handleUpload} id="uploadBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
           </svg>
           Upload
         </button>
         <button className="header-btn primary" onClick={handleExport} id="exportBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
           </svg>
           Export

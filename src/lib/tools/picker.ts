@@ -56,7 +56,12 @@ import PixelStudio from '../app';
     const endX = Math.min(width, Math.floor(x) + halfSize + 1);
     const endY = Math.min(height, Math.floor(y) + halfSize + 1);
 
-    const imageData = Canvas.getContext().getImageData(startX, startY, endX - startX, endY - startY);
+    const imageData = Canvas.getContext().getImageData(
+      startX,
+      startY,
+      endX - startX,
+      endY - startY
+    );
     const data = imageData.data;
 
     // Calculate average color from sampled area

@@ -20,7 +20,12 @@ export default function CanvasComponent({ state }: CanvasProps) {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const selectionOverlayRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [loupePosition, setLoupePosition] = useState<{ x: number; y: number; screenX: number; screenY: number } | null>(null);
+  const [loupePosition, setLoupePosition] = useState<{
+    x: number;
+    y: number;
+    screenX: number;
+    screenY: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current || isInitialized) return;
@@ -47,7 +52,9 @@ export default function CanvasComponent({ state }: CanvasProps) {
         brushFlow: document.getElementById('brushFlow') as HTMLInputElement | null,
         brushSpacing: document.getElementById('brushSpacing') as HTMLInputElement | null,
         brushJitter: document.getElementById('brushJitter') as HTMLInputElement | null,
-        stabilizerStrength: document.getElementById('stabilizerStrength') as HTMLInputElement | null,
+        stabilizerStrength: document.getElementById(
+          'stabilizerStrength'
+        ) as HTMLInputElement | null,
         tolerance: document.getElementById('tolerance') as HTMLInputElement | null,
         canvasWidth: document.getElementById('canvasWidth') as HTMLInputElement | null,
         canvasHeight: document.getElementById('canvasHeight') as HTMLInputElement | null,
@@ -123,7 +130,7 @@ export default function CanvasComponent({ state }: CanvasProps) {
             x: coords.x,
             y: coords.y,
             screenX,
-            screenY
+            screenY,
           });
         } catch (error) {
           // Silently fail if canvas not ready
@@ -161,7 +168,11 @@ export default function CanvasComponent({ state }: CanvasProps) {
 
   return (
     <div className="canvas-area">
-      <div className="canvas-wrapper" ref={canvasWrapperRef} style={{ transform: `scale(${state.zoom})` }}>
+      <div
+        className="canvas-wrapper"
+        ref={canvasWrapperRef}
+        style={{ transform: `scale(${state.zoom})` }}
+      >
         <div className="canvas-container">
           <div className="checkerboard" style={{ width: canvasWidth, height: canvasHeight }}></div>
           <canvas
@@ -180,7 +191,12 @@ export default function CanvasComponent({ state }: CanvasProps) {
             }}
             onContextMenu={(e) => e.preventDefault()}
           />
-          <canvas ref={selectionCanvasRef} id="selectionCanvas" width={canvasWidth} height={canvasHeight} />
+          <canvas
+            ref={selectionCanvasRef}
+            id="selectionCanvas"
+            width={canvasWidth}
+            height={canvasHeight}
+          />
           <div className="selection-overlay" ref={selectionOverlayRef} id="selectionOverlay"></div>
           <div className="brush-preview" id="brushPreview"></div>
           {loupePosition && (

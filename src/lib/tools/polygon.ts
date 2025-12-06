@@ -63,7 +63,10 @@ import Canvas from '../canvas';
   /**
    * Draw polygon path for visual feedback
    */
-  function drawPolygonPath(points: { x: number; y: number }[], currentPoint?: { x: number; y: number }): void {
+  function drawPolygonPath(
+    points: { x: number; y: number }[],
+    currentPoint?: { x: number; y: number }
+  ): void {
     const ctx = Canvas.getSelectionContext();
     if (!ctx) return;
 
@@ -159,7 +162,9 @@ import Canvas from '../canvas';
     // Apply feathering if enabled
     let finalSelection: Uint8Array = selected;
     if (state.selectionFeather && state.selectionFeather > 0) {
-      finalSelection = new Uint8Array(featherSelection(finalSelection, state.selectionFeather, width, height));
+      finalSelection = new Uint8Array(
+        featherSelection(finalSelection, state.selectionFeather, width, height)
+      );
     }
 
     // Store selection

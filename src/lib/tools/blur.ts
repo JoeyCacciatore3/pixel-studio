@@ -8,11 +8,7 @@ import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { createStabilizer } from './stabilizer';
-import {
-  getPressure,
-  calculateBrushSize,
-  calculateSpacing,
-} from './brushHelpers';
+import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelpers';
 
 (function () {
   let toolState: DrawingToolState | null = null;
@@ -125,7 +121,10 @@ import {
         const dist = Math.sqrt(Math.pow(cx - x, 2) + Math.pow(cy - y, 2));
 
         if (dist <= radius) {
-          let r = 0, g = 0, b = 0, count = 0;
+          let r = 0,
+            g = 0,
+            b = 0,
+            count = 0;
           for (let ky = -blurRadius; ky <= blurRadius; ky++) {
             for (let kx = -blurRadius; kx <= blurRadius; kx++) {
               const idx = ((py + ky) * (endX - startX) + (px + kx)) * 4;

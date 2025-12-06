@@ -155,17 +155,17 @@ const Layers = (function () {
   function setState(state: LayerState): void {
     layers = state.layers.map((layer) => ({
       ...layer,
-          // Ensure canvas is properly initialized
-          canvas: (() => {
-            const canvas = document.createElement('canvas');
-            canvas.width = layer.canvas.width;
-            canvas.height = layer.canvas.height;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            if (ctx) {
-              ctx.drawImage(layer.canvas, 0, 0);
-            }
-            return canvas;
-          })(),
+      // Ensure canvas is properly initialized
+      canvas: (() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = layer.canvas.width;
+        canvas.height = layer.canvas.height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (ctx) {
+          ctx.drawImage(layer.canvas, 0, 0);
+        }
+        return canvas;
+      })(),
     }));
     activeLayerId = state.activeLayerId;
   }

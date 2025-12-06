@@ -127,7 +127,9 @@ import Canvas from '../canvas';
     // Apply feathering if enabled
     let finalSelection: Uint8Array = selected;
     if (state.selectionFeather && state.selectionFeather > 0) {
-      finalSelection = new Uint8Array(featherSelection(selected, state.selectionFeather, width, height));
+      finalSelection = new Uint8Array(
+        featherSelection(selected, state.selectionFeather, width, height)
+      );
     }
 
     // Store selection

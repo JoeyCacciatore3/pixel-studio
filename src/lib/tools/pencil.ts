@@ -228,7 +228,13 @@ import {
     ctx.drawImage(tempCanvas, finalX - size / 2, finalY - size / 2);
   }
 
-  function drawLineWithSpacing(x1: number, y1: number, x2: number, y2: number, e: PointerEvent): void {
+  function drawLineWithSpacing(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    e: PointerEvent
+  ): void {
     if (!toolState) return;
 
     const state = toolState.state;

@@ -194,7 +194,13 @@ import {
     toolState.offsetY = y - toolState.sourceY;
   }
 
-  function cloneLineWithSpacing(x1: number, y1: number, x2: number, y2: number, e: PointerEvent): void {
+  function cloneLineWithSpacing(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    e: PointerEvent
+  ): void {
     if (!toolState) return;
 
     const state = toolState.state;

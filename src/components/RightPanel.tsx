@@ -7,8 +7,18 @@ import LayerPanel from '@/components/LayerPanel';
 import type { PressureCurveType } from '@/lib/types';
 
 const swatches = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#6366f1',
-  '#a855f7', '#ec4899', '#ffffff', '#94a3b8', '#475569', '#000000',
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#06b6d4',
+  '#6366f1',
+  '#a855f7',
+  '#ec4899',
+  '#ffffff',
+  '#94a3b8',
+  '#475569',
+  '#000000',
 ];
 
 export default function RightPanel() {
@@ -92,7 +102,13 @@ export default function RightPanel() {
       <div className="panel-section">
         <div className="panel-title">Color</div>
         <div className="color-preview-large">
-          <div className="color-preview-inner" id="colorPreview" style={{ background: `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, ${alpha / 100})` }}></div>
+          <div
+            className="color-preview-inner"
+            id="colorPreview"
+            style={{
+              background: `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, ${alpha / 100})`,
+            }}
+          ></div>
         </div>
         <div className="color-inputs">
           <div className="color-input-group full">
@@ -126,51 +142,71 @@ export default function RightPanel() {
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Size</span>
-            <span className="slider-value" id="sizeValue">{brushSize}px</span>
+            <span className="slider-value" id="sizeValue">
+              {brushSize}px
+            </span>
           </div>
           <input type="range" id="brushSize" min={1} max={100} defaultValue={brushSize} />
         </div>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Hardness</span>
-            <span className="slider-value" id="hardnessValue">{brushHardness}%</span>
+            <span className="slider-value" id="hardnessValue">
+              {brushHardness}%
+            </span>
           </div>
           <input type="range" id="brushHardness" min={0} max={100} defaultValue={brushHardness} />
         </div>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Opacity</span>
-            <span className="slider-value" id="opacityValue">{brushOpacity}%</span>
+            <span className="slider-value" id="opacityValue">
+              {brushOpacity}%
+            </span>
           </div>
           <input type="range" id="brushOpacity" min={0} max={100} defaultValue={brushOpacity} />
         </div>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Flow</span>
-            <span className="slider-value" id="flowValue">{brushFlow}%</span>
+            <span className="slider-value" id="flowValue">
+              {brushFlow}%
+            </span>
           </div>
           <input type="range" id="brushFlow" min={0} max={100} defaultValue={brushFlow} />
         </div>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Spacing</span>
-            <span className="slider-value" id="spacingValue">{brushSpacing}%</span>
+            <span className="slider-value" id="spacingValue">
+              {brushSpacing}%
+            </span>
           </div>
           <input type="range" id="brushSpacing" min={1} max={1000} defaultValue={brushSpacing} />
         </div>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Jitter</span>
-            <span className="slider-value" id="jitterValue">{brushJitter}%</span>
+            <span className="slider-value" id="jitterValue">
+              {brushJitter}%
+            </span>
           </div>
           <input type="range" id="brushJitter" min={0} max={100} defaultValue={brushJitter} />
         </div>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Stabilizer</span>
-            <span className="slider-value" id="stabilizerValue">{stabilizerStrength}%</span>
+            <span className="slider-value" id="stabilizerValue">
+              {stabilizerStrength}%
+            </span>
           </div>
-          <input type="range" id="stabilizerStrength" min={0} max={100} defaultValue={stabilizerStrength} />
+          <input
+            type="range"
+            id="stabilizerStrength"
+            min={0}
+            max={100}
+            defaultValue={stabilizerStrength}
+          />
         </div>
       </div>
 
@@ -178,13 +214,18 @@ export default function RightPanel() {
         <div className="panel-title">Pressure</div>
         <div className="checkbox-group">
           <label>
-            <input type="checkbox" id="pressureEnabled" checked={pressureEnabled} onChange={(e) => {
-              const state = PixelStudio.getState();
-              if (state) {
-                state.pressureEnabled = e.target.checked;
-                setPressureEnabled(e.target.checked);
-              }
-            }} />
+            <input
+              type="checkbox"
+              id="pressureEnabled"
+              checked={pressureEnabled}
+              onChange={(e) => {
+                const state = PixelStudio.getState();
+                if (state) {
+                  state.pressureEnabled = e.target.checked;
+                  setPressureEnabled(e.target.checked);
+                }
+              }}
+            />
             Enable Pressure
           </label>
         </div>
@@ -192,37 +233,52 @@ export default function RightPanel() {
           <>
             <div className="checkbox-group">
               <label>
-                <input type="checkbox" id="pressureSize" checked={pressureSize} onChange={(e) => {
-                  const state = PixelStudio.getState();
-                  if (state) {
-                    state.pressureSize = e.target.checked;
-                    setPressureSize(e.target.checked);
-                  }
-                }} />
+                <input
+                  type="checkbox"
+                  id="pressureSize"
+                  checked={pressureSize}
+                  onChange={(e) => {
+                    const state = PixelStudio.getState();
+                    if (state) {
+                      state.pressureSize = e.target.checked;
+                      setPressureSize(e.target.checked);
+                    }
+                  }}
+                />
                 Size
               </label>
             </div>
             <div className="checkbox-group">
               <label>
-                <input type="checkbox" id="pressureOpacity" checked={pressureOpacity} onChange={(e) => {
-                  const state = PixelStudio.getState();
-                  if (state) {
-                    state.pressureOpacity = e.target.checked;
-                    setPressureOpacity(e.target.checked);
-                  }
-                }} />
+                <input
+                  type="checkbox"
+                  id="pressureOpacity"
+                  checked={pressureOpacity}
+                  onChange={(e) => {
+                    const state = PixelStudio.getState();
+                    if (state) {
+                      state.pressureOpacity = e.target.checked;
+                      setPressureOpacity(e.target.checked);
+                    }
+                  }}
+                />
                 Opacity
               </label>
             </div>
             <div className="checkbox-group">
               <label>
-                <input type="checkbox" id="pressureFlow" checked={pressureFlow} onChange={(e) => {
-                  const state = PixelStudio.getState();
-                  if (state) {
-                    state.pressureFlow = e.target.checked;
-                    setPressureFlow(e.target.checked);
-                  }
-                }} />
+                <input
+                  type="checkbox"
+                  id="pressureFlow"
+                  checked={pressureFlow}
+                  onChange={(e) => {
+                    const state = PixelStudio.getState();
+                    if (state) {
+                      state.pressureFlow = e.target.checked;
+                      setPressureFlow(e.target.checked);
+                    }
+                  }}
+                />
                 Flow
               </label>
             </div>
@@ -230,13 +286,17 @@ export default function RightPanel() {
               <div className="slider-header">
                 <span className="slider-label">Curve</span>
               </div>
-              <select id="pressureCurve" value={pressureCurve} onChange={(e) => {
-                const state = PixelStudio.getState();
-                if (state) {
-                  state.pressureCurve = e.target.value as typeof pressureCurve;
-                  setPressureCurve(e.target.value as typeof pressureCurve);
-                }
-              }}>
+              <select
+                id="pressureCurve"
+                value={pressureCurve}
+                onChange={(e) => {
+                  const state = PixelStudio.getState();
+                  if (state) {
+                    state.pressureCurve = e.target.value as typeof pressureCurve;
+                    setPressureCurve(e.target.value as typeof pressureCurve);
+                  }
+                }}
+              >
                 <option value="linear">Linear</option>
                 <option value="ease-in">Ease In</option>
                 <option value="ease-out">Ease Out</option>
@@ -252,7 +312,9 @@ export default function RightPanel() {
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Tolerance</span>
-            <span className="slider-value" id="toleranceValue">{tolerance}</span>
+            <span className="slider-value" id="toleranceValue">
+              {tolerance}
+            </span>
           </div>
           <input type="range" id="tolerance" min={0} max={255} defaultValue={tolerance} />
         </div>

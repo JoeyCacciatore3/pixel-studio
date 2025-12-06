@@ -59,16 +59,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         <div className="error-boundary">
           <div className="error-boundary-content">
             <h2>Something went wrong</h2>
-            <p>
-              We apologize for the inconvenience. An unexpected error has occurred.
-            </p>
+            <p>We apologize for the inconvenience. An unexpected error has occurred.</p>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="error-details">
                 <summary>Error Details (Development Only)</summary>
                 <pre>{this.state.error.toString()}</pre>
-                {this.state.error.stack && (
-                  <pre>{this.state.error.stack}</pre>
-                )}
+                {this.state.error.stack && <pre>{this.state.error.stack}</pre>}
               </details>
             )}
             <button onClick={this.handleReset} className="error-reset-button">

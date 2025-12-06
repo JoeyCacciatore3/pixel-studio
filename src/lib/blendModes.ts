@@ -70,15 +70,18 @@ export function applyBlendMode(
         b = baseB < 0.5 ? 2 * baseB * overlayB : 1 - 2 * (1 - baseB) * (1 - overlayB);
         break;
       case 'soft-light':
-        r = overlayR < 0.5
-          ? 2 * baseR * overlayR + baseR * baseR * (1 - 2 * overlayR)
-          : Math.sqrt(baseR) * (2 * overlayR - 1) + 2 * baseR * (1 - overlayR);
-        g = overlayG < 0.5
-          ? 2 * baseG * overlayG + baseG * baseG * (1 - 2 * overlayG)
-          : Math.sqrt(baseG) * (2 * overlayG - 1) + 2 * baseG * (1 - overlayG);
-        b = overlayB < 0.5
-          ? 2 * baseB * overlayB + baseB * baseB * (1 - 2 * overlayB)
-          : Math.sqrt(baseB) * (2 * overlayB - 1) + 2 * baseB * (1 - overlayB);
+        r =
+          overlayR < 0.5
+            ? 2 * baseR * overlayR + baseR * baseR * (1 - 2 * overlayR)
+            : Math.sqrt(baseR) * (2 * overlayR - 1) + 2 * baseR * (1 - overlayR);
+        g =
+          overlayG < 0.5
+            ? 2 * baseG * overlayG + baseG * baseG * (1 - 2 * overlayG)
+            : Math.sqrt(baseG) * (2 * overlayG - 1) + 2 * baseG * (1 - overlayG);
+        b =
+          overlayB < 0.5
+            ? 2 * baseB * overlayB + baseB * baseB * (1 - 2 * overlayB)
+            : Math.sqrt(baseB) * (2 * overlayB - 1) + 2 * baseB * (1 - overlayB);
         break;
       case 'hard-light':
         r = overlayR < 0.5 ? 2 * baseR * overlayR : 1 - 2 * (1 - baseR) * (1 - overlayR);

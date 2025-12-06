@@ -18,7 +18,11 @@ const Canvas = (function () {
   /**
    * Initialize the canvas module
    */
-  function init(canvasElement: HTMLCanvasElement, selectionCanvasElement?: HTMLCanvasElement, enableLayers: boolean = false) {
+  function init(
+    canvasElement: HTMLCanvasElement,
+    selectionCanvasElement?: HTMLCanvasElement,
+    enableLayers: boolean = false
+  ) {
     canvas = canvasElement;
     ctx = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -198,7 +202,12 @@ const Canvas = (function () {
         // Get current layer content
         const layerCtx = layer.canvas.getContext('2d', { willReadFrequently: true });
         if (layerCtx) {
-          const currentImageData = layerCtx.getImageData(0, 0, layer.canvas.width, layer.canvas.height);
+          const currentImageData = layerCtx.getImageData(
+            0,
+            0,
+            layer.canvas.width,
+            layer.canvas.height
+          );
 
           // Resize layer canvas
           layer.canvas.width = newWidth;

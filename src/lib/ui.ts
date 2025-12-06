@@ -22,7 +22,6 @@ const UI = (function () {
     state = appState;
   }
 
-
   /**
    * Setup color control event listeners
    */

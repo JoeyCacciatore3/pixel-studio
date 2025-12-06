@@ -41,7 +41,16 @@ import UI from '../ui';
    * Calculate color distance using Euclidean distance in RGB space
    * More accurate than simple per-channel tolerance
    */
-  function colorDistance(r1: number, g1: number, b1: number, a1: number, r2: number, g2: number, b2: number, a2: number): number {
+  function colorDistance(
+    r1: number,
+    g1: number,
+    b1: number,
+    a1: number,
+    r2: number,
+    g2: number,
+    b2: number,
+    a2: number
+  ): number {
     // Weight alpha less than RGB for better tolerance behavior
     const dr = r1 - r2;
     const dg = g1 - g2;
