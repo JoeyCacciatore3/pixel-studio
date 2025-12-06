@@ -1,16 +1,25 @@
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
+import { fixupConfigRules } from '@eslint/compat';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
+  resolvePluginsRelativeTo: __dirname,
 });
 
+// Split extends to avoid circular reference issues
+const nextConfig = fixupConfigRules(compat.extends('next/core-web-vitals'));
+const prettierConfig = fixupConfigRules(compat.extends('prettier'));
+const jsxA11yConfig = fixupConfigRules(compat.extends('plugin:jsx-a11y/recommended'));
+
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'prettier', 'plugin:jsx-a11y/recommended'),
+  ...nextConfig,
+  ...prettierConfig,
+  ...jsxA11yConfig,
   {
     rules: {
       // TypeScript rules
