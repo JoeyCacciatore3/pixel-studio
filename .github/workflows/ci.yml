@@ -28,11 +28,11 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npm run lint
+        id: eslint
+        run: npm run lint || echo "eslint_exit_code=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
-        if: always()
       - name: ESLint Status
-        if: failure()
+        if: steps.eslint.outcome == 'failure'
         run: |
           echo "::warning::ESLint check skipped due to known circular reference bug in ESLint 9.39.1"
           echo "::warning::See ESLINT_KNOWN_ISSUE.md for details. This is an upstream bug, not a code issue."
