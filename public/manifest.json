@@ -1,0 +1,52 @@
+{
+  "name": "Pixel Studio - Professional Pixel Art Editor",
+  "short_name": "Pixel Studio",
+  "description": "Professional pixel art editor built with Next.js, TypeScript, and React",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0f",
+  "theme_color": "#6366f1",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["graphics", "design", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "New Canvas",
+      "short_name": "New",
+      "description": "Create a new canvas",
+      "url": "/?action=new",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "image",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  }
+}

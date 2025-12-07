@@ -182,7 +182,7 @@ export default function LayerPanel() {
     return (
       <div className="panel-section">
         <div className="panel-title">Layers</div>
-        <button className="layer-add-btn" onClick={handleAddLayer}>
+        <button className="layer-add-btn" onClick={handleAddLayer} aria-label="Add new layer">
           <svg
             width="14"
             height="14"
@@ -201,9 +201,14 @@ export default function LayerPanel() {
 
   return (
     <div className="panel-section">
-      <div className="panel-title">
+      <h2 className="panel-title">
         Layers
-        <button className="layer-add-btn-small" onClick={handleAddLayer} title="Add New Layer">
+        <button
+          className="layer-add-btn-small"
+          onClick={handleAddLayer}
+          title="Add New Layer"
+          aria-label="Add new layer"
+        >
           <svg
             width="12"
             height="12"
@@ -211,17 +216,21 @@ export default function LayerPanel() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            aria-hidden="true"
           >
             <path d="M12 5v14M5 12h14" />
           </svg>
         </button>
-      </div>
-      <div className="layer-list">
+      </h2>
+      <div className="layer-list" role="list" aria-label="Layers">
         {layers.map((layer) => (
           <div
             key={layer.id}
             className={`layer-item ${activeLayerId === layer.id ? 'active' : ''} ${layer.locked ? 'locked' : ''}`}
             onClick={() => !layer.locked && handleSetActiveLayer(layer.id)}
+            role="listitem"
+            aria-label={`Layer: ${layer.name}`}
+            aria-selected={activeLayerId === layer.id}
           >
             <div
               className="layer-thumb"
@@ -253,6 +262,7 @@ export default function LayerPanel() {
                   handleToggleVisibility(layer.id);
                 }}
                 title={layer.visible ? 'Hide Layer' : 'Show Layer'}
+                aria-label={layer.visible ? 'Hide layer' : 'Show layer'}
               >
                 {layer.visible ? (
                   <svg
@@ -287,6 +297,7 @@ export default function LayerPanel() {
                   handleToggleLock(layer.id);
                 }}
                 title={layer.locked ? 'Unlock Layer' : 'Lock Layer'}
+                aria-label={layer.locked ? 'Unlock layer' : 'Lock layer'}
               >
                 {layer.locked ? (
                   <svg
@@ -322,6 +333,7 @@ export default function LayerPanel() {
                   handleDuplicateLayer(layer.id);
                 }}
                 title="Duplicate Layer"
+                aria-label="Duplicate layer"
               >
                 <svg
                   width="14"
@@ -343,6 +355,7 @@ export default function LayerPanel() {
                     handleDeleteLayer(layer.id);
                   }}
                   title="Delete Layer"
+                  aria-label="Delete layer"
                 >
                   <svg
                     width="14"

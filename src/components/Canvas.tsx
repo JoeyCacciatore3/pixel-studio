@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import type { AppState, CanvasElements } from '@/lib/types';
 import Canvas from '@/lib/canvas';
 import PixelStudio from '@/lib/app';
 import UI from '@/lib/ui';
 import History from '@/lib/history';
 import ColorLoupe from '@/components/ColorLoupe';
+import { useDeviceDetection } from '@/hooks/useDeviceDetection';
 import '@/lib/tools'; // Import tools to register them
 
 interface CanvasProps {
@@ -20,12 +21,34 @@ export default function CanvasComponent({ state }: CanvasProps) {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const selectionOverlayRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { isMobile, isTouchDevice } = useDeviceDetection();
   const [loupePosition, setLoupePosition] = useState<{
     x: number;
     y: number;
     screenX: number;
     screenY: number;
   } | null>(null);
+
+  // Multi-touch state
+  const touchStateRef = useRef<{
+    touches: Map<number, React.Touch>;
+    lastDistance: number;
+    lastZoom: number;
+  }>({
+    touches: new Map(),
+    lastDistance: 0,
+    lastZoom: 1,
+  });
+
+  // Hardware acceleration setup
+  useEffect(() => {
+    if (canvasWrapperRef.current) {
+      // Force GPU acceleration
+      const wrapper = canvasWrapperRef.current;
+      wrapper.style.transform = `translate3d(0, 0, 0) scale(${state.zoom})`;
+      wrapper.style.willChange = 'transform';
+    }
+  }, [state.zoom]);
 
   useEffect(() => {
     if (!canvasRef.current || isInitialized) return;
@@ -34,8 +57,21 @@ export default function CanvasComponent({ state }: CanvasProps) {
     const initTimer = setTimeout(() => {
       if (!canvasRef.current) return;
 
-      // Initialize canvas
+      // Initialize canvas with mobile optimizations
       Canvas.init(canvasRef.current, selectionCanvasRef.current || undefined);
+
+      // Optimize canvas context for mobile
+      if (isMobile && canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d', {
+          willReadFrequently: false, // Optimize for drawing, not reading
+          alpha: true,
+        });
+        if (ctx) {
+          // Mobile-specific optimizations
+          ctx.imageSmoothingEnabled = false; // Pixel art should be crisp
+          ctx.imageSmoothingQuality = 'low';
+        }
+      }
 
       // Set up canvas elements - use null if not found yet
       const elements: CanvasElements = {
@@ -83,6 +119,64 @@ export default function CanvasComponent({ state }: CanvasProps) {
     return () => clearTimeout(initTimer);
   }, [state, isInitialized]);
 
+  // Handle multi-touch for zoom/pan
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (!isTouchDevice || !canvasRef.current) return;
+
+      const touches = Array.from(e.touches);
+      touchStateRef.current.touches.clear();
+
+      touches.forEach((touch) => {
+        touchStateRef.current.touches.set(touch.identifier, touch);
+      });
+
+      // Two-finger pinch
+      if (touches.length === 2) {
+        e.preventDefault();
+        const [t1, t2] = touches;
+        const distance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        touchStateRef.current.lastDistance = distance;
+        touchStateRef.current.lastZoom = state.zoom;
+      }
+    },
+    [isTouchDevice, state.zoom]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (!isTouchDevice || !canvasRef.current) return;
+
+      const touches = Array.from(e.touches);
+
+      // Update touch positions
+      touches.forEach((touch) => {
+        touchStateRef.current.touches.set(touch.identifier, touch);
+      });
+
+      // Two-finger pinch to zoom
+      if (touches.length === 2) {
+        e.preventDefault();
+        const [t1, t2] = touches;
+        const distance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+        if (touchStateRef.current.lastDistance > 0) {
+          const scale = distance / touchStateRef.current.lastDistance;
+          const newZoom = Math.max(0.25, Math.min(4, touchStateRef.current.lastZoom * scale));
+
+          const state = PixelStudio.getState();
+          if (state) {
+            state.zoom = newZoom;
+            UI.applyZoom(newZoom);
+          }
+        }
+
+        touchStateRef.current.lastDistance = distance;
+      }
+    },
+    [isTouchDevice]
+  );
+
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     if (!canvasRef.current || !isInitialized) return;
@@ -93,6 +187,12 @@ export default function CanvasComponent({ state }: CanvasProps) {
         console.warn('Canvas not initialized yet');
         return;
       }
+
+      // Prevent default touch behaviors on mobile
+      if (isTouchDevice && e.pointerType === 'touch') {
+        e.preventDefault();
+      }
+
       const coords = Canvas.getCanvasCoords(e.nativeEvent);
       const tool = PixelStudio.getCurrentTool();
       if (tool) {
@@ -181,6 +281,11 @@ export default function CanvasComponent({ state }: CanvasProps) {
             width={canvasWidth}
             height={canvasHeight}
             className={`cursor-${state.currentTool}`}
+            style={{
+              touchAction: isTouchDevice ? 'none' : 'auto',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+            }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -189,6 +294,8 @@ export default function CanvasComponent({ state }: CanvasProps) {
               UI.hideBrushPreview();
               setLoupePosition(null);
             }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
             onContextMenu={(e) => e.preventDefault()}
           />
           <canvas

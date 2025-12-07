@@ -79,9 +79,9 @@ export default function Header() {
   };
 
   return (
-    <header className="header">
-      <div className="logo">
-        <div className="logo-icon">
+    <header className="header" role="banner">
+      <div className="logo" aria-label="Pixel Studio">
+        <div className="logo-icon" aria-hidden="true">
           <svg
             width="14"
             height="14"
@@ -89,6 +89,7 @@ export default function Header() {
             fill="none"
             stroke="white"
             strokeWidth="2.5"
+            aria-hidden="true"
           >
             <path d="M12 19l7-7 3 3-7 7-3-3z" />
             <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
@@ -97,13 +98,14 @@ export default function Header() {
         </div>
         <span>Pixel Studio</span>
       </div>
-      <div className="header-actions">
+      <nav className="header-actions" aria-label="Main actions">
         <button
           className="header-btn"
           onClick={handleUndo}
           disabled={!canUndo}
           id="undoBtn"
           title="Undo (Ctrl+Z)"
+          aria-label="Undo last action"
         >
           <svg
             width="14"
@@ -123,6 +125,7 @@ export default function Header() {
           disabled={!canRedo}
           id="redoBtn"
           title="Redo (Ctrl+Shift+Z)"
+          aria-label="Redo last undone action"
         >
           <svg
             width="14"
@@ -136,7 +139,12 @@ export default function Header() {
           </svg>
           Redo
         </button>
-        <button className="header-btn" onClick={handleClear} id="clearBtn">
+        <button
+          className="header-btn"
+          onClick={handleClear}
+          id="clearBtn"
+          aria-label="Clear canvas"
+        >
           <svg
             width="14"
             height="14"
@@ -144,12 +152,18 @@ export default function Header() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            aria-hidden="true"
           >
             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
           </svg>
           Clear
         </button>
-        <button className="header-btn" onClick={handleUpload} id="uploadBtn">
+        <button
+          className="header-btn"
+          onClick={handleUpload}
+          id="uploadBtn"
+          aria-label="Upload image"
+        >
           <svg
             width="14"
             height="14"
@@ -157,12 +171,18 @@ export default function Header() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            aria-hidden="true"
           >
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
           </svg>
           Upload
         </button>
-        <button className="header-btn primary" onClick={handleExport} id="exportBtn">
+        <button
+          className="header-btn primary"
+          onClick={handleExport}
+          id="exportBtn"
+          aria-label="Export artwork"
+        >
           <svg
             width="14"
             height="14"
@@ -170,13 +190,20 @@ export default function Header() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            aria-hidden="true"
           >
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
           </svg>
           Export
         </button>
-      </div>
-      <input type="file" id="imageUpload" accept="image/*" style={{ display: 'none' }} />
+      </nav>
+      <input
+        type="file"
+        id="imageUpload"
+        accept="image/*"
+        style={{ display: 'none' }}
+        aria-label="Upload image file"
+      />
     </header>
   );
 }

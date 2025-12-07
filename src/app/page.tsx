@@ -2,17 +2,32 @@
 
 import { useState, useEffect } from 'react';
 import type { AppState } from '@/lib/types';
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import Toolbar from '@/components/Toolbar';
+import MobileToolbar from '@/components/MobileToolbar';
 import CanvasComponent from '@/components/Canvas';
-import RightPanel from '@/components/RightPanel';
 import StatusBar from '@/components/StatusBar';
 import ZoomControls from '@/components/ZoomControls';
 import SelectionToolbar from '@/components/SelectionToolbar';
+import MobileLayout from '@/components/MobileLayout';
+
+// Lazy load non-critical components
+const RightPanel = dynamic(() => import('@/components/RightPanel'), {
+  ssr: false,
+  loading: () => <div className="right-panel-loading" aria-label="Loading panel" />,
+});
+import { MobilePanelProvider, useMobilePanel } from '@/contexts/MobilePanelContext';
+import { useDeviceDetection } from '@/hooks/useDeviceDetection';
+import { useOrientation } from '@/hooks/useOrientation';
 import Canvas from '@/lib/canvas';
 import History from '@/lib/history';
 
-export default function Home() {
+function HomeContent() {
+  const { isMobile } = useDeviceDetection();
+  const orientation = useOrientation();
+  const { isOpen: rightPanelOpen, setIsOpen: setRightPanelOpen } = useMobilePanel();
+
   const [appState, setAppState] = useState<AppState>({
     currentTool: 'pencil',
     currentColor: '#6366f1',
@@ -102,15 +117,32 @@ export default function Home() {
     };
   }, []);
 
+  // Handle orientation changes
+  useEffect(() => {
+    // Preserve canvas state during rotation
+    // Canvas state is already preserved in appState
+  }, [orientation]);
+
   return (
-    <div className="app-container">
-      <Header />
-      <Toolbar />
-      <SelectionToolbar />
-      <CanvasComponent state={appState} onStateChange={setAppState} />
-      <RightPanel />
-      <ZoomControls />
-      <StatusBar />
-    </div>
+    <MobileLayout>
+      <div className="app-container">
+        <Header />
+        {!isMobile && <Toolbar />}
+        {isMobile && <MobileToolbar />}
+        <SelectionToolbar />
+        <CanvasComponent state={appState} onStateChange={setAppState} />
+        <RightPanel isOpen={rightPanelOpen} onClose={() => setRightPanelOpen(false)} />
+        <ZoomControls />
+        <StatusBar />
+      </div>
+    </MobileLayout>
+  );
+}
+
+export default function Home() {
+  return (
+    <MobilePanelProvider>
+      <HomeContent />
+    </MobilePanelProvider>
   );
 }

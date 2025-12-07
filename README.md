@@ -14,6 +14,20 @@ A professional pixel art editor built with Next.js, TypeScript, and React.
   - Image upload
   - Export to PNG
   - Keyboard shortcuts
+- **Mobile & Tablet Support**:
+  - Responsive design (mobile, tablet, desktop)
+  - Touch-optimized interface
+  - Pinch-to-zoom gestures
+  - Mobile-specific toolbar
+  - Orientation detection
+- **PWA (Progressive Web App)**:
+  - Installable on mobile and desktop
+  - Offline support
+  - App-like experience
+- **Cross-Browser Compatibility**:
+  - Works on Chrome, Firefox, Safari, Edge
+  - Mobile browser support (iOS Safari, Chrome Android)
+  - Comprehensive browser compatibility testing
 
 ## Getting Started
 
@@ -45,16 +59,30 @@ npm start
 
 ## Scripts
 
+### Development
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
+
+### Code Quality
+
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Run ESLint with auto-fix
 - `npm run format` - Format code with Prettier
 - `npm run type-check` - Run TypeScript type checking
-- `npm run test` - Run tests
+
+### Testing
+
+- `npm run test` - Run unit tests (Vitest)
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:coverage` - Run tests with coverage
+- `npm run test:e2e` - Run end-to-end browser tests (Playwright)
+- `npm run test:e2e:ui` - Run E2E tests in interactive UI mode
+- `npm run test:e2e:debug` - Run E2E tests in debug mode
+- `npm run test:e2e:browser` - Run browser compatibility tests
+- `npm run test:e2e:mobile` - Run mobile touch interaction tests
+- `npm run test:e2e:report` - View E2E test report
 
 ## Keyboard Shortcuts
 
@@ -145,14 +173,43 @@ nvm install
 - `npm run clean` - Remove build artifacts and cache
 - `npm run analyze` - Analyze bundle size
 
+## Testing
+
+Pixel Studio includes comprehensive testing infrastructure:
+
+- **Unit Tests**: Vitest for component and utility testing
+- **E2E Tests**: Playwright for cross-browser and device testing
+- **Browser Compatibility**: Automated testing across Chrome, Firefox, Safari, Edge
+- **Mobile Testing**: Touch interaction and responsive design validation
+
+See [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for complete testing documentation.
+
 ## Documentation
+
+### Development
 
 - [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Contribution guidelines
 - [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) - Code style and conventions
-- [docs/CHANGELOG.md](docs/CHANGELOG.md) - Project changelog
 - [docs/SECURITY.md](docs/SECURITY.md) - Security policy
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - Deployment guide
 - [docs/ESLINT_KNOWN_ISSUE.md](docs/ESLINT_KNOWN_ISSUE.md) - ESLint known issues
+
+### Testing & Quality Assurance
+
+- [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) - Comprehensive testing guide
+- [docs/QUICK_START_TESTING.md](docs/QUICK_START_TESTING.md) - Quick start for testing
+- [docs/BROWSER_COMPATIBILITY_MATRIX.md](docs/BROWSER_COMPATIBILITY_MATRIX.md) - Browser compatibility matrix
+- [docs/MULTI_DEVICE_REVIEW.md](docs/MULTI_DEVICE_REVIEW.md) - Multi-device implementation review
+- [docs/IMPLEMENTATION_SUMMARY.md](docs/IMPLEMENTATION_SUMMARY.md) - Implementation summary
+- [docs/COMPLETE_IMPLEMENTATION_REPORT.md](docs/COMPLETE_IMPLEMENTATION_REPORT.md) - Complete implementation report
+
+### PWA
+
+- [docs/PWA_ICONS_README.md](docs/PWA_ICONS_README.md) - PWA icon generation guide
+
+### Project
+
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) - Project changelog
 
 ## License
 

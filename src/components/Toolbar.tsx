@@ -78,7 +78,7 @@ export default function Toolbar() {
   };
 
   return (
-    <aside className="toolbar">
+    <aside className="toolbar" role="toolbar" aria-label="Drawing tools">
       {tools.map((tool) => (
         <button
           key={tool.name}
@@ -86,6 +86,8 @@ export default function Toolbar() {
           data-tool={tool.name}
           data-tooltip={`${tool.name.charAt(0).toUpperCase() + tool.name.slice(1)} (${tool.key})`}
           onClick={() => handleToolSelect(tool.name)}
+          aria-label={`${tool.name} tool`}
+          aria-pressed={activeTool === tool.name}
         >
           <svg
             viewBox="0 0 24 24"
@@ -93,6 +95,7 @@ export default function Toolbar() {
             stroke="currentColor"
             strokeWidth="2"
             strokeDasharray={tool.strokeDasharray}
+            aria-hidden="true"
           >
             <path d={tool.icon} />
           </svg>

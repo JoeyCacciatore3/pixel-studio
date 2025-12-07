@@ -17,6 +17,7 @@ const Canvas = (function () {
 
   /**
    * Initialize the canvas module
+   * Optimized for mobile devices
    */
   function init(
     canvasElement: HTMLCanvasElement,
@@ -24,15 +25,34 @@ const Canvas = (function () {
     enableLayers: boolean = false
   ) {
     canvas = canvasElement;
-    ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // Detect if mobile for optimization
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+    // Optimize context settings based on device
+    ctx = canvas.getContext('2d', {
+      willReadFrequently: !isMobile, // Mobile: optimize for drawing, not reading
+      alpha: true,
+    });
 
     if (selectionCanvasElement) {
       selectionCanvas = selectionCanvasElement;
-      selectionCtx = selectionCanvas.getContext('2d', { willReadFrequently: true });
+      selectionCtx = selectionCanvas.getContext('2d', {
+        willReadFrequently: !isMobile,
+        alpha: true,
+      });
     }
 
     if (!ctx) {
       throw new Error('Failed to get 2D context from canvas');
+    }
+
+    // Mobile-specific optimizations
+    if (isMobile) {
+      ctx.imageSmoothingEnabled = false; // Pixel art should be crisp
+      ctx.imageSmoothingQuality = 'low';
     }
 
     useLayers = enableLayers;
@@ -313,6 +333,7 @@ const Canvas = (function () {
 
   /**
    * Get canvas coordinates from pointer event
+   * Optimized for mobile: rounds to integers for better performance
    */
   function getCanvasCoords(e: PointerEvent | MouseEvent): { x: number; y: number } {
     if (!canvas) {
@@ -322,9 +343,10 @@ const Canvas = (function () {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
+      // Round to integers for better performance (especially on mobile)
       return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY,
+        x: Math.round((e.clientX - rect.left) * scaleX),
+        y: Math.round((e.clientY - rect.top) * scaleY),
       };
     } catch (error) {
       console.error('Error getting canvas coordinates:', error);

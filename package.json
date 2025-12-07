@@ -21,12 +21,25 @@
     "clean": "rm -rf .next out dist coverage node_modules/.cache",
     "clean:all": "npm run clean && rm -rf node_modules",
     "check": "npm run validate && npm run build",
-    "analyze": "ANALYZE=true npm run build"
+    "analyze": "ANALYZE=true npm run build",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:browser": "playwright test browser-compatibility",
+    "test:e2e:mobile": "playwright test mobile-touch",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "test:e2e:firefox": "playwright test --project=firefox",
+    "test:e2e:webkit": "playwright test --project=webkit",
+    "test:e2e:mobile-safari": "playwright test --project=\"Mobile Safari\"",
+    "test:e2e:mobile-chrome": "playwright test --project=\"Mobile Chrome\"",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "next": "^16.0.7",
+    "next-pwa": "^5.6.0",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "workbox-window": "^7.0.0"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.0",
@@ -52,6 +65,7 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "@playwright/test": "^1.40.0"
   }
 }

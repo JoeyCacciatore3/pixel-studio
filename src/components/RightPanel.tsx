@@ -4,7 +4,14 @@ import { useEffect, useState } from 'react';
 import PixelStudio from '@/lib/app';
 import UI from '@/lib/ui';
 import LayerPanel from '@/components/LayerPanel';
+import { useDeviceDetection } from '@/hooks/useDeviceDetection';
+import { useMobilePanel } from '@/contexts/MobilePanelContext';
 import type { PressureCurveType } from '@/lib/types';
+
+interface RightPanelProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
 
 const swatches = [
   '#ef4444',
@@ -21,7 +28,14 @@ const swatches = [
   '#000000',
 ];
 
-export default function RightPanel() {
+export default function RightPanel({
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+}: RightPanelProps = {}) {
+  const { isMobile } = useDeviceDetection();
+  const { isOpen: contextIsOpen, setIsOpen: contextSetIsOpen } = useMobilePanel();
+  const isOpen = propIsOpen !== undefined ? propIsOpen : contextIsOpen;
+  const onClose = propOnClose || (() => contextSetIsOpen(false));
   const [color, setColor] = useState('#6366f1');
   const [alpha, setAlpha] = useState(100);
   const [brushSize, setBrushSize] = useState(4);
@@ -97,10 +111,29 @@ export default function RightPanel() {
     setColor(swatchColor);
   };
 
+  // Close panel when clicking outside on mobile
+  useEffect(() => {
+    if (isMobile && isOpen && onClose) {
+      const handleClickOutside = (e: MouseEvent) => {
+        const panel = document.querySelector('.right-panel');
+        if (panel && !panel.contains(e.target as Node)) {
+          onClose();
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return undefined;
+  }, [isMobile, isOpen, onClose]);
+
   return (
-    <aside className="right-panel">
+    <aside
+      className={`right-panel ${isMobile && isOpen ? 'open' : ''}`}
+      role="complementary"
+      aria-label="Properties panel"
+    >
       <div className="panel-section">
-        <div className="panel-title">Color</div>
+        <h2 className="panel-title">Color</h2>
         <div className="color-preview-large">
           <div
             className="color-preview-inner"
@@ -138,7 +171,7 @@ export default function RightPanel() {
       </div>
 
       <div className="panel-section">
-        <div className="panel-title">Brush</div>
+        <h2 className="panel-title">Brush</h2>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Size</span>
@@ -211,7 +244,7 @@ export default function RightPanel() {
       </div>
 
       <div className="panel-section">
-        <div className="panel-title">Pressure</div>
+        <h2 className="panel-title">Pressure</h2>
         <div className="checkbox-group">
           <label>
             <input
@@ -308,7 +341,7 @@ export default function RightPanel() {
       </div>
 
       <div className="panel-section">
-        <div className="panel-title">Selection</div>
+        <h2 className="panel-title">Selection</h2>
         <div className="slider-group">
           <div className="slider-header">
             <span className="slider-label">Tolerance</span>
@@ -321,7 +354,7 @@ export default function RightPanel() {
       </div>
 
       <div className="panel-section">
-        <div className="panel-title">Canvas</div>
+        <h2 className="panel-title">Canvas</h2>
         <div className="color-inputs">
           <div className="color-input-group">
             <label>Width</label>

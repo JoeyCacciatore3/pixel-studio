@@ -1,5 +1,26 @@
 import type { Metadata, Viewport } from 'next';
+import { Sora, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+
+// Initialize polyfills and browser compatibility
+if (typeof window !== 'undefined') {
+  import('@/lib/polyfills');
+  import('@/lib/browser-compat');
+}
+
+const sora = Sora({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  display: 'swap',
+  variable: '--font-sora',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-jetbrains-mono',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -12,6 +33,12 @@ export const metadata: Metadata = {
   creator: 'Pixel Studio',
   publisher: 'Pixel Studio',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Pixel Studio',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -44,18 +71,18 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  themeColor: '#6366f1',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${sora.variable} ${jetbrainsMono.variable}`}>
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
-        />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png" />
       </head>
-      <body>{children}</body>
+      <body className={sora.className}>{children}</body>
     </html>
   );
 }
