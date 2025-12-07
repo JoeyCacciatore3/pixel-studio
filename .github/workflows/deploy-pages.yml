@@ -63,8 +63,14 @@ jobs:
           node-version: '20'
           cache: ${{ steps.detect-package-manager.outputs.manager }}
 
+      # IMPORTANT: Before this workflow can run, you must enable GitHub Pages:
+      # 1. Go to: https://github.com/JoeyCacciatore3/pixel-studio/settings/pages
+      # 2. Under "Build and deployment", set Source to "GitHub Actions"
+      # 3. Click Save
+      # If you see an error here, Pages is not enabled yet.
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        continue-on-error: false
 
       - name: Restore cache
         uses: actions/cache@v4
