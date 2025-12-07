@@ -10,9 +10,11 @@ Your site will be automatically deployed to GitHub Pages whenever you push to th
 
 1. Go to your repository: `https://github.com/JoeyCacciatore3/pixel-studio`
 2. Click **Settings** → **Pages**
-3. Under **Source**, select:
-   - **Source**: GitHub Actions
-4. The deployment workflow will run automatically on the next push
+3. Under **Build and deployment**, select:
+   - **Source**: Deploy from a branch
+   - **Branch**: `gh-pages` / `/ (root)`
+4. Click **Save**
+5. The deployment workflow will run automatically on the next push
 
 ### Your Site URL
 
