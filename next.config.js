@@ -149,10 +149,11 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Disable Turbopack when using webpack-based plugins like next-pwa
-  // next-pwa requires webpack configuration which is incompatible with Turbopack
-  experimental: {
-    turbo: false,
+  // next-pwa requires webpack configuration
+  // Ensure webpack is used (not Turbopack) when PWA is enabled
+  webpack: (config, { isServer }) => {
+    // Add any webpack customizations here if needed
+    return config;
   },
   async headers() {
     return [
