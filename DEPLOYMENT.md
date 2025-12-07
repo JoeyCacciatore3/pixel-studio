@@ -1,44 +1,10 @@
 # Deployment Guide
 
-This project can be deployed to production using several methods. The recommended approach is **GitHub Pages** (free, automatic) or **Vercel** for Next.js applications.
+This project is optimized for deployment on **Vercel**, which provides the best experience for Next.js applications with automatic deployments, edge network, and zero configuration.
 
-## Option 1: GitHub Pages (Recommended - Free & Automatic)
+## Option 1: Vercel (Recommended - Primary Host)
 
-Your site will be automatically deployed to GitHub Pages whenever you push to the `master` branch.
-
-### Setup (One-time)
-
-1. Go to your repository: `https://github.com/JoeyCacciatore3/pixel-studio`
-2. Click **Settings** → **Pages**
-3. Under **Build and deployment**, select:
-   - **Source**: Deploy from a branch
-   - **Branch**: `gh-pages` / `/ (root)`
-4. Click **Save**
-5. The deployment workflow will run automatically on the next push
-
-### Your Site URL
-
-After the first deployment, your site will be available at:
-
-- `https://joeycacciatore3.github.io/pixel-studio/`
-
-### Automatic Deployments
-
-- Every push to `master` branch = Automatic deployment
-- Deployments happen via GitHub Actions
-- Build logs available in the **Actions** tab
-
-### Manual Deployment
-
-You can also trigger a deployment manually:
-
-1. Go to **Actions** tab in your repository
-2. Select "Deploy to GitHub Pages" workflow
-3. Click "Run workflow"
-
-## Option 1: Vercel (Recommended - Easiest)
-
-Vercel is made by the Next.js team and provides the best experience for Next.js apps.
+Vercel is made by the Next.js team and provides the best experience for Next.js apps. Deployments happen automatically when you push to your repository.
 
 ### Quick Deploy
 
@@ -56,6 +22,7 @@ That's it! Your site will be live in ~2 minutes.
 - Every push to `master` branch = Production deployment
 - Every pull request = Preview deployment
 - Automatic HTTPS, CDN, and global edge network
+- No manual workflow configuration needed - Vercel handles everything automatically
 
 ### Custom Domain
 
@@ -64,7 +31,40 @@ That's it! Your site will be live in ~2 minutes.
 3. Add your custom domain
 4. Follow DNS configuration instructions
 
-## Option 2: Netlify
+### Environment Variables
+
+If you need environment variables:
+
+1. In Vercel: Project Settings → Environment Variables
+2. Add your variables
+3. Redeploy (or wait for automatic deployment)
+
+## Option 2: GitHub Pages (Alternative - Static Export Required)
+
+**Note:** This project is currently configured for Vercel (server mode). To deploy to GitHub Pages, you would need to:
+
+1. Modify `next.config.js` to enable static export (`output: 'export'`)
+2. Disable image optimization
+3. Set up a GitHub Actions workflow to build and deploy
+
+For the best Next.js experience, we recommend using Vercel instead.
+
+### Setup (if needed)
+
+1. Go to your repository: `https://github.com/JoeyCacciatore3/pixel-studio`
+2. Click **Settings** → **Pages**
+3. Under **Build and deployment**, select:
+   - **Source**: Deploy from a branch
+   - **Branch**: `gh-pages` / `/ (root)`
+4. Click **Save**
+
+### Your Site URL
+
+After deployment, your site would be available at:
+
+- `https://joeycacciatore3.github.io/pixel-studio/`
+
+## Option 3: Netlify
 
 1. Go to [netlify.com](https://netlify.com)
 2. Sign in with GitHub
@@ -75,7 +75,7 @@ That's it! Your site will be live in ~2 minutes.
    - Publish directory: `.next`
 6. Click "Deploy site"
 
-## Option 3: GitHub Actions + Vercel CLI
+## Manual Deployment with Vercel CLI
 
 The repository includes a `vercel.json` configuration file. You can also deploy manually using:
 
@@ -83,14 +83,6 @@ The repository includes a `vercel.json` configuration file. You can also deploy 
 npm install -g vercel
 vercel
 ```
-
-## Environment Variables
-
-If you need environment variables:
-
-1. In Vercel: Project Settings → Environment Variables
-2. Add your variables
-3. Redeploy
 
 ## Build Configuration
 
@@ -101,4 +93,10 @@ The project is configured with:
 - **Build Command**: `npm run build`
 - **Install Command**: `npm ci`
 
-All settings are in `vercel.json` and can be customized in the Vercel dashboard.
+All settings are in `vercel.json` and can be customized in the Vercel dashboard. Vercel automatically handles:
+
+- Image optimization
+- CDN and edge network
+- Automatic HTTPS
+- Server-side rendering and API routes
+- Preview deployments for pull requests
