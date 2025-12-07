@@ -15,8 +15,6 @@ const nextConfig = {
   compress: true,
   // Enable static export for GitHub Pages
   output: process.env.GITHUB_PAGES === 'true' ? 'export' : undefined,
-  // Set base path for GitHub Pages (repository name)
-  basePath: process.env.GITHUB_PAGES === 'true' ? '/pixel-studio' : '',
   // Disable image optimization for static export (GitHub Pages)
   images:
     process.env.GITHUB_PAGES === 'true'
