@@ -107,7 +107,7 @@ This project implements several security measures:
 Security updates will be:
 
 - Released as patch versions (e.g., 0.1.0 → 0.1.1)
-- Documented in CHANGELOG.md
+- Documented in [CHANGELOG.md](CHANGELOG.md)
 - Tagged with `security` label
 - Announced in release notes
 

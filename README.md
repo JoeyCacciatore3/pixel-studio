@@ -121,7 +121,7 @@ The project is configured to work with Model Context Protocol (MCP) agents for e
 - **Firecrawl**: Scraping documentation
 - **Sentry**: Error tracking and monitoring (if configured)
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on using MCP agents.
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for more details on using MCP agents.
 
 ### Node Version Management
 
@@ -147,10 +147,12 @@ nvm install
 
 ## Documentation
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
-- [STYLE_GUIDE.md](STYLE_GUIDE.md) - Code style and conventions
-- [CHANGELOG.md](CHANGELOG.md) - Project changelog
-- [SECURITY.md](SECURITY.md) - Security policy
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Contribution guidelines
+- [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) - Code style and conventions
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) - Project changelog
+- [docs/SECURITY.md](docs/SECURITY.md) - Security policy
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - Deployment guide
+- [docs/ESLINT_KNOWN_ISSUE.md](docs/ESLINT_KNOWN_ISSUE.md) - ESLint known issues
 
 ## License
 

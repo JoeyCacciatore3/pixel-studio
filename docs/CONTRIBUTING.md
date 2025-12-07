@@ -114,7 +114,7 @@ docs(readme): update installation instructions
 
 ### Code Style
 
-- Follow the existing code style (see [STYLE_GUIDE.md](STYLE_GUIDE.md))
+- Follow the existing code style (see [STYLE_GUIDE.md](STYLE_GUIDE.md) in this directory)
 - Use TypeScript for all new code
 - Write meaningful variable and function names
 - Add comments for complex logic
@@ -256,7 +256,7 @@ MCP agents are configured in `~/.cursor/mcp.json`. The project uses:
 - Open an issue for bug reports or feature requests
 - Check existing issues before creating new ones
 - Be specific and provide context in issue descriptions
-- Refer to [STYLE_GUIDE.md](STYLE_GUIDE.md) for code style questions
+- Refer to [STYLE_GUIDE.md](STYLE_GUIDE.md) in this directory for code style questions
 
 ## License
 
