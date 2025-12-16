@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Analytics } from '@vercel/analytics/next';
 import { Sora, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -82,7 +83,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png" />
       </head>
-      <body className={sora.className}>{children}</body>
+      <body className={sora.className}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
