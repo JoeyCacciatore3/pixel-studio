@@ -24,7 +24,6 @@ describe('PixelStudio', () => {
     expect(PixelStudio).toHaveProperty('getState');
     expect(PixelStudio).toHaveProperty('getElements');
     expect(PixelStudio).toHaveProperty('getLayers');
-    expect(PixelStudio).toHaveProperty('syncLayerState');
   });
 
   it('should have init as a function', () => {

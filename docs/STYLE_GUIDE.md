@@ -308,10 +308,53 @@ export default toolName;
 Tools are auto-registered when imported in `src/lib/tools/index.ts`:
 
 ```typescript
-import toolName from './toolName';
+// src/lib/tools/cleanup-stray-pixels.ts
 import PixelStudio from '../app';
 
-PixelStudio.registerTool(toolName.name, toolName);
+(function () {
+  const StrayPixelTool: Tool = {
+    name: 'cleanup-stray-pixels',
+    // ... tool implementation
+  };
+
+  PixelStudio.registerTool('cleanup-stray-pixels', StrayPixelTool);
+})();
+```
+
+Then import in `src/lib/tools/index.ts`:
+
+```typescript
+import './cleanup-stray-pixels';
+```
+
+### Cleanup Tools Pattern
+
+Cleanup tools follow a specific pattern:
+
+1. **Algorithm Module** (`src/lib/cleanup/*.ts`): Core algorithm implementation
+2. **Tool Wrapper** (`src/lib/tools/cleanup-*.ts`): Tool interface implementation
+3. **Web Worker Support**: Heavy operations use `WorkerManager.executeCleanupOperation()`
+4. **UI Options**: Options panel in `CleanupPanel.tsx` component
+
+Example cleanup tool structure:
+
+```typescript
+// Algorithm module
+export async function removeStrayPixels(
+  imageData: ImageData,
+  options: StrayPixelOptions
+): Promise<ImageData> {
+  // Implementation with worker fallback
+}
+
+// Tool wrapper
+const StrayPixelTool: Tool = {
+  name: 'cleanup-stray-pixels',
+  async onPointerDown() {
+    await executeStrayPixelRemoval();
+  },
+  // ...
+};
 ```
 
 ## Code Organization
@@ -369,6 +412,62 @@ PixelStudio.registerTool(toolName.name, toolName);
 - Use type guards for runtime type checking
 - Leverage TypeScript's strict mode features
 - Use discriminated unions for state management
+
+### Unused Code Handling
+
+When dealing with unused code, follow these guidelines:
+
+#### Unused Variables
+
+- **Prefix with `_`**: For intentionally unused parameters or variables that must exist for API compatibility
+
+  ```typescript
+  function handleEvent(_event: Event): void {
+    // Event parameter required by API but not used
+  }
+  ```
+
+- **Remove if truly unused**: If a variable serves no purpose, remove it entirely
+- **Comment out for future use**: If code is reserved for future implementation, comment it out with explanation
+  ```typescript
+  // Reserved for future use: brush pressure dynamics
+  // const brushPressure = toolState?.currentPressure ?? 0.5;
+  ```
+
+#### Unused Functions
+
+- **Comment out with explanation**: For functions reserved for future features, comment them out with a clear explanation
+
+  ```typescript
+  /**
+   * Draw overlay preview
+   * Reserved for future use
+   */
+  /*
+  function drawOverlay(ctx: CanvasRenderingContext2D): void {
+    // Implementation
+  }
+  */
+  ```
+
+- **Remove if obsolete**: If a function is no longer needed and won't be used, remove it entirely
+- **Keep if part of public API**: If a function is part of a public API that external code might use, keep it even if currently unused
+
+#### Unused Imports
+
+- **Remove immediately**: Unused imports should always be removed
+- **Use `import type` for type-only imports**: This helps TypeScript tree-shake unused type imports
+  ```typescript
+  import type { AppState } from '@/lib/types'; // Type-only import
+  import { Canvas } from '@/lib/canvas'; // Value import
+  ```
+
+#### Best Practices
+
+- Run `npm run type-check` regularly to catch unused code
+- Use ESLint's `no-unused-vars` rule (configured to allow `_` prefix)
+- Review unused code during code reviews
+- Document why code is commented out rather than removed
 
 ### Git Practices
 

@@ -9,17 +9,49 @@ import PixelStudio from './app';
 import Canvas from './canvas';
 import History from './history';
 import SelectionActions from './selectionActions';
+import StateManager from './stateManager';
+import { logger } from './utils/logger';
 
 const UI = (function () {
   let elements: CanvasElements | null = null;
-  let state: AppState | null = null;
+
+  // Store event listeners for cleanup
+  interface ListenerRef {
+    element: HTMLElement | Document;
+    event: string;
+    handler: EventListener;
+  }
+  const listeners: ListenerRef[] = [];
+
+  /**
+   * Helper to add and track event listener
+   */
+  function addListener(
+    element: HTMLElement | Document,
+    event: string,
+    handler: EventListener
+  ): void {
+    element.addEventListener(event, handler);
+    listeners.push({ element, event, handler });
+  }
+
+  /**
+   * Clean up all event listeners
+   */
+  function cleanup(): void {
+    listeners.forEach(({ element, event, handler }) => {
+      element.removeEventListener(event, handler);
+    });
+    listeners.length = 0;
+  }
 
   /**
    * Initialize the UI module
    */
-  function init(appState: AppState, canvasElements: CanvasElements): void {
+  function init(_appState: AppState, canvasElements: CanvasElements): void {
     elements = canvasElements;
-    state = appState;
+    // Clean up any existing listeners before reinitializing
+    cleanup();
   }
 
   /**
@@ -33,52 +65,57 @@ const UI = (function () {
 
     // Color picker
     if (elements.colorPicker) {
-      elements.colorPicker.addEventListener('input', (e) => {
+      const colorPickerHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
         const color = target.value;
         // Validate hex color format
         if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
-          if (state) {
-            state.currentColor = color;
+          try {
+            StateManager.setColor(color);
+            if (elements?.hexInput) {
+              elements.hexInput.value = color;
+            }
+            onColorChange(color);
+            PixelStudio.updateColorPreview();
+          } catch (error) {
+            logger.error('Failed to set color:', error);
           }
-          if (elements?.hexInput) {
-            elements.hexInput.value = color;
-          }
-          onColorChange(color);
-          PixelStudio.updateColorPreview();
         }
-      });
+      };
+      addListener(elements.colorPicker, 'input', colorPickerHandler);
     }
 
     // Hex input
     if (elements.hexInput) {
-      elements.hexInput.addEventListener('change', (e) => {
+      const hexInputHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
         if (/^#[0-9A-Fa-f]{6}$/.test(target.value)) {
           const color = target.value;
-          if (state) {
-            state.currentColor = color;
+          try {
+            StateManager.setColor(color);
+            if (elements?.colorPicker) {
+              elements.colorPicker.value = color;
+            }
+            onColorChange(color);
+            PixelStudio.updateColorPreview();
+          } catch (error) {
+            logger.error('Failed to set color:', error);
           }
-          if (elements?.colorPicker) {
-            elements.colorPicker.value = color;
-          }
-          onColorChange(color);
-          PixelStudio.updateColorPreview();
         }
-      });
+      };
+      addListener(elements.hexInput, 'input', hexInputHandler);
     }
 
     // Alpha input
     if (elements.alphaInput) {
-      elements.alphaInput.addEventListener('change', (e) => {
+      const alphaInputHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const alpha = Math.max(0, Math.min(100, parseInt(target.value) || 0)) / 100;
-        if (state) {
-          state.currentAlpha = alpha;
-        }
+        const alpha = Math.max(0, Math.min(100, parseInt(target.value, 10) || 0)) / 100;
+        StateManager.setAlpha(alpha);
         onAlphaChange(alpha);
         PixelStudio.updateColorPreview();
-      });
+      };
+      addListener(elements.alphaInput, 'change', alphaInputHandler);
     }
   }
 
@@ -93,34 +130,32 @@ const UI = (function () {
 
     // Brush size
     if (elements.brushSize) {
-      elements.brushSize.addEventListener('input', (e) => {
+      const brushSizeHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const size = parseInt(target.value) || 1;
-        if (state) {
-          state.brushSize = size;
-        }
+        const size = parseInt(target.value, 10) || 1;
+        StateManager.setBrushSize(size);
         onBrushSizeChange(size);
         const sizeValue = document.getElementById('sizeValue');
         if (sizeValue) {
           sizeValue.textContent = size + 'px';
         }
-      });
+      };
+      addListener(elements.brushSize, 'input', brushSizeHandler);
     }
 
     // Tolerance
     if (elements.tolerance) {
-      elements.tolerance.addEventListener('input', (e) => {
+      const toleranceHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const tolerance = parseInt(target.value) || 0;
-        if (state) {
-          state.tolerance = tolerance;
-        }
+        const tolerance = parseInt(target.value, 10) || 0;
+        StateManager.setTolerance(tolerance);
         onToleranceChange(tolerance);
         const toleranceValue = document.getElementById('toleranceValue');
         if (toleranceValue) {
           toleranceValue.textContent = tolerance.toString();
         }
-      });
+      };
+      addListener(elements.tolerance, 'input', toleranceHandler);
     }
   }
 
@@ -145,168 +180,157 @@ const UI = (function () {
     // Brush hardness
     const brushHardness = document.getElementById('brushHardness') as HTMLInputElement;
     if (brushHardness) {
-      brushHardness.addEventListener('input', (e) => {
+      const brushHardnessHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const hardness = parseInt(target.value) || 100;
-        if (state) {
-          state.brushHardness = hardness;
-        }
+        const hardness = parseInt(target.value, 10) || 100;
+        StateManager.setBrushHardness(hardness);
         onHardnessChange(hardness);
         const hardnessValue = document.getElementById('hardnessValue');
         if (hardnessValue) {
           hardnessValue.textContent = hardness + '%';
         }
-      });
+      };
+      addListener(brushHardness, 'input', brushHardnessHandler);
     }
 
     // Brush opacity
     const brushOpacity = document.getElementById('brushOpacity') as HTMLInputElement;
     if (brushOpacity) {
-      brushOpacity.addEventListener('input', (e) => {
+      const brushOpacityHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const opacity = parseInt(target.value) || 100;
-        if (state) {
-          state.brushOpacity = opacity;
-        }
+        const opacity = parseInt(target.value, 10) || 100;
+        StateManager.setBrushOpacity(opacity);
         onOpacityChange(opacity);
         const opacityValue = document.getElementById('opacityValue');
         if (opacityValue) {
           opacityValue.textContent = opacity + '%';
         }
-      });
+      };
+      addListener(brushOpacity, 'input', brushOpacityHandler);
     }
 
     // Brush flow
     const brushFlow = document.getElementById('brushFlow') as HTMLInputElement;
     if (brushFlow) {
-      brushFlow.addEventListener('input', (e) => {
+      const brushFlowHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const flow = parseInt(target.value) || 100;
-        if (state) {
-          state.brushFlow = flow;
-        }
+        const flow = parseInt(target.value, 10) || 100;
+        StateManager.setBrushFlow(flow);
         onFlowChange(flow);
         const flowValue = document.getElementById('flowValue');
         if (flowValue) {
           flowValue.textContent = flow + '%';
         }
-      });
+      };
+      addListener(brushFlow, 'input', brushFlowHandler);
     }
 
     // Brush spacing
     const brushSpacing = document.getElementById('brushSpacing') as HTMLInputElement;
     if (brushSpacing) {
-      brushSpacing.addEventListener('input', (e) => {
+      const brushSpacingHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const spacing = parseInt(target.value) || 25;
-        if (state) {
-          state.brushSpacing = spacing;
-        }
+        const spacing = parseInt(target.value, 10) || 25;
+        StateManager.setBrushSpacing(spacing);
         onSpacingChange(spacing);
         const spacingValue = document.getElementById('spacingValue');
         if (spacingValue) {
           spacingValue.textContent = spacing + '%';
         }
-      });
+      };
+      addListener(brushSpacing, 'input', brushSpacingHandler);
     }
 
     // Brush jitter
     const brushJitter = document.getElementById('brushJitter') as HTMLInputElement;
     if (brushJitter) {
-      brushJitter.addEventListener('input', (e) => {
+      const brushJitterHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const jitter = parseInt(target.value) || 0;
-        if (state) {
-          state.brushJitter = jitter;
-        }
+        const jitter = parseInt(target.value, 10) || 0;
+        StateManager.setBrushJitter(jitter);
         onJitterChange(jitter);
         const jitterValue = document.getElementById('jitterValue');
         if (jitterValue) {
           jitterValue.textContent = jitter + '%';
         }
-      });
+      };
+      addListener(brushJitter, 'input', brushJitterHandler);
     }
 
     // Stabilizer strength
     const stabilizerStrength = document.getElementById('stabilizerStrength') as HTMLInputElement;
     if (stabilizerStrength) {
-      stabilizerStrength.addEventListener('input', (e) => {
+      const stabilizerStrengthHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const strength = parseInt(target.value) || 30;
-        if (state) {
-          state.stabilizerStrength = strength;
-        }
+        const strength = parseInt(target.value, 10) || 30;
+        StateManager.setStabilizerStrength(strength);
         onStabilizerChange(strength);
         const stabilizerValue = document.getElementById('stabilizerValue');
         if (stabilizerValue) {
           stabilizerValue.textContent = strength + '%';
         }
-      });
+      };
+      addListener(stabilizerStrength, 'input', stabilizerStrengthHandler);
     }
 
     // Pressure enabled
     const pressureEnabled = document.getElementById('pressureEnabled') as HTMLInputElement;
     if (pressureEnabled) {
-      pressureEnabled.addEventListener('change', (e) => {
+      const pressureEnabledHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
         const enabled = target.checked;
-        if (state) {
-          state.pressureEnabled = enabled;
-        }
+        StateManager.setPressureEnabled(enabled);
         onPressureEnabledChange(enabled);
-      });
+      };
+      addListener(pressureEnabled, 'change', pressureEnabledHandler);
     }
 
     // Pressure size
     const pressureSize = document.getElementById('pressureSize') as HTMLInputElement;
     if (pressureSize) {
-      pressureSize.addEventListener('change', (e) => {
+      const pressureSizeHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
         const enabled = target.checked;
-        if (state) {
-          state.pressureSize = enabled;
-        }
+        StateManager.setPressureSize(enabled);
         onPressureSizeChange(enabled);
-      });
+      };
+      addListener(pressureSize, 'change', pressureSizeHandler);
     }
 
     // Pressure opacity
     const pressureOpacity = document.getElementById('pressureOpacity') as HTMLInputElement;
     if (pressureOpacity) {
-      pressureOpacity.addEventListener('change', (e) => {
+      const pressureOpacityHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
         const enabled = target.checked;
-        if (state) {
-          state.pressureOpacity = enabled;
-        }
+        StateManager.setPressureOpacity(enabled);
         onPressureOpacityChange(enabled);
-      });
+      };
+      addListener(pressureOpacity, 'change', pressureOpacityHandler);
     }
 
     // Pressure flow
     const pressureFlow = document.getElementById('pressureFlow') as HTMLInputElement;
     if (pressureFlow) {
-      pressureFlow.addEventListener('change', (e) => {
+      const pressureFlowHandler = (e: Event) => {
         const target = e.target as HTMLInputElement;
         const enabled = target.checked;
-        if (state) {
-          state.pressureFlow = enabled;
-        }
+        StateManager.setPressureFlow(enabled);
         onPressureFlowChange(enabled);
-      });
+      };
+      addListener(pressureFlow, 'change', pressureFlowHandler);
     }
 
     // Pressure curve
     const pressureCurve = document.getElementById('pressureCurve') as HTMLSelectElement;
     if (pressureCurve) {
-      pressureCurve.addEventListener('change', (e) => {
+      const pressureCurveHandler = (e: Event) => {
         const target = e.target as HTMLSelectElement;
-        const curve = target.value;
-        if (state) {
-          state.pressureCurve = curve as PressureCurveType;
-        }
+        const curve = target.value as PressureCurveType;
+        StateManager.setPressureCurve(curve);
         onPressureCurveChange(curve);
-      });
+      };
+      addListener(pressureCurve, 'change', pressureCurveHandler);
     }
   }
 
@@ -314,20 +338,34 @@ const UI = (function () {
    * Setup keyboard shortcuts
    */
   function setupKeyboardShortcuts(): void {
-    document.addEventListener('keydown', (e) => {
+    const keyboardHandler = (e: Event) => {
+      const keyEvent = e as KeyboardEvent;
       // Don't capture when typing in inputs
-      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      if ((keyEvent.target as HTMLElement).tagName === 'INPUT') return;
 
-      const key = e.key.toLowerCase();
+      const key = keyEvent.key.toLowerCase();
 
       // Undo/Redo
-      if ((e.ctrlKey || e.metaKey) && key === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) {
-          History.redo();
+      if ((keyEvent.ctrlKey || keyEvent.metaKey) && key === 'z') {
+        keyEvent.preventDefault();
+        if (keyEvent.shiftKey) {
+          History.redo().catch((error) => {
+            logger.error('Error during redo:', error);
+          });
         } else {
-          History.undo();
+          History.undo().catch((error) => {
+            logger.error('Error during undo:', error);
+          });
         }
+        return;
+      }
+
+      // Redo alternative shortcut (Ctrl+Y / Cmd+Y - Photoshop standard)
+      if ((keyEvent.ctrlKey || keyEvent.metaKey) && key === 'y' && !keyEvent.shiftKey) {
+        keyEvent.preventDefault();
+        History.redo().catch((error) => {
+          logger.error('Error during redo:', error);
+        });
         return;
       }
 
@@ -367,7 +405,7 @@ const UI = (function () {
           PixelStudio.selectTool('clone');
           break;
         case 's':
-          if (!e.shiftKey) {
+          if (!keyEvent.shiftKey) {
             PixelStudio.selectTool('smudge');
           }
           break;
@@ -382,37 +420,48 @@ const UI = (function () {
           handleDelete();
           break;
         case 'x':
-          if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-            e.preventDefault();
+          if ((keyEvent.ctrlKey || keyEvent.metaKey) && keyEvent.shiftKey) {
+            keyEvent.preventDefault();
             handleExtractToLayer();
           }
           break;
-        case '[':
-          if (state) {
-            state.brushSize = Math.max(1, state.brushSize - 1);
+        case '[': {
+          try {
+            const state = StateManager.getState();
+            const newSize = Math.max(1, state.brushSize - 1);
+            StateManager.setBrushSize(newSize);
             if (elements?.brushSize) {
-              elements.brushSize.value = state.brushSize.toString();
+              elements.brushSize.value = newSize.toString();
             }
             const sizeValue = document.getElementById('sizeValue');
             if (sizeValue) {
-              sizeValue.textContent = state.brushSize + 'px';
+              sizeValue.textContent = newSize + 'px';
             }
+          } catch (error) {
+            logger.error('StateManager not initialized in keyboard shortcut [:', error);
           }
           break;
-        case ']':
-          if (state) {
-            state.brushSize = Math.min(100, state.brushSize + 1);
+        }
+        case ']': {
+          try {
+            const state = StateManager.getState();
+            const newSize = Math.min(100, state.brushSize + 1);
+            StateManager.setBrushSize(newSize);
             if (elements?.brushSize) {
-              elements.brushSize.value = state.brushSize.toString();
+              elements.brushSize.value = newSize.toString();
             }
             const sizeValue = document.getElementById('sizeValue');
             if (sizeValue) {
-              sizeValue.textContent = state.brushSize + 'px';
+              sizeValue.textContent = newSize + 'px';
             }
+          } catch (error) {
+            logger.error('StateManager not initialized in keyboard shortcut ]:', error);
           }
           break;
+        }
       }
-    });
+    };
+    addListener(document, 'keydown', keyboardHandler);
   }
 
   /**
@@ -431,11 +480,12 @@ const UI = (function () {
 
   /**
    * Apply zoom level
+   * Note: The transform is now handled by React inline styles in Canvas.tsx.
+   * This function only updates the zoom level display.
    */
   function applyZoom(zoom: number): void {
-    if (elements?.canvasWrapper) {
-      elements.canvasWrapper.style.transform = `scale(${zoom})`;
-    }
+    // Transform is handled by React inline style in Canvas.tsx
+    // Only update the zoom level display
     if (elements?.zoomLevel) {
       elements.zoomLevel.textContent = Math.round(zoom * 100) + '%';
     }
@@ -566,6 +616,7 @@ const UI = (function () {
     setupSliders,
     setupAdvancedBrushControls,
     setupKeyboardShortcuts,
+    cleanup,
     applyZoom,
     showSelection,
     showColorRangeOverlay,

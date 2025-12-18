@@ -9,6 +9,9 @@ tests/
 ├── e2e/
 │   ├── browser-compatibility.spec.ts  # Cross-browser compatibility tests
 │   ├── mobile-touch.spec.ts           # Mobile touch interaction tests
+│   ├── canvas-functions.spec.ts       # Canvas operations (clear, undo, redo, upload)
+│   ├── layer-system-verification.spec.ts  # Layer system functionality and checkerboard
+│   ├── tools.spec.ts                  # Tool functionality tests
 │   └── playwright.config.ts           # Playwright configuration
 ├── screenshots/                        # Test screenshots (generated)
 └── reports/                           # Test reports (generated)
@@ -51,6 +54,15 @@ npx playwright test browser-compatibility
 
 # Mobile touch tests only
 npx playwright test mobile-touch
+
+# Canvas functions tests
+npx playwright test canvas-functions
+
+# Layer system verification tests
+npx playwright test layer-system-verification
+
+# Tools tests
+npx playwright test tools
 
 # Run on specific browser
 npx playwright test --project=chromium
@@ -117,6 +129,21 @@ This opens an interactive HTML report showing:
 - Orientation changes
 - Mobile performance
 - Touch gesture recognition
+
+### Canvas Functions Tests
+
+- Clear canvas functionality
+- Undo/redo operations
+- Image upload and loading
+- Canvas state management
+
+### Layer System Verification Tests
+
+- Image loading into layers
+- Layer bounds tracking
+- Layer operations (visibility, opacity, reorder, delete)
+- Checkerboard transparency display
+- Erased areas showing checkerboard pattern
 
 ## Continuous Integration
 

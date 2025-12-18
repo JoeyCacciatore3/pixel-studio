@@ -7,6 +7,9 @@ import type { Tool, BaseToolState } from '../types';
 import Canvas from '../canvas';
 import { rgbToHex } from '../colorUtils';
 import PixelStudio from '../app';
+import StateManager from '../stateManager';
+import EventEmitter from '../utils/eventEmitter';
+import { logger } from '../utils/logger';
 
 (function () {
   let toolState: BaseToolState | null = null;
@@ -56,12 +59,28 @@ import PixelStudio from '../app';
     const endX = Math.min(width, Math.floor(x) + halfSize + 1);
     const endY = Math.min(height, Math.floor(y) + halfSize + 1);
 
-    const imageData = Canvas.getContext().getImageData(
-      startX,
-      startY,
-      endX - startX,
-      endY - startY
-    );
+    let imageData: ImageData;
+    try {
+      const ctx = Canvas.getContext();
+      if (!ctx) {
+        logger.error('Canvas context is null in picker tool');
+        EventEmitter.emit('tool:error', {
+          tool: 'picker',
+          operation: 'getContext',
+          error: 'Canvas context is null',
+        });
+        return;
+      }
+      imageData = ctx.getImageData(startX, startY, endX - startX, endY - startY);
+    } catch (error) {
+      logger.error('Failed to get image data for picker tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'picker',
+        operation: 'getImageData',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const data = imageData.data;
 
     // Calculate average color from sampled area
@@ -89,17 +108,16 @@ import PixelStudio from '../app';
     const hex = rgbToHex(avgR, avgG, avgB);
     const alpha = avgA;
 
-    const state = toolState.state;
     const elements = toolState.elements;
 
     // Validate hex color format before setting
     if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) {
-      console.error('Invalid hex color from picker:', hex);
+      logger.error('Invalid hex color from picker:', hex);
       return;
     }
 
-    state.currentColor = hex;
-    state.currentAlpha = alpha;
+    StateManager.setColor(hex);
+    StateManager.setAlpha(alpha);
 
     if (elements.colorPicker) {
       elements.colorPicker.value = hex;

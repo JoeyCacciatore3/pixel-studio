@@ -5,58 +5,55 @@
 
 import type { Tool, AppState, CanvasElements } from './types';
 import Canvas from './canvas';
-import History from './history';
 import Layers from './layers';
+import StateManager from './stateManager';
 import { hexToRgba } from './colorUtils';
+import EventEmitter from './utils/eventEmitter';
+import { logger } from './utils/logger';
 
 const PixelStudio = (function () {
   const tools: Map<string, Tool> = new Map();
   let currentTool: Tool | null = null;
-  let state: AppState;
-  let elements: CanvasElements;
+  let elements: CanvasElements | null = null;
+  let isReadyFlag = false;
 
   /**
-   * Initialize the application
+   * Initialize tools (called after modules are initialized)
+   * Note: Module initialization (StateManager, Canvas, Layers, History) is handled by init.ts
    */
   function init(
-    appState: AppState,
+    _appState: AppState,
     canvasElements: CanvasElements,
-    enableLayers: boolean = true
+    _enableLayers: boolean = true
   ): void {
-    state = appState;
     elements = canvasElements;
 
-    // Initialize modules
-    if (elements.canvas) {
-      const ctx = elements.canvas.getContext('2d', { willReadFrequently: true });
-      if (ctx) {
-        Canvas.init(elements.canvas, elements.selectionCanvas || undefined, enableLayers);
-        if (enableLayers) {
-          Layers.init(elements.canvas, ctx);
-          // Initialize layers in state if not already set
-          if (!state.layers || state.layers.length === 0) {
-            const initialLayer = Layers.createLayer('Layer 1');
-            state.layers = Layers.getAllLayers();
-            state.activeLayerId = initialLayer.id;
-          } else {
-            // Restore layers from state
-            Layers.setState({ layers: state.layers, activeLayerId: state.activeLayerId });
-          }
-          Layers.renderLayers();
-        }
+    // Initialize all registered tools
+    if (elements) {
+      const state = StateManager.getState();
+      const elementsNonNull = elements; // Type narrowing
+      tools.forEach((tool) => {
+        tool.init(state, elementsNonNull);
+      });
+
+      // Select default tool
+      if (state.currentTool && tools.has(state.currentTool)) {
+        selectTool(state.currentTool);
       }
     }
-    History.init(enableLayers);
 
-    // Initialize all registered tools
-    tools.forEach((tool) => {
-      tool.init(state, elements);
+    // Mark as ready and emit event
+    isReadyFlag = true;
+    EventEmitter.emit('app:ready', {
+      timestamp: Date.now(),
     });
+  }
 
-    // Select default tool
-    if (state.currentTool && tools.has(state.currentTool)) {
-      selectTool(state.currentTool);
-    }
+  /**
+   * Check if application is ready (all modules initialized)
+   */
+  function isReady(): boolean {
+    return isReadyFlag;
   }
 
   /**
@@ -64,8 +61,18 @@ const PixelStudio = (function () {
    */
   function registerTool(name: string, tool: Tool): void {
     tools.set(name, tool);
-    if (state && elements) {
-      tool.init(state, elements);
+    if (elements) {
+      // Only initialize tool if StateManager is ready
+      if (StateManager.isInitialized()) {
+        try {
+          const state = StateManager.getState();
+          tool.init(state, elements);
+        } catch (error) {
+          logger.error(`Failed to initialize tool ${name}:`, error);
+          // Tool will be initialized later in PixelStudio.init()
+        }
+      }
+      // If StateManager not initialized, tool will be initialized in PixelStudio.init()
     }
   }
 
@@ -80,14 +87,20 @@ const PixelStudio = (function () {
    * Select a tool
    */
   function selectTool(name: string): void {
-    if (!state) return;
     const tool = tools.get(name);
     if (tool) {
       currentTool = tool;
-      state.currentTool = name;
+      const previousTool = StateManager.getState().currentTool;
+      StateManager.setCurrentTool(name);
       if (elements && elements.canvas) {
         elements.canvas.className = `cursor-${name}`;
       }
+
+      // Emit event for tool change (StateManager already emitted state:toolChange)
+      EventEmitter.emit('app:toolChange', {
+        tool: name,
+        previousTool,
+      });
     }
   }
 
@@ -102,7 +115,8 @@ const PixelStudio = (function () {
    * Update color preview
    */
   function updateColorPreview(): void {
-    if (!state || !elements) return;
+    if (!elements) return;
+    const state = StateManager.getState();
     if (elements.colorPicker) {
       const preview = document.getElementById('colorPreview');
       if (preview) {
@@ -115,64 +129,79 @@ const PixelStudio = (function () {
    * Set color
    */
   function setColor(color: string): void {
-    if (!state || !elements) return;
-    // Validate hex color format
-    if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
-      console.error('Invalid color format:', color);
-      return;
+    if (!elements) return;
+    try {
+      StateManager.setColor(color);
+      if (elements.colorPicker) {
+        elements.colorPicker.value = color;
+      }
+      if (elements.hexInput) {
+        elements.hexInput.value = color;
+      }
+      updateColorPreview();
+    } catch (error) {
+      logger.error('Invalid color format:', color, error);
     }
-    state.currentColor = color;
-    if (elements.colorPicker) {
-      elements.colorPicker.value = color;
-    }
-    if (elements.hexInput) {
-      elements.hexInput.value = color;
-    }
-    updateColorPreview();
   }
 
   /**
    * Clear selection
    */
   function clearSelection(): void {
-    if (!state) return;
-    state.selection = null;
-    state.colorRangeSelection = null;
+    StateManager.setSelection(null);
+    StateManager.setColorRangeSelection(null);
     Canvas.clearOverlay();
     if (elements && elements.selectionOverlay) {
       elements.selectionOverlay.style.display = 'none';
     }
+    // StateManager already emitted app:selectionChange event
   }
 
   /**
    * Get application state
    */
   function getState(): AppState | null {
-    return state || null;
+    try {
+      return StateManager.getState();
+    } catch {
+      return null;
+    }
   }
 
   /**
    * Get canvas elements
    */
-  function getElements(): CanvasElements {
+  function getElements(): CanvasElements | null {
     return elements;
   }
 
   /**
    * Get layers module
+   * @returns The Layers module instance
    */
-  function getLayers() {
+  function getLayers(): typeof Layers {
     return Layers;
   }
 
   /**
-   * Sync layer state from layers module
+   * Emit selection change event (helper for tools to use)
    */
-  function syncLayerState(): void {
-    if (state) {
-      state.layers = Layers.getAllLayers();
-      const activeLayer = Layers.getActiveLayer();
-      state.activeLayerId = activeLayer?.id || null;
+  function emitSelectionChange(): void {
+    try {
+      const state = StateManager.getState();
+      EventEmitter.emit('app:selectionChange', {
+        hasSelection: !!(state.selection || state.colorRangeSelection),
+        selection: state.selection,
+        colorRangeSelection: state.colorRangeSelection ? 'present' : null, // Don't send full array
+      });
+    } catch (error) {
+      logger.error('Failed to emit selection change:', error);
+      // Emit with safe defaults
+      EventEmitter.emit('app:selectionChange', {
+        hasSelection: false,
+        selection: null,
+        colorRangeSelection: null,
+      });
     }
   }
 
@@ -189,7 +218,11 @@ const PixelStudio = (function () {
     getState,
     getElements,
     getLayers,
-    syncLayerState,
+    emitSelectionChange,
+    isReady,
+    // Expose event emitter for components to subscribe
+    on: EventEmitter.on.bind(EventEmitter),
+    off: EventEmitter.off.bind(EventEmitter),
   };
 })();
 

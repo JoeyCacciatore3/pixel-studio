@@ -9,6 +9,8 @@ import History from '../history';
 import PixelStudio from '../app';
 import { createStabilizer } from './stabilizer';
 import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelpers';
+import EventEmitter from '../utils/eventEmitter';
+import { logger } from '../utils/logger';
 
 (function () {
   let toolState: DrawingToolState | null = null;
@@ -56,12 +58,12 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
       toolState.lastY = smoothed.y;
     },
 
-    onPointerUp(_e) {
+    async onPointerUp(_e) {
       if (toolState && toolState.isDrawing) {
         toolState.isDrawing = false;
         toolState.stabilizer.reset();
-        Canvas.triggerRender();
-        History.save();
+        await Canvas.triggerRender();
+        await History.saveImmediate();
       }
     },
   };
@@ -89,7 +91,6 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
 
   function blurDot(x: number, y: number, _e: PointerEvent): void {
     if (!toolState) return;
-    const ctx = Canvas.getContext();
     const state = toolState.state;
 
     const size = calculateBrushSize(
@@ -109,7 +110,18 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
     const endX = Math.min(width, Math.floor(x + radius));
     const endY = Math.min(height, Math.floor(y + radius));
 
-    const imageData = ctx.getImageData(startX, startY, endX - startX, endY - startY);
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageDataRegion(startX, startY, endX - startX, endY - startY);
+    } catch (error) {
+      logger.error('Failed to get image data region for blur tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'blur',
+        operation: 'getImageDataRegion',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const data = imageData.data;
     const tempData = new Uint8ClampedArray(data);
 
@@ -144,7 +156,7 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
       }
     }
 
-    ctx.putImageData(imageData, startX, startY);
+    Canvas.putImageData(imageData, startX, startY);
   }
 
   // Register the tool

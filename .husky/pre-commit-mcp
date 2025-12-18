@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# MCP-Enhanced Pre-Commit Hook
+# Runs smart test selection based on changed files
+
+echo "🔍 MCP Pre-Commit: Analyzing changed files..."
+
+# Get changed files
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | tr '\n' ',' | sed 's/,$//')
+
+if [ -z "$CHANGED_FILES" ]; then
+  echo "ℹ️  No changed files detected. Skipping MCP test selection."
+  exit 0
+fi
+
+echo "📋 Changed files: $CHANGED_FILES"
+
+# Check if MCP is enabled
+if [ "$MCP_ENABLED" != "true" ]; then
+  echo "ℹ️  MCP not enabled. Set MCP_ENABLED=true to use MCP test selection."
+  exit 0
+fi
+
+# Run MCP test runner with affected tests
+echo "🧪 Running affected tests..."
+tsx scripts/mcp-test-runner.ts --affected --changed-files "$CHANGED_FILES" || {
+  echo "❌ Tests failed. Please fix issues before committing."
+  exit 1
+}
+
+echo "✅ All affected tests passed!"

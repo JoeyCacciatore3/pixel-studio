@@ -119,7 +119,8 @@ export function featherSelection(
       }
 
       const idx = y * width + x;
-      feathered[idx] = weightSum > 0 ? Math.round((sum / weightSum) * 255) / 255 : 0;
+      // Store as 0-255 value in Uint8Array (not 0-1 fractional)
+      feathered[idx] = weightSum > 0 ? Math.round((sum / weightSum) * 255) : 0;
     }
   }
 

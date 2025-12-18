@@ -4,9 +4,12 @@
  */
 
 import type { Tool, BaseToolState } from '../types';
+import { logger } from '../utils/logger';
 import Canvas from '../canvas';
 import PixelStudio from '../app';
 import UI from '../ui';
+import StateManager from '../stateManager';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: BaseToolState | null = null;
@@ -69,7 +72,18 @@ import UI from '../ui';
       return;
     }
 
-    const imageData = Canvas.getImageData();
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageData();
+    } catch (error) {
+      logger.error('Failed to get image data for wand tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'wand',
+        operation: 'getImageData',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const data = imageData.data;
 
     const startIdx = (startY * width + startX) * 4;
@@ -127,13 +141,13 @@ import UI from '../ui';
 
     if (hasSelection) {
       // Store selection mask and bounding box
-      state.selection = {
+      StateManager.setSelection({
         x: minX,
         y: minY,
         width: maxX - minX + 1,
         height: maxY - minY + 1,
-      };
-      state.colorRangeSelection = selected;
+      });
+      StateManager.setColorRangeSelection(selected);
 
       // Display actual selected region on selection canvas (precise pixel selection)
       // Don't show rectangular bounding box - only show the actual selected pixels

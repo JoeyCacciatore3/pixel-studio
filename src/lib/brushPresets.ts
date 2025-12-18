@@ -4,9 +4,11 @@
  */
 
 import type { BrushPreset, AppState } from './types';
+import StateManager from './stateManager';
+import { logger } from './utils/logger';
 
 const BrushPresets = (function () {
-  const STORAGE_KEY = 'pixel-studio-brush-presets';
+  const STORAGE_KEY = 'pixel-studio-brush-presets' as const;
   let presets: BrushPreset[] = [];
 
   /**
@@ -121,7 +123,7 @@ const BrushPresets = (function () {
         presets = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('Failed to load brush presets:', error);
+      logger.error('Failed to load brush presets:', error);
       presets = [];
     }
   }
@@ -133,7 +135,7 @@ const BrushPresets = (function () {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
     } catch (error) {
-      console.error('Failed to save brush presets:', error);
+      logger.error('Failed to save brush presets:', error);
     }
   }
 
@@ -163,7 +165,7 @@ const BrushPresets = (function () {
    */
   function savePreset(name: string, category: string, state: AppState): string {
     const preset: BrushPreset = {
-      id: `preset-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `preset-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       name,
       category,
       size: state.brushSize,
@@ -187,21 +189,22 @@ const BrushPresets = (function () {
   /**
    * Apply preset to state
    */
-  function applyPreset(presetId: string, state: AppState): void {
+  function applyPreset(presetId: string): void {
     const preset = getPreset(presetId);
     if (!preset) return;
 
-    state.brushSize = preset.size;
-    state.brushHardness = preset.hardness;
-    state.brushOpacity = preset.opacity;
-    state.brushFlow = preset.flow;
-    state.brushSpacing = preset.spacing;
-    state.brushJitter = preset.jitter;
-    state.brushTexture = preset.texture;
-    state.pressureSize = preset.pressureSize;
-    state.pressureOpacity = preset.pressureOpacity;
-    state.pressureFlow = preset.pressureFlow;
-    state.pressureCurve = preset.pressureCurve;
+    // Use StateManager setters instead of direct mutation
+    StateManager.setBrushSize(preset.size);
+    StateManager.setBrushHardness(preset.hardness);
+    StateManager.setBrushOpacity(preset.opacity);
+    StateManager.setBrushFlow(preset.flow);
+    StateManager.setBrushSpacing(preset.spacing);
+    StateManager.setBrushJitter(preset.jitter);
+    StateManager.setBrushTexture(preset.texture);
+    StateManager.setPressureSize(preset.pressureSize);
+    StateManager.setPressureOpacity(preset.pressureOpacity);
+    StateManager.setPressureFlow(preset.pressureFlow);
+    StateManager.setPressureCurve(preset.pressureCurve);
   }
 
   /**
@@ -236,7 +239,7 @@ const BrushPresets = (function () {
         return true;
       }
     } catch (error) {
-      console.error('Failed to import presets:', error);
+      logger.error('Failed to import presets:', error);
     }
     return false;
   }

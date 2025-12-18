@@ -151,13 +151,84 @@ const nextConfig = {
   },
   // Explicitly disable Turbopack - next-pwa requires webpack
   turbopack: {},
+  // Experimental optimizations
+  experimental: {
+    // Optimize package imports for better tree-shaking and bundle size
+    // Add packages here that export many modules (e.g., icon libraries)
+    optimizePackageImports: [],
+    // Enable webpack memory optimizations (Next.js 15+)
+    webpackMemoryOptimizations: true,
+  },
   // next-pwa requires webpack configuration
   // Ensure webpack is used (not Turbopack) when PWA is enabled
-  webpack: (config, { isServer }) => {
-    // Add any webpack customizations here if needed
+  webpack: (config) => {
     return config;
   },
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+
+    // Conditional CSP based on environment
+    // Development: Permissive CSP for Next.js HMR and development tools
+    // Production: More strict CSP while maintaining Next.js compatibility
+    // NOTE: Do NOT use 'strict-dynamic' as it disables host-based allowlisting
+    // and requires nonces for all scripts, which blocks Next.js dynamic scripts
+    const cspDirectives = [
+      "default-src 'self'",
+
+      // Scripts: Allow Next.js scripts and inline scripts
+      // script-src-elem is explicitly set to handle <script> elements
+      // This is separate from script-src which handles eval() and other script execution
+      isDev
+        ? // Development: Allow all necessary Next.js development features including HMR
+          "script-src 'self' 'unsafe-eval' 'unsafe-inline' http://localhost:3000 http://localhost:* ws://localhost:* wss://localhost:*"
+        : // Production: Allow Next.js scripts without strict-dynamic
+          "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+
+      // script-src-elem: Explicitly allow script elements (required for Next.js)
+      // This directive handles <script> tags, separate from script-src
+      isDev
+        ? "script-src-elem 'self' 'unsafe-inline' http://localhost:3000 http://localhost:*"
+        : "script-src-elem 'self' 'unsafe-inline'",
+
+      // Styles: unsafe-inline required for Next.js CSS-in-JS in all environments
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+
+      // Images: Allow data URIs and blob URLs for canvas operations
+      "img-src 'self' data: blob:",
+
+      // Fonts: Allow Google Fonts and data URIs
+      "font-src 'self' data: https://fonts.gstatic.com",
+
+      // Connections: Allow Google Fonts API and same-origin
+      // Also allow localhost in development for HMR WebSocket connections
+      isDev
+        ? "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com http://localhost:3000 http://localhost:* ws://localhost:* wss://localhost:*"
+        : "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
+
+      // Workers: Required for Web Workers (blend modes, history)
+      "worker-src 'self' blob:",
+
+      // Manifest: Allow manifest.json
+      "manifest-src 'self'",
+
+      // Frame ancestors: Prevent clickjacking
+      "frame-ancestors 'self'",
+
+      // Base URI: Prevent base tag injection
+      "base-uri 'self'",
+
+      // Form action: Restrict form submissions
+      "form-action 'self'",
+
+      // Object source: Block plugins
+      "object-src 'none'",
+    ];
+
+    // Add upgrade-insecure-requests in production only
+    if (!isDev) {
+      cspDirectives.push('upgrade-insecure-requests');
+    }
+
     return [
       {
         source: '/:path*',
@@ -189,6 +260,10 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: cspDirectives.join('; '),
           },
         ],
       },

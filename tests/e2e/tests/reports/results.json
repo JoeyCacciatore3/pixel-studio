@@ -1,0 +1,248 @@
+{
+  "config": {
+    "configFile": "/home/joey/Desktop/pixie/tests/e2e/playwright.config.ts",
+    "rootDir": "/home/joey/Desktop/pixie/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "tests/reports/html"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "tests/reports/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "tests/reports/junit.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/home/joey/Desktop/pixie/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/home/joey/Desktop/pixie/tests/e2e",
+        "testIgnore": [
+          "**/node_modules/**",
+          "**/src/**",
+          "**/__tests__/**",
+          "**/*.test.ts",
+          "**/lib/__tests__/**",
+          "**/mcp-helpers.test.ts",
+          "**/mcp-helpers.spec.ts",
+          "**/helpers/mcp-helpers.spec.ts",
+          "**/*.test.ts",
+          "**/src/lib/__tests__/**",
+          "**/__tests__/**",
+          "**/*.test.*"
+        ],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/home/joey/Desktop/pixie/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/home/joey/Desktop/pixie/tests/e2e",
+        "testIgnore": [
+          "**/node_modules/**",
+          "**/src/**",
+          "**/__tests__/**",
+          "**/*.test.ts",
+          "**/lib/__tests__/**",
+          "**/mcp-helpers.test.ts",
+          "**/mcp-helpers.spec.ts",
+          "**/helpers/mcp-helpers.spec.ts",
+          "**/*.test.ts",
+          "**/src/lib/__tests__/**",
+          "**/__tests__/**",
+          "**/*.test.*"
+        ],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/home/joey/Desktop/pixie/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/home/joey/Desktop/pixie/tests/e2e",
+        "testIgnore": [
+          "**/node_modules/**",
+          "**/src/**",
+          "**/__tests__/**",
+          "**/*.test.ts",
+          "**/lib/__tests__/**",
+          "**/mcp-helpers.test.ts",
+          "**/mcp-helpers.spec.ts",
+          "**/helpers/mcp-helpers.spec.ts",
+          "**/*.test.ts",
+          "**/src/lib/__tests__/**",
+          "**/__tests__/**",
+          "**/*.test.*"
+        ],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/home/joey/Desktop/pixie/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/home/joey/Desktop/pixie/tests/e2e",
+        "testIgnore": [
+          "**/node_modules/**",
+          "**/src/**",
+          "**/__tests__/**",
+          "**/*.test.ts",
+          "**/lib/__tests__/**",
+          "**/mcp-helpers.test.ts",
+          "**/mcp-helpers.spec.ts",
+          "**/helpers/mcp-helpers.spec.ts",
+          "**/*.test.ts",
+          "**/src/lib/__tests__/**",
+          "**/__tests__/**",
+          "**/*.test.*"
+        ],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/home/joey/Desktop/pixie/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/home/joey/Desktop/pixie/tests/e2e",
+        "testIgnore": [
+          "**/node_modules/**",
+          "**/src/**",
+          "**/__tests__/**",
+          "**/*.test.ts",
+          "**/lib/__tests__/**",
+          "**/mcp-helpers.test.ts",
+          "**/mcp-helpers.spec.ts",
+          "**/helpers/mcp-helpers.spec.ts",
+          "**/*.test.ts",
+          "**/src/lib/__tests__/**",
+          "**/__tests__/**",
+          "**/*.test.*"
+        ],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/home/joey/Desktop/pixie/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "Tablet",
+        "name": "Tablet",
+        "testDir": "/home/joey/Desktop/pixie/tests/e2e",
+        "testIgnore": [
+          "**/node_modules/**",
+          "**/src/**",
+          "**/__tests__/**",
+          "**/*.test.ts",
+          "**/lib/__tests__/**",
+          "**/mcp-helpers.test.ts",
+          "**/mcp-helpers.spec.ts",
+          "**/helpers/mcp-helpers.spec.ts",
+          "**/*.test.ts",
+          "**/src/lib/__tests__/**",
+          "**/__tests__/**",
+          "**/*.test.*"
+        ],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 6,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "SyntaxError: /home/joey/Desktop/pixie/tests/e2e/history-failures.spec.ts: Identifier 'undoButton' has already been declared. (130:10)\n\n  128 |     await expect(undoButton).toBeVisible({ timeout: 10000 });\n  129 |\n> 130 |     const undoButton = page.locator('#undoBtn');\n      |           ^\n  131 |     await undoButton.click();\n  132 |     await page.waitForTimeout(1000);\n  133 |",
+      "stack": "SyntaxError: /home/joey/Desktop/pixie/tests/e2e/history-failures.spec.ts: Identifier 'undoButton' has already been declared. (130:10)\n\n  128 |     await expect(undoButton).toBeVisible({ timeout: 10000 });\n  129 |\n> 130 |     const undoButton = page.locator('#undoBtn');\n      |           ^\n  131 |     await undoButton.click();\n  132 |     await page.waitForTimeout(1000);\n  133 |",
+      "location": {
+        "file": "/home/joey/Desktop/pixie/tests/e2e/history-failures.spec.ts",
+        "line": 130,
+        "column": 10
+      },
+      "snippet": "   at history-failures.spec.ts:130\n\n  128 |     await expect(undoButton).toBeVisible({ timeout: 10000 });\n  129 |\n> 130 |     const undoButton = page.locator('#undoBtn');\n      |          ^\n  131 |     await undoButton.click();\n  132 |     await page.waitForTimeout(1000);\n  133 |"
+    },
+    {
+      "message": "SyntaxError: /home/joey/Desktop/pixie/tests/e2e/visual-regression.spec.ts: Identifier 'canvas' has already been declared. (104:12)\n\n  102 |         maxDiffPixelRatio: 0.01,\n  103 |       });\n> 104 |       const canvas = page.locator('#mainCanvas');\n      |             ^\n  105 |       await expect(canvas).toBeVisible();\n  106 |\n  107 |       const result = await compareElementVisualState(",
+      "stack": "SyntaxError: /home/joey/Desktop/pixie/tests/e2e/visual-regression.spec.ts: Identifier 'canvas' has already been declared. (104:12)\n\n  102 |         maxDiffPixelRatio: 0.01,\n  103 |       });\n> 104 |       const canvas = page.locator('#mainCanvas');\n      |             ^\n  105 |       await expect(canvas).toBeVisible();\n  106 |\n  107 |       const result = await compareElementVisualState(",
+      "location": {
+        "file": "/home/joey/Desktop/pixie/tests/e2e/visual-regression.spec.ts",
+        "line": 104,
+        "column": 12
+      },
+      "snippet": "   at visual-regression.spec.ts:104\n\n  102 |         maxDiffPixelRatio: 0.01,\n  103 |       });\n> 104 |       const canvas = page.locator('#mainCanvas');\n      |            ^\n  105 |       await expect(canvas).toBeVisible();\n  106 |\n  107 |       const result = await compareElementVisualState("
+    }
+  ],
+  "stats": {
+    "startTime": "2025-12-18T16:49:37.852Z",
+    "duration": 331.624,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

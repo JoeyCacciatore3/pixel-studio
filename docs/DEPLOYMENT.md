@@ -100,3 +100,49 @@ All settings are in `vercel.json` and can be customized in the Vercel dashboard.
 - Automatic HTTPS
 - Server-side rendering and API routes
 - Preview deployments for pull requests
+
+## Production Testing
+
+Before deploying to production, test the production build locally:
+
+```bash
+# Build production bundle
+npm run build
+
+# Start production server
+npm start
+
+# Test in browser at http://localhost:3000
+# Check browser console for CSP violations
+```
+
+### CSP Verification
+
+After deployment, verify Content Security Policy:
+
+1. Open browser DevTools → Console
+2. Check for CSP violation errors
+3. Verify all scripts load correctly
+4. Test Web Workers (blend modes, history compression)
+5. Test canvas operations (drawing, image loading)
+6. Verify fonts load from Google Fonts
+
+### Common Deployment Issues
+
+**CSP Violations**:
+
+- Ensure `NODE_ENV=production` is set in deployment environment
+- Check that CSP allows Next.js `/_next/static/` scripts
+- Verify Web Workers are accessible via blob URLs
+
+**Build Errors**:
+
+- Run `npm run type-check` to verify TypeScript
+- Run `npm run lint` to check code quality
+- Ensure all dependencies are installed (`npm ci`)
+
+**Performance**:
+
+- Check bundle size with `npm run analyze`
+- Verify images are optimized (WebP/AVIF)
+- Monitor Core Web Vitals in production

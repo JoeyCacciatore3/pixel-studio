@@ -4,11 +4,13 @@
  */
 
 import type { Tool, DrawingToolState } from '../types';
+import { logger } from '../utils/logger';
 import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { createStabilizer } from './stabilizer';
 import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelpers';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: DrawingToolState | null = null;
@@ -56,12 +58,12 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
       toolState.lastY = smoothed.y;
     },
 
-    onPointerUp(_e) {
+    async onPointerUp(_e) {
       if (toolState && toolState.isDrawing) {
         toolState.isDrawing = false;
         toolState.stabilizer.reset();
-        Canvas.triggerRender();
-        History.save();
+        await Canvas.triggerRender();
+        await History.saveImmediate();
       }
     },
   };
@@ -89,7 +91,6 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
 
   function sharpenDot(x: number, y: number, _e: PointerEvent): void {
     if (!toolState) return;
-    const ctx = Canvas.getContext();
     const state = toolState.state;
 
     const size = calculateBrushSize(
@@ -109,12 +110,23 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
     const endX = Math.min(width - 1, Math.floor(x + radius));
     const endY = Math.min(height - 1, Math.floor(y + radius));
 
-    const imageData = ctx.getImageData(
-      startX - 1,
-      startY - 1,
-      endX - startX + 2,
-      endY - startY + 2
-    );
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageDataRegion(
+        startX - 1,
+        startY - 1,
+        endX - startX + 2,
+        endY - startY + 2
+      );
+    } catch (error) {
+      logger.error('Failed to get image data region for sharpen tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'sharpen',
+        operation: 'getImageDataRegion',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const data = imageData.data;
     const tempData = new Uint8ClampedArray(data);
 
@@ -153,7 +165,7 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
       }
     }
 
-    ctx.putImageData(imageData, startX - 1, startY - 1);
+    Canvas.putImageData(imageData, startX - 1, startY - 1);
   }
 
   PixelStudio.registerTool('sharpen', SharpenTool);

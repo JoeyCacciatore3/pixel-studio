@@ -7,7 +7,9 @@ import type { Tool, BaseToolState } from '../types';
 import PixelStudio from '../app';
 import UI from '../ui';
 import Canvas from '../canvas';
+import StateManager from '../stateManager';
 import { createRectangularMask, combineSelections } from './selectionHelpers';
+import { logger } from '../utils/logger';
 
 (function () {
   let toolState: BaseToolState | null = null;
@@ -49,56 +51,86 @@ import { createRectangularMask, combineSelections } from './selectionHelpers';
 
   function startSelection(x: number, y: number): void {
     if (!toolState) return;
-    const state = toolState.state;
-
-    // If shift is held, use add mode; if alt/ctrl is held, use subtract
-    // This will be handled by keyboard state, for now use state.selectionMode
-    const mode = state.selectionMode || 'replace';
-
-    // If mode is not replace, keep existing selection
-    if (mode === 'replace' || !state.colorRangeSelection) {
-      state.selection = {
-        x,
-        y,
-        width: 0,
-        height: 0,
-        startX: x,
-        startY: y,
-        mode,
-      };
-      state.colorRangeSelection = null;
-    } else {
-      // Start new selection but will combine later
-      state.selection = {
-        x,
-        y,
-        width: 0,
-        height: 0,
-        startX: x,
-        startY: y,
-        mode,
-      };
+    const appState = toolState.state;
+    let currentState;
+    try {
+      currentState = StateManager.getState();
+    } catch (error) {
+      logger.error('StateManager not initialized in startSelection:', error);
+      return; // Can't proceed without state
     }
 
-    UI.showSelection(state.selection);
+    // If shift is held, use add mode; if alt/ctrl is held, use subtract
+    // This will be handled by keyboard state, for now use appState.selectionMode
+    const mode = appState.selectionMode || 'replace';
+
+    // If mode is not replace, keep existing selection
+    if (mode === 'replace' || !currentState.colorRangeSelection) {
+      StateManager.setSelection({
+        x,
+        y,
+        width: 0,
+        height: 0,
+        startX: x,
+        startY: y,
+        mode,
+      });
+      StateManager.setColorRangeSelection(null);
+    } else {
+      // Start new selection but will combine later
+      StateManager.setSelection({
+        x,
+        y,
+        width: 0,
+        height: 0,
+        startX: x,
+        startY: y,
+        mode,
+      });
+      // Keep existing colorRangeSelection for combining
+      if (currentState.colorRangeSelection) {
+        StateManager.setColorRangeSelection(currentState.colorRangeSelection);
+      }
+    }
+
+    try {
+      const updatedState = StateManager.getState();
+      if (updatedState.selection) {
+        UI.showSelection(updatedState.selection);
+      }
+    } catch (error) {
+      logger.error('StateManager not initialized when getting updated state:', error);
+    }
   }
 
   function updateSelection(x: number, y: number): void {
     if (!toolState) return;
-    const state = toolState.state;
+    let currentState;
+    try {
+      currentState = StateManager.getState();
+    } catch (error) {
+      logger.error('StateManager not initialized in updateSelection:', error);
+      return; // Can't proceed without state
+    }
     if (
-      !state.selection ||
-      state.selection.startX === undefined ||
-      state.selection.startY === undefined
+      !currentState.selection ||
+      currentState.selection.startX === undefined ||
+      currentState.selection.startY === undefined
     ) {
       return;
     }
 
-    state.selection.x = Math.min(state.selection.startX, x);
-    state.selection.y = Math.min(state.selection.startY, y);
-    state.selection.width = Math.abs(x - state.selection.startX);
-    state.selection.height = Math.abs(y - state.selection.startY);
-    UI.showSelection(state.selection);
+    // Create updated selection object immutably
+    const updatedSelection = {
+      ...currentState.selection,
+      x: Math.min(currentState.selection.startX, x),
+      y: Math.min(currentState.selection.startY, y),
+      width: Math.abs(x - currentState.selection.startX),
+      height: Math.abs(y - currentState.selection.startY),
+    };
+
+    StateManager.setSelection(updatedSelection);
+    UI.showSelection(updatedSelection);
   }
 
   function finalizeSelection(): void {
@@ -147,16 +179,23 @@ import { createRectangularMask, combineSelections } from './selectionHelpers';
     }
 
     if (hasSelection) {
-      state.selection = {
+      let currentState;
+      try {
+        currentState = StateManager.getState();
+      } catch (error) {
+        logger.error('StateManager not initialized in finalizeSelection:', error);
+        return; // Can't proceed without state
+      }
+      StateManager.setSelection({
         x: minX,
         y: minY,
         width: maxX - minX + 1,
         height: maxY - minY + 1,
         mode,
-        feather: state.selectionFeather,
-        antiAlias: state.selectionAntiAlias,
-      };
-      state.colorRangeSelection = finalMask;
+        feather: currentState.selectionFeather,
+        antiAlias: currentState.selectionAntiAlias,
+      });
+      StateManager.setColorRangeSelection(finalMask);
       UI.showColorRangeOverlay(finalMask);
     } else {
       PixelStudio.clearSelection();

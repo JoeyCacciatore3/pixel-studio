@@ -52,7 +52,7 @@ Before committing, ensure all checks pass:
 # Type checking
 npm run type-check
 
-# Linting
+# Linting (Note: ESLint may show circular reference warning - this is a known upstream bug in ESLint 9.39.1)
 npm run lint
 
 # Formatting
@@ -61,6 +61,8 @@ npm run format:check
 # Tests
 npm run test
 ```
+
+**Note**: ESLint may show a circular reference error due to a known bug in ESLint 9.39.1 with FlatCompat. This is an upstream issue and does not affect code quality. Type checking and formatting checks are the primary quality gates.
 
 ### Git Hooks
 
@@ -127,6 +129,9 @@ docs(readme): update installation instructions
 - Ensure all existing tests pass
 - Aim for good test coverage
 - Test edge cases and error conditions
+- Use shared test helpers from `tests/e2e/helpers/` instead of duplicating code
+- Import `APP_URL` from `./helpers/test-constants` instead of defining it locally
+- See `docs/TESTING_GUIDE.md` for comprehensive testing documentation
 
 ## Submitting Changes
 

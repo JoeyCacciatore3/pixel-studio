@@ -1,0 +1,59 @@
+{
+  "mcp": {
+    "enabled": true,
+    "playwrightMCP": {
+      "enabled": true,
+      "debugMode": false,
+      "traceEnabled": true,
+      "screenshotOnFailure": true,
+      "videoOnFailure": true
+    },
+    "context7": {
+      "enabled": true,
+      "apiKey": "${CONTEXT7_API_KEY}",
+      "libraries": [
+        "playwright",
+        "react",
+        "next.js",
+        "typescript"
+      ]
+    },
+    "memory": {
+      "enabled": true,
+      "storePatterns": true,
+      "learnFromFailures": true,
+      "maxPatterns": 1000
+    },
+    "visualRegression": {
+      "enabled": true,
+      "threshold": 0.2,
+      "maxDiffPixels": 100,
+      "maxDiffPixelRatio": 0.01,
+      "baselineDir": "tests/e2e/visual-baselines"
+    },
+    "performance": {
+      "enabled": true,
+      "budgets": {
+        "loadTime": 5000,
+        "fcp": 2000,
+        "lcp": 2500,
+        "memory": 104857600,
+        "canvasOperationDuration": 2000
+      },
+      "baselineDir": "tests/e2e/performance-baselines",
+      "trackMetrics": true
+    },
+    "testGeneration": {
+      "enabled": true,
+      "usePatterns": true,
+      "validateAgainstBestPractices": true
+    },
+    "reporting": {
+      "enabled": true,
+      "generateHTML": true,
+      "generateJSON": true,
+      "includeInsights": true,
+      "includePatterns": true
+    }
+  }
+}

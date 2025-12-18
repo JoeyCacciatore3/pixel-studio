@@ -4,10 +4,12 @@
  */
 
 import type { Tool, BaseToolState } from '../types';
+import { logger } from '../utils/logger';
 import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { hexToRgbaArray } from '../colorUtils';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: BaseToolState | null = null;
@@ -43,18 +45,38 @@ import { hexToRgbaArray } from '../colorUtils';
       // Preview gradient
     },
 
-    onPointerUp(_e) {
+    async onPointerUp(_e) {
       if (!isDrawing) return;
       isDrawing = false;
       drawGradient(startX, startY, endX, endY);
-      Canvas.triggerRender();
-      History.save();
+      await Canvas.triggerRender();
+      await History.saveImmediate();
     },
   };
 
   function drawGradient(x1: number, y1: number, x2: number, y2: number): void {
     if (!toolState) return;
-    const ctx = Canvas.getContext();
+    let ctx: CanvasRenderingContext2D;
+    try {
+      ctx = Canvas.getContext();
+      if (!ctx) {
+        logger.error('Canvas context is null in gradient tool');
+        EventEmitter.emit('tool:error', {
+          tool: 'gradient',
+          operation: 'getContext',
+          error: 'Canvas context is null',
+        });
+        return;
+      }
+    } catch (error) {
+      logger.error('Failed to get canvas context for gradient tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'gradient',
+        operation: 'getContext',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const state = toolState.state;
 
     const width = Canvas.getWidth();
@@ -71,7 +93,19 @@ import { hexToRgbaArray } from '../colorUtils';
     gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
 
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+
+    // Respect selection bounds if there's an active selection
+    if (state.selection) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(state.selection.x, state.selection.y, state.selection.width, state.selection.height);
+      ctx.clip();
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    } else {
+      // Fill entire canvas (or active layer when layers are enabled)
+      ctx.fillRect(0, 0, width, height);
+    }
   }
 
   PixelStudio.registerTool('gradient', GradientTool);

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import Canvas from '@/lib/canvas';
+import { logger } from '@/lib/utils/logger';
 
 interface ColorLoupeProps {
   visible: boolean;
@@ -13,7 +14,7 @@ interface ColorLoupeProps {
   pixelSize?: number;
 }
 
-export default function ColorLoupe({
+function ColorLoupe({
   visible,
   x,
   y,
@@ -138,7 +139,9 @@ export default function ColorLoupe({
       ctx.stroke();
     } catch (error) {
       // Canvas not initialized yet or other error - silently fail
-      console.debug('ColorLoupe: Canvas not ready', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('ColorLoupe: Canvas not ready', error);
+      }
     }
   }, [visible, x, y, gridSize, pixelSize]);
 
@@ -159,3 +162,6 @@ export default function ColorLoupe({
     </div>
   );
 }
+
+// Memoize to prevent re-renders when props haven't changed
+export default memo(ColorLoupe);

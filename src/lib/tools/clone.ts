@@ -8,6 +8,7 @@ import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { createStabilizer } from './stabilizer';
+import { logger } from '../utils/logger';
 import {
   getPressure,
   calculateBrushSize,
@@ -15,6 +16,7 @@ import {
   calculateBrushFlow,
   calculateSpacing,
 } from './brushHelpers';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: CloneToolState | null = null;
@@ -98,13 +100,13 @@ import {
       toolState.lastY = smoothed.y;
     },
 
-    onPointerUp(_e) {
+    async onPointerUp(_e) {
       if (toolState && toolState.isDrawing) {
         toolState.isDrawing = false;
         toolState.stabilizer.reset();
         toolState.distanceSinceLastStamp = 0;
-        Canvas.triggerRender();
-        History.save();
+        await Canvas.triggerRender();
+        await History.saveImmediate();
       }
     },
   };
@@ -112,7 +114,6 @@ import {
   function cloneDot(x: number, y: number, _e: PointerEvent): void {
     if (!toolState) return;
 
-    const ctx = Canvas.getContext();
     const state = toolState.state;
 
     // Calculate source coordinates
@@ -172,9 +173,26 @@ import {
 
     if (sourceWidth <= 0 || sourceHeight <= 0 || destWidth <= 0 || destHeight <= 0) return;
 
-    // Get source image data
-    const sourceImageData = ctx.getImageData(sourceStartX, sourceStartY, sourceWidth, sourceHeight);
-    const destImageData = ctx.getImageData(destStartX, destStartY, destWidth, destHeight);
+    // Get source image data using Canvas method for layer awareness
+    let sourceImageData: ImageData;
+    let destImageData: ImageData;
+    try {
+      sourceImageData = Canvas.getImageDataRegion(
+        sourceStartX,
+        sourceStartY,
+        sourceWidth,
+        sourceHeight
+      );
+      destImageData = Canvas.getImageDataRegion(destStartX, destStartY, destWidth, destHeight);
+    } catch (error) {
+      logger.error('Failed to get image data region for clone tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'clone',
+        operation: 'getImageDataRegion',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
 
     // Blend source into destination with opacity
     for (let i = 0; i < destImageData.data.length; i += 4) {
@@ -187,7 +205,7 @@ import {
       }
     }
 
-    ctx.putImageData(destImageData, destStartX, destStartY);
+    Canvas.putImageData(destImageData, destStartX, destStartY);
 
     // Update offset for next stamp
     toolState.offsetX = x - toolState.sourceX;

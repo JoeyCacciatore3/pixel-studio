@@ -4,11 +4,13 @@
  */
 
 import type { Tool, BucketToolState } from '../types';
+import { logger } from '../utils/logger';
 import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { hexToRgbaArray } from '../colorUtils';
 import { createGapCloser } from './gapCloser';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: BucketToolState | null = null;
@@ -27,11 +29,11 @@ import { createGapCloser } from './gapCloser';
       };
     },
 
-    onPointerDown(coords, _e) {
+    async onPointerDown(coords, _e) {
       if (!toolState) return;
       const x = Math.floor(coords.x);
       const y = Math.floor(coords.y);
-      floodFill(x, y);
+      await floodFill(x, y);
     },
 
     onPointerMove(_coords, _e) {
@@ -65,7 +67,7 @@ import { createGapCloser } from './gapCloser';
     return Math.sqrt(dr * dr + dg * dg + db * db + da * da);
   }
 
-  function floodFill(startX: number, startY: number): void {
+  async function floodFill(startX: number, startY: number): Promise<void> {
     if (!toolState) return;
 
     const width = Canvas.getWidth();
@@ -75,7 +77,18 @@ import { createGapCloser } from './gapCloser';
       return;
     }
 
-    const imageData = Canvas.getImageData();
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageData();
+    } catch (error) {
+      logger.error('Failed to get image data for bucket tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'bucket',
+        operation: 'getImageData',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const data = imageData.data;
 
     const startIdx = (startY * width + startX) * 4;
@@ -172,7 +185,8 @@ import { createGapCloser } from './gapCloser';
     }
 
     Canvas.putImageData(imageData);
-    History.save();
+    await Canvas.triggerRender();
+    await History.saveImmediate();
   }
 
   // Register the tool

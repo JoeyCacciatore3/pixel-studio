@@ -1,0 +1,68 @@
+{
+  "agents": [
+    {
+      "name": "Context7",
+      "available": false,
+      "testResults": [
+        {
+          "test": "resolve-library-id",
+          "passed": false,
+          "error": "mcp_context7_resolve is not defined"
+        }
+      ]
+    },
+    {
+      "name": "Memory MCP",
+      "available": false,
+      "testResults": [
+        {
+          "test": "create-entities",
+          "passed": false,
+          "error": "mcp_memory_create_entities is not defined"
+        }
+      ]
+    },
+    {
+      "name": "Sequential-Thinking",
+      "available": false,
+      "testResults": [
+        {
+          "test": "sequentialthinking",
+          "passed": false,
+          "error": "mcp_sequential is not defined"
+        }
+      ]
+    },
+    {
+      "name": "Coding-Agent",
+      "available": false,
+      "testResults": [
+        {
+          "test": "read-file",
+          "passed": false,
+          "error": "mcp_coding is not defined"
+        }
+      ]
+    },
+    {
+      "name": "Firecrawl",
+      "available": false,
+      "testResults": [
+        {
+          "test": "search",
+          "passed": false,
+          "error": "mcp_firecrawl is not defined"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "available": 0,
+    "unavailable": 5,
+    "averageLatency": 0
+  },
+  "recommendations": [
+    "5 MCP agent(s) are unavailable. Functional fallbacks will be used."
+  ]
+}

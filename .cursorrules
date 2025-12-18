@@ -72,6 +72,12 @@ export default ModuleName
 - Tools are registered via `PixelStudio.registerTool()`
 - Tools are imported in `src/lib/tools/index.ts` to auto-register
 - Each tool has: `init`, `onPointerDown`, `onPointerMove`, `onPointerUp`
+- **Cleanup Tools**: Professional cleanup tools for logo-ready output
+  - Algorithm modules in `src/lib/cleanup/` with utilities in `src/lib/cleanup/utils/`
+  - Tool wrappers in `src/lib/tools/cleanup-*.ts`
+  - Use Web Workers for CPU-intensive operations via `WorkerManager.executeCleanupOperation()`
+  - Options UI in `CleanupPanel.tsx` component
+  - All cleanup operations save to history via `History.saveImmediate()`
 
 ### File Organization
 ```
@@ -79,7 +85,13 @@ src/
 ├── app/              # Next.js App Router pages (Server Components by default)
 ├── components/       # React client components ('use client')
 ├── lib/             # Core application logic (IIFE modules)
+│   ├── cleanup/     # Cleanup algorithms and utilities
+│   │   ├── utils/   # Cleanup utility functions (connected components, morphology, color distance, contour tracing)
+│   │   └── index.ts # Cleanup module exports
 │   ├── tools/       # Tool implementations
+│   │   └── cleanup-*.ts # Cleanup tool wrappers
+│   ├── workers/     # Web Workers
+│   │   └── cleanupWorker.ts # Cleanup operations worker
 │   └── types.ts     # TypeScript type definitions
 └── test/            # Test utilities
 ```

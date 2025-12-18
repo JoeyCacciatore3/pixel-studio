@@ -4,9 +4,12 @@
  */
 
 import type { Tool, BaseToolState } from '../types';
+import { logger } from '../utils/logger';
 import Canvas from '../canvas';
 import PixelStudio from '../app';
 import UI from '../ui';
+import StateManager from '../stateManager';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: BaseToolState | null = null;
@@ -51,7 +54,18 @@ import UI from '../ui';
     const width = Canvas.getWidth();
     const height = Canvas.getHeight();
 
-    const imageData = Canvas.getImageData();
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageData();
+    } catch (error) {
+      logger.error('Failed to get image data for color range tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'colorRange',
+        operation: 'getImageData',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const data = imageData.data;
 
     const startIdx = (startY * width + startX) * 4;
@@ -94,16 +108,17 @@ import UI from '../ui';
 
     if (hasSelection) {
       // Store selection
-      state.selection = {
+      const selection = {
         x: minX,
         y: minY,
         width: maxX - minX + 1,
         height: maxY - minY + 1,
       };
-      state.colorRangeSelection = selected;
+      StateManager.setSelection(selection);
+      StateManager.setColorRangeSelection(selected);
 
       // Show selection
-      UI.showSelection(state.selection);
+      UI.showSelection(selection);
       UI.showColorRangeOverlay(selected);
     }
   }

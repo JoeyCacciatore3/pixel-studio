@@ -79,13 +79,13 @@ const SelectionActions = (function () {
       }
 
       // Create layer from current content
-      const initialLayer = Layers.createLayer('Layer 1');
+      const initialLayer = Layers.create('Layer 1');
       const layerCtx = initialLayer.canvas.getContext('2d', { willReadFrequently: true });
       if (layerCtx) {
         layerCtx.putImageData(currentImageData, 0, 0);
       }
 
-      Layers.renderLayers();
+      Layers.render();
     }
 
     if (state.colorRangeSelection) {
@@ -120,27 +120,19 @@ const SelectionActions = (function () {
           height: maxY - minY + 1,
         };
 
-        const newLayer = Layers.extractSelectionToLayer(selection, calculatedBounds);
+        const newLayer = Layers.extractSelection(selection, calculatedBounds);
         if (newLayer) {
           PixelStudio.clearSelection();
           History.save();
-
-          // Update state
-          state.layers = Layers.getAllLayers();
-          state.activeLayerId = newLayer.id;
-
+          // State automatically updated via StateManager from Layers module
           return true;
         }
       } else {
-        const newLayer = Layers.extractSelectionToLayer(selection, bounds);
+        const newLayer = Layers.extractSelection(selection, bounds);
         if (newLayer) {
           PixelStudio.clearSelection();
           History.save();
-
-          // Update state
-          state.layers = Layers.getAllLayers();
-          state.activeLayerId = newLayer.id;
-
+          // State automatically updated via StateManager from Layers module
           return true;
         }
       }
@@ -160,15 +152,11 @@ const SelectionActions = (function () {
         }
       }
 
-      const newLayer = Layers.extractSelectionToLayer(selection, state.selection);
+      const newLayer = Layers.extractSelection(selection, state.selection);
       if (newLayer) {
         PixelStudio.clearSelection();
         History.save();
-
-        // Update state
-        state.layers = Layers.getAllLayers();
-        state.activeLayerId = newLayer.id;
-
+        // State automatically updated via StateManager from Layers module
         return true;
       }
     }

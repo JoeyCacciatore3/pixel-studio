@@ -4,9 +4,13 @@
  */
 
 import type { Tool, MagneticToolState } from '../types';
+import { logger } from '../utils/logger';
 import PixelStudio from '../app';
 import UI from '../ui';
 import Canvas from '../canvas';
+import StateManager from '../stateManager';
+import { featherSelection } from './selectionHelpers';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: MagneticToolState | null = null;
@@ -85,7 +89,18 @@ import Canvas from '../canvas';
    */
   function buildEdgeMap(): void {
     if (!toolState) return;
-    const imageData = Canvas.getImageData();
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageData();
+    } catch (error) {
+      logger.error('Failed to get image data for magnetic tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'magnetic',
+        operation: 'getImageData',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const width = Canvas.getWidth();
     const height = Canvas.getHeight();
     const data = imageData.data;
@@ -238,13 +253,11 @@ import Canvas from '../canvas';
     // Apply feathering if enabled
     let finalSelection: Uint8Array = selected;
     if (state.selectionFeather && state.selectionFeather > 0) {
-      finalSelection = new Uint8Array(
-        featherSelection(finalSelection, state.selectionFeather, width, height)
-      );
+      finalSelection = featherSelection(finalSelection, state.selectionFeather, width, height);
     }
 
     // Store selection
-    state.selection = {
+    StateManager.setSelection({
       x: minX,
       y: minY,
       width: maxX - minX + 1,
@@ -252,8 +265,8 @@ import Canvas from '../canvas';
       mode: state.selectionMode || 'replace',
       feather: state.selectionFeather,
       antiAlias: state.selectionAntiAlias,
-    };
-    state.colorRangeSelection = finalSelection;
+    });
+    StateManager.setColorRangeSelection(finalSelection);
 
     // Show selection
     UI.showColorRangeOverlay(finalSelection);
@@ -274,51 +287,6 @@ import Canvas from '../canvas';
       if (intersect) inside = !inside;
     }
     return inside;
-  }
-
-  /**
-   * Apply feathering to selection mask
-   */
-  function featherSelection(
-    mask: Uint8Array,
-    radius: number,
-    width: number,
-    height: number
-  ): Uint8Array {
-    // Simple Gaussian blur approximation for feathering
-    const feathered = new Uint8Array(mask.length);
-    const sigma = radius / 3;
-    const kernelSize = Math.ceil(radius * 2);
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        let sum = 0;
-        let weightSum = 0;
-
-        for (let ky = -kernelSize; ky <= kernelSize; ky++) {
-          for (let kx = -kernelSize; kx <= kernelSize; kx++) {
-            const px = x + kx;
-            const py = y + ky;
-
-            if (px >= 0 && px < width && py >= 0 && py < height) {
-              const dist = Math.sqrt(kx * kx + ky * ky);
-              if (dist <= radius) {
-                const weight = Math.exp(-(dist * dist) / (2 * sigma * sigma));
-                const idx = py * width + px;
-                sum += mask[idx]! * weight;
-                weightSum += weight;
-              }
-            }
-          }
-        }
-
-        const idx = y * width + x;
-        // Store as 0-255 value in Uint8Array (not 0-1 fractional)
-        feathered[idx] = weightSum > 0 ? Math.round((sum / weightSum) * 255) : 0;
-      }
-    }
-
-    return feathered;
   }
 
   // Register the tool

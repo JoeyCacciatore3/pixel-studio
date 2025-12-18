@@ -4,8 +4,9 @@
  */
 
 import { test, expect, devices } from '@playwright/test';
-
-const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+import { waitForCanvasReady, APP_URL } from './helpers/canvas-helpers';
+import { waitForAppReady } from './helpers/app-readiness';
+import { waitForElementInteractive, getByTestId } from './helpers/element-helpers';
 
 const mobileDevices = [
   { name: 'iPhone SE', ...devices['iPhone SE'] },
@@ -14,19 +15,21 @@ const mobileDevices = [
   { name: 'Pixel 5', ...devices['Pixel 5'] },
 ];
 
+// Mobile Touch Interactions - enable touch support
+test.use({ hasTouch: true });
+
 test.describe('Mobile Touch Interactions', () => {
   for (const device of mobileDevices) {
     test.describe(`Device: ${device.name}`, () => {
-      test.use({
-        ...device,
-        colorScheme: 'dark',
-      });
-
       test('should display mobile toolbar', async ({ page }) => {
+        // Set viewport for this test
+        if (device.viewport) {
+          await page.setViewportSize(device.viewport)
+        }
         await page.goto(APP_URL);
-        await page.waitForLoadState('networkidle');
+        await waitForAppReady(page);
 
-        const mobileToolbar = page.locator('.mobile-toolbar');
+        const mobileToolbar = page.locator('[data-testid="mobile-toolbar"]');
         await expect(mobileToolbar).toBeVisible();
 
         // Toolbar should be at bottom
@@ -40,15 +43,21 @@ test.describe('Mobile Touch Interactions', () => {
       });
 
       test('should allow tool selection via touch', async ({ page }) => {
-        await page.goto(APP_URL);
-        await page.waitForLoadState('networkidle');
+        // Set viewport for this test
+        if (device.viewport) {
+          await page.setViewportSize(device.viewport)
+        }
+        await page.goto(APP_URL)
+        await waitForAppReady(page)
 
-        // Find a tool button in mobile toolbar
-        const toolButton = page.locator('.mobile-tool-btn').first();
-        await expect(toolButton).toBeVisible();
+        // Find a tool button in mobile toolbar using data-testid
+        const toolButton = await getByTestId(page, 'testid-mobile-toolbar-pencil', {
+          maxWait: 10000,
+        });
+        await waitForElementInteractive(toolButton);
 
         // Tap the tool button
-        await toolButton.tap();
+        await toolButton.tap({ timeout: 10000 });
 
         // Button should have active state or visual feedback
         // This is a basic check - actual tool selection would need state verification
@@ -56,8 +65,12 @@ test.describe('Mobile Touch Interactions', () => {
       });
 
       test('should support single touch drawing', async ({ page }) => {
-        await page.goto(APP_URL);
-        await page.waitForLoadState('networkidle');
+        // Set viewport for this test
+        if (device.viewport) {
+          await page.setViewportSize(device.viewport)
+        }
+        await page.goto(APP_URL)
+        await waitForAppReady(page)
 
         const canvas = page.locator('#mainCanvas');
         await expect(canvas).toBeVisible();
@@ -81,8 +94,12 @@ test.describe('Mobile Touch Interactions', () => {
       });
 
       test('should support pinch-to-zoom gesture', async ({ page }) => {
-        await page.goto(APP_URL);
-        await page.waitForLoadState('networkidle');
+        // Set viewport for this test
+        if (device.viewport) {
+          await page.setViewportSize(device.viewport)
+        }
+        await page.goto(APP_URL)
+        await waitForAppReady(page)
 
         const canvas = page.locator('#mainCanvas');
         await expect(canvas).toBeVisible();
@@ -103,8 +120,12 @@ test.describe('Mobile Touch Interactions', () => {
       });
 
       test('should prevent default touch behaviors', async ({ page }) => {
-        await page.goto(APP_URL);
-        await page.waitForLoadState('networkidle');
+        // Set viewport for this test
+        if (device.viewport) {
+          await page.setViewportSize(device.viewport)
+        }
+        await page.goto(APP_URL)
+        await waitForAppReady(page)
 
         const canvas = page.locator('#mainCanvas');
         const touchAction = await canvas.evaluate((el) => {
@@ -112,32 +133,34 @@ test.describe('Mobile Touch Interactions', () => {
         });
 
         // Touch action should be 'none' or 'manipulation' to prevent scrolling
-        expect(['none', 'manipulation']).toContain(touchAction);
-      });
-    });
+        expect(['none', 'manipulation']).toContain(touchAction)
+      })
+    })
   }
-});
+})
+
+// Mobile UI Components tests with iPhone 12 configuration
+// Note: test.use() at top level applies to all subsequent tests until next test.use()
+test.use({ ...devices['iPhone 12'] })
 
 test.describe('Mobile UI Components', () => {
-  test.use({ ...devices['iPhone 12'] });
-
   test('should show/hide right panel on mobile', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForAppReady(page);
 
     // Check for mobile panel toggle button
     const panelToggle = page.locator('.mobile-panel-toggle');
 
     if ((await panelToggle.count()) > 0) {
       // Panel should start closed (or check initial state)
-      const rightPanel = page.locator('.right-panel');
+      const panelOverlay = page.locator('.mobile-panel-overlay');
 
       // Toggle panel open
-      await panelToggle.tap();
-      await page.waitForTimeout(300); // Wait for animation
+      await panelToggle.tap({ timeout: 10000 });
+      await page.waitForTimeout(500); // Wait for animation
 
-      // Panel should be visible/open
-      await expect(rightPanel).toBeVisible();
+      // Panel overlay should be visible/open
+      await expect(panelOverlay).toBeVisible({ timeout: 5000 });
 
       // Toggle panel closed
       await panelToggle.tap();
@@ -147,9 +170,9 @@ test.describe('Mobile UI Components', () => {
 
   test('should have touch-friendly button sizes', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForAppReady(page);
 
-    const mobileToolbarButtons = page.locator('.mobile-tool-btn');
+    const mobileToolbarButtons = page.locator('[data-testid^="testid-mobile-toolbar-"]');
     const buttonCount = await mobileToolbarButtons.count();
 
     if (buttonCount > 0) {
@@ -166,7 +189,7 @@ test.describe('Mobile UI Components', () => {
 
   test('should handle orientation changes', async ({ page, viewport }) => {
     await page.goto(APP_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForAppReady(page);
 
     if (viewport) {
       // Simulate orientation change by changing viewport
@@ -190,13 +213,14 @@ test.describe('Mobile UI Components', () => {
   });
 });
 
-test.describe('Mobile Performance', () => {
-  test.use({ ...devices['iPhone 12'] });
+// Mobile Performance tests with iPhone 12 configuration
+test.use({ ...devices['iPhone 12'] })
 
+test.describe('Mobile Performance', () => {
   test('should load efficiently on mobile', async ({ page }) => {
     const startTime = Date.now();
     await page.goto(APP_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForAppReady(page);
     const loadTime = Date.now() - startTime;
 
     // Mobile should load in reasonable time (under 6 seconds)
@@ -205,7 +229,7 @@ test.describe('Mobile Performance', () => {
 
   test('should optimize canvas for mobile', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForAppReady(page);
 
     const canvas = page.locator('#mainCanvas');
 
@@ -221,12 +245,13 @@ test.describe('Mobile Performance', () => {
   });
 });
 
-test.describe('Touch Gesture Recognition', () => {
-  test.use({ ...devices['iPhone 12'] });
+// Touch Gesture Recognition tests with iPhone 12 configuration
+test.use({ ...devices['iPhone 12'] })
 
+test.describe('Touch Gesture Recognition', () => {
   test('should handle tap gestures', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForAppReady(page);
 
     const canvas = page.locator('#mainCanvas');
     await expect(canvas).toBeVisible();
@@ -240,7 +265,7 @@ test.describe('Touch Gesture Recognition', () => {
 
   test('should prevent double-tap zoom', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForAppReady(page);
 
     // Check viewport meta tag has user-scalable or maximum-scale
     const viewportMeta = await page.locator('meta[name="viewport"]').getAttribute('content');

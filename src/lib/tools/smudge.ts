@@ -4,11 +4,13 @@
  */
 
 import type { Tool, SmudgeToolState } from '../types';
+import { logger } from '../utils/logger';
 import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
 import { createStabilizer } from './stabilizer';
 import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelpers';
+import EventEmitter from '../utils/eventEmitter';
 
 (function () {
   let toolState: SmudgeToolState | null = null;
@@ -49,7 +51,18 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
       toolState.isDrawing = true;
 
       // Sample initial color
-      const imageData = Canvas.getImageData();
+      let imageData: ImageData;
+      try {
+        imageData = Canvas.getImageData();
+      } catch (error) {
+        logger.error('Failed to get image data for smudge tool:', error);
+        EventEmitter.emit('tool:error', {
+          tool: 'smudge',
+          operation: 'getImageData',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        return;
+      }
       const width = Canvas.getWidth();
       const idx = (Math.floor(y) * width + Math.floor(x)) * 4;
       if (idx >= 0 && idx < imageData.data.length) {
@@ -69,12 +82,12 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
       toolState.lastY = smoothed.y;
     },
 
-    onPointerUp(_e) {
+    async onPointerUp(_e) {
       if (toolState && toolState.isDrawing) {
         toolState.isDrawing = false;
         toolState.stabilizer.reset();
-        Canvas.triggerRender();
-        History.save();
+        await Canvas.triggerRender();
+        await History.saveImmediate();
       }
     },
   };
@@ -105,7 +118,6 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
 
   function smudgeDot(x: number, y: number): void {
     if (!toolState) return;
-    const ctx = Canvas.getContext();
     const state = toolState.state;
 
     const size = calculateBrushSize(
@@ -126,7 +138,18 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
     const endX = Math.min(width, Math.floor(x + radius));
     const endY = Math.min(height, Math.floor(y + radius));
 
-    const imageData = ctx.getImageData(startX, startY, endX - startX, endY - startY);
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageDataRegion(startX, startY, endX - startX, endY - startY);
+    } catch (error) {
+      logger.error('Failed to get image data region for smudge tool:', error);
+      EventEmitter.emit('tool:error', {
+        tool: 'smudge',
+        operation: 'getImageDataRegion',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return;
+    }
     const data = imageData.data;
 
     // Blend colors in the brush area
@@ -158,7 +181,7 @@ import { getPressure, calculateBrushSize, calculateSpacing } from './brushHelper
       }
     }
 
-    ctx.putImageData(imageData, startX, startY);
+    Canvas.putImageData(imageData, startX, startY);
   }
 
   // Register the tool

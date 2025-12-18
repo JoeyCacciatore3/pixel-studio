@@ -1,112 +1,63 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { AppState } from '@/lib/types';
+import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import Header from '@/components/Header';
-import Toolbar from '@/components/Toolbar';
-import MobileToolbar from '@/components/MobileToolbar';
-import CanvasComponent from '@/components/Canvas';
-import StatusBar from '@/components/StatusBar';
-import ZoomControls from '@/components/ZoomControls';
-import SelectionToolbar from '@/components/SelectionToolbar';
-import MobileLayout from '@/components/MobileLayout';
 
-// Lazy load non-critical components
-const RightPanel = dynamic(() => import('@/components/RightPanel'), {
-  ssr: false,
-  loading: () => <div className="right-panel-loading" aria-label="Loading panel" />,
-});
-import { MobilePanelProvider, useMobilePanel } from '@/contexts/MobilePanelContext';
+import { MobilePanelProvider } from '@/contexts/MobilePanelContext';
 import { useDeviceDetection } from '@/hooks/useDeviceDetection';
-import { useOrientation } from '@/hooks/useOrientation';
 import Canvas from '@/lib/canvas';
 import History from '@/lib/history';
+import { debounce } from '@/lib/utils/debounce';
+import { logger } from '@/lib/utils/logger';
+import { DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT, DEBOUNCE_DELAY } from '@/lib/constants';
+import Header from '@/components/Header';
+import ExtendedToolbar from '@/components/ExtendedToolbar';
+import CanvasComponent from '@/components/Canvas';
+import StatusBar from '@/components/StatusBar';
+import SelectionToolbar from '@/components/SelectionToolbar';
+
+// Import browser-compat to ensure browser fixes are applied (iOS viewport height, etc.)
+// This runs automatically on module load
+import '@/lib/browser-compat';
+
+// Lazy load mobile-specific components (Next.js 16: optimize with dynamic imports)
+const MobileToolbar = dynamic(() => import('@/components/MobileToolbar'), {
+  ssr: false,
+  loading: () => null, // Mobile toolbar is small, no loading state needed
+});
+
+const MobileLayout = dynamic(() => import('@/components/MobileLayout'), {
+  ssr: false,
+  loading: () => <div className="mobile-layout-loading" aria-label="Loading layout" />,
+});
+
+// RightPanel removed
 
 function HomeContent() {
   const { isMobile } = useDeviceDetection();
-  const orientation = useOrientation();
-  const { isOpen: rightPanelOpen, setIsOpen: setRightPanelOpen } = useMobilePanel();
-
-  const [appState, setAppState] = useState<AppState>({
-    currentTool: 'pencil',
-    currentColor: '#6366f1',
-    currentAlpha: 1,
-    brushSize: 4,
-    brushHardness: 100,
-    brushOpacity: 100,
-    brushFlow: 100,
-    brushSpacing: 25,
-    brushJitter: 0,
-    brushTexture: null,
-    pressureEnabled: false,
-    pressureSize: true,
-    pressureOpacity: true,
-    pressureFlow: false,
-    pressureCurve: 'linear',
-    stabilizerStrength: 30,
-    tolerance: 32,
-    zoom: 1,
-    selection: null,
-    colorRangeSelection: null,
-    selectionMode: 'replace',
-    selectionFeather: 0,
-    selectionAntiAlias: true,
-    imageLayer: null,
-    imageOffsetX: 0,
-    imageOffsetY: 0,
-    layers: [],
-    activeLayerId: null,
-  });
+  // State is managed via StateManager, accessed through useAppState hook in components that need it
 
   useEffect(() => {
-    // Setup image upload handler
-    const imageUpload = document.getElementById('imageUpload');
-    if (imageUpload) {
-      const handleImageUpload = (e: Event) => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (!file) return;
-
-        const img = new Image();
-        img.onload = () => {
-          try {
-            Canvas.loadImage(img, true);
-            const offset = Canvas.getImageOffset();
-            setAppState((prev) => ({
-              ...prev,
-              imageLayer: img,
-              imageOffsetX: offset.x,
-              imageOffsetY: offset.y,
-            }));
-            History.save();
-          } catch (error) {
-            console.error('Failed to load image:', error);
-          }
-        };
-        img.src = URL.createObjectURL(file);
-        (e.target as HTMLInputElement).value = '';
-      };
-      imageUpload.addEventListener('change', handleImageUpload);
-      return () => {
-        imageUpload.removeEventListener('change', handleImageUpload);
-      };
-    }
-
-    // Setup canvas resize handlers
+    // Setup canvas resize handlers with debouncing
     const canvasWidth = document.getElementById('canvasWidth');
     const canvasHeight = document.getElementById('canvasHeight');
 
-    const handleResize = () => {
+    const handleResize = debounce(() => {
       try {
-        const width = parseInt((canvasWidth as HTMLInputElement)?.value || '512', 10);
-        const height = parseInt((canvasHeight as HTMLInputElement)?.value || '512', 10);
+        const width = parseInt(
+          (canvasWidth as HTMLInputElement)?.value || String(DEFAULT_CANVAS_WIDTH),
+          10
+        );
+        const height = parseInt(
+          (canvasHeight as HTMLInputElement)?.value || String(DEFAULT_CANVAS_HEIGHT),
+          10
+        );
         Canvas.resize(width, height);
-        setAppState((prev) => ({ ...prev }));
         History.save();
       } catch (error) {
-        console.error('Failed to resize canvas:', error);
+        logger.error('Failed to resize canvas:', error);
       }
-    };
+    }, DEBOUNCE_DELAY);
 
     canvasWidth?.addEventListener('change', handleResize);
     canvasHeight?.addEventListener('change', handleResize);
@@ -117,22 +68,17 @@ function HomeContent() {
     };
   }, []);
 
-  // Handle orientation changes
-  useEffect(() => {
-    // Preserve canvas state during rotation
-    // Canvas state is already preserved in appState
-  }, [orientation]);
 
   return (
     <MobileLayout>
       <div className="app-container">
         <Header />
-        {!isMobile && <Toolbar />}
+        {!isMobile && <ExtendedToolbar />}
         {isMobile && <MobileToolbar />}
         <SelectionToolbar />
-        <CanvasComponent state={appState} onStateChange={setAppState} />
-        <RightPanel isOpen={rightPanelOpen} onClose={() => setRightPanelOpen(false)} />
-        <ZoomControls />
+        <main role="main" aria-label="Pixel art canvas">
+          <CanvasComponent />
+        </main>
         <StatusBar />
       </div>
     </MobileLayout>

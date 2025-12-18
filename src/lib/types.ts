@@ -1,9 +1,9 @@
 export interface Tool {
   name: string;
   init(state: AppState, elements: CanvasElements): void;
-  onPointerDown(coords: { x: number; y: number }, e: PointerEvent): void;
+  onPointerDown(coords: { x: number; y: number }, e: PointerEvent): void | Promise<void>; // Allow async for history operations
   onPointerMove(coords: { x: number; y: number }, e: PointerEvent): void;
-  onPointerUp(e: PointerEvent): void;
+  onPointerUp(e: PointerEvent): void | Promise<void>; // Allow async for history operations
   [key: string]: unknown; // Allow additional properties for tool-specific methods
 }
 
@@ -18,6 +18,9 @@ export interface AppState {
   brushSpacing: number; // 1-1000%, brush stamp spacing
   brushJitter: number; // 0-100%, random variation
   brushTexture: string | null; // Texture pattern ID or null
+  brushScatter: number; // 0-100%, brush scattering (Procreate feature)
+  brushAngle: number; // 0-360°, brush angle
+  brushRoundness: number; // 0-100%, brush shape roundness
   pressureEnabled: boolean; // Enable pressure sensitivity
   pressureSize: boolean; // Pressure affects size
   pressureOpacity: boolean; // Pressure affects opacity
@@ -31,9 +34,9 @@ export interface AppState {
   selectionMode: SelectionMode; // Selection operation mode
   selectionFeather: number; // 0-100px, feather radius
   selectionAntiAlias: boolean; // Anti-aliased selection edges
-  imageLayer: HTMLImageElement | null;
-  imageOffsetX: number;
-  imageOffsetY: number;
+  imageLayer: ImageData | null; // Current loaded image layer
+  imageOffsetX: number; // X offset for image layer
+  imageOffsetY: number; // Y offset for image layer
   layers: Layer[];
   activeLayerId: string | null;
 }
@@ -43,6 +46,9 @@ export interface CanvasElements {
   canvasWrapper: HTMLElement | null;
   selectionOverlay: HTMLElement | null;
   selectionCanvas: HTMLCanvasElement | null;
+  // UI elements - can be refs or direct elements
+  // When passed from Canvas component, these will be ref.current values
+  // Modules should handle null checks appropriately
   colorPicker: HTMLInputElement | null;
   hexInput: HTMLInputElement | null;
   alphaInput: HTMLInputElement | null;
@@ -78,6 +84,22 @@ export type SelectionMode = 'replace' | 'add' | 'subtract' | 'intersect';
 
 export type PressureCurveType = 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'custom';
 
+// TypeScript 5.9: Use satisfies for better type inference
+export const SELECTION_MODES = [
+  'replace',
+  'add',
+  'subtract',
+  'intersect',
+] as const satisfies readonly SelectionMode[];
+
+export const PRESSURE_CURVE_TYPES = [
+  'linear',
+  'ease-in',
+  'ease-out',
+  'ease-in-out',
+  'custom',
+] as const satisfies readonly PressureCurveType[];
+
 export interface PressureCurve {
   type: PressureCurveType;
   points?: [number, number][]; // For custom curves: [input, output] pairs
@@ -110,6 +132,7 @@ export interface Layer {
   locked: boolean;
   opacity: number;
   blendMode: string;
+  backgroundColor?: string; // Hex color format (e.g., '#FFFFFF' for white, null/undefined for transparent)
 }
 
 export interface LayerState {
@@ -124,7 +147,7 @@ export interface BaseToolState {
   elements: CanvasElements;
 }
 
-// Drawing tool state (pencil, eraser, clone, blur, sharpen, smudge)
+// Drawing tool state (pencil, clone, blur, sharpen, smudge)
 export interface DrawingToolState extends BaseToolState {
   isDrawing: boolean;
   lastX: number;

@@ -3,6 +3,8 @@
  * Handles browser-specific issues and optimizations
  */
 
+import { DOUBLE_TAP_DELAY } from './constants';
+
 export interface BrowserInfo {
   name: string;
   version: number;
@@ -81,11 +83,26 @@ export function detectBrowser(): BrowserInfo {
 
 const browserInfo = detectBrowser();
 
+// Track if fixes have been applied to prevent duplicate listeners
+let fixesApplied = false;
+// Store event listener references for cleanup
+const listenerRefs: Array<{
+  element: Window | Document;
+  event: string;
+  handler: EventListener | ((e: TouchEvent) => void);
+  options?: boolean | AddEventListenerOptions;
+}> = [];
+
 /**
  * Apply browser-specific fixes
  */
 export function applyBrowserFixes(): void {
   if (typeof window === 'undefined') return;
+  // Prevent duplicate listeners
+  if (fixesApplied) {
+    return;
+  }
+  fixesApplied = true;
 
   // Safari-specific fixes
   if (browserInfo.isSafari) {
@@ -97,20 +114,29 @@ export function applyBrowserFixes(): void {
       };
       setViewportHeight();
       window.addEventListener('resize', setViewportHeight);
+      listenerRefs.push({ element: window, event: 'resize', handler: setViewportHeight });
       window.addEventListener('orientationchange', setViewportHeight);
+      listenerRefs.push({
+        element: window,
+        event: 'orientationchange',
+        handler: setViewportHeight,
+      });
     }
 
     // Prevent elastic scrolling on canvas
-    document.addEventListener(
-      'touchmove',
-      (e) => {
-        const target = e.target as HTMLElement;
-        if (target.closest('#mainCanvas')) {
-          e.preventDefault();
-        }
-      },
-      { passive: false }
-    );
+    const preventElasticScroll = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('#mainCanvas')) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('touchmove', preventElasticScroll, { passive: false });
+    listenerRefs.push({
+      element: document,
+      event: 'touchmove',
+      handler: preventElasticScroll,
+      options: { passive: false },
+    });
   }
 
   // Chrome-specific optimizations
@@ -143,89 +169,66 @@ export function applyBrowserFixes(): void {
   if (browserInfo.isMobile) {
     // Prevent double-tap zoom
     let lastTouchEnd = 0;
-    document.addEventListener(
-      'touchend',
-      (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-          e.preventDefault();
-        }
-        lastTouchEnd = now;
-      },
-      false
-    );
+    const preventDoubleTapZoom = (e: TouchEvent) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= DOUBLE_TAP_DELAY) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    };
+    document.addEventListener('touchend', preventDoubleTapZoom, false);
+    listenerRefs.push({
+      element: document,
+      event: 'touchend',
+      handler: preventDoubleTapZoom,
+      options: false,
+    });
 
     // Prevent pull-to-refresh on canvas
     let touchStartY = 0;
-    document.addEventListener(
-      'touchstart',
-      (e) => {
-        const target = e.target as HTMLElement;
-        if (target.closest('#mainCanvas')) {
-          touchStartY = e.touches[0].clientY;
+    const handleTouchStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('#mainCanvas')) {
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    listenerRefs.push({
+      element: document,
+      event: 'touchstart',
+      handler: handleTouchStart,
+      options: { passive: true },
+    });
+
+    const preventPullToRefresh = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('#mainCanvas')) {
+        const touchY = e.touches[0].clientY;
+        // Prevent pull-to-refresh when scrolling down on canvas
+        if (touchY > touchStartY && window.scrollY === 0) {
+          e.preventDefault();
         }
-      },
-      { passive: true }
-    );
-
-    document.addEventListener(
-      'touchmove',
-      (e) => {
-        const target = e.target as HTMLElement;
-        if (target.closest('#mainCanvas')) {
-          const touchY = e.touches[0].clientY;
-          // Prevent pull-to-refresh when scrolling down on canvas
-          if (touchY > touchStartY && window.scrollY === 0) {
-            e.preventDefault();
-          }
-        }
-      },
-      { passive: false }
-    );
+      }
+    };
+    document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+    listenerRefs.push({
+      element: document,
+      event: 'touchmove',
+      handler: preventPullToRefresh,
+      options: { passive: false },
+    });
   }
-}
-
-/**
- * Get canvas memory limits based on browser
- */
-export function getCanvasMemoryLimit(): { maxWidth: number; maxHeight: number } {
-  if (browserInfo.isSafari && browserInfo.isIOS) {
-    // iOS Safari has stricter memory limits
-    return { maxWidth: 2048, maxHeight: 2048 };
-  }
-  if (browserInfo.isMobile) {
-    // Mobile browsers generally have lower limits
-    return { maxWidth: 4096, maxHeight: 4096 };
-  }
-  // Desktop browsers can handle larger canvases
-  return { maxWidth: 8192, maxHeight: 8192 };
-}
-
-/**
- * Check if browser supports touch pressure
- */
-export function supportsTouchPressure(): boolean {
-  if (typeof window === 'undefined') return false;
-  return 'TouchEvent' in window && 'force' in TouchEvent.prototype;
-}
-
-/**
- * Get optimal frame rate for device
- */
-export function getOptimalFrameRate(): number {
-  if (browserInfo.isMobile) {
-    // Mobile devices: 30fps to save battery
-    return 30;
-  }
-  // Desktop: 60fps
-  return 60;
 }
 
 // Apply fixes on module load
 if (typeof window !== 'undefined') {
   // Wait for DOM to be ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyBrowserFixes);
+    const onDOMContentLoaded = () => {
+      applyBrowserFixes();
+      document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
+    };
+    document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
   } else {
     applyBrowserFixes();
   }
