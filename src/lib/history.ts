@@ -33,6 +33,7 @@ const History = (function () {
   let transactionGroupingTimer: ReturnType<typeof setTimeout> | null = null;
   let pendingSave: (() => void) | null = null;
   const TRANSACTION_GROUPING_DELAY = 500; // Group actions within 500ms
+  let testMode = false; // Test mode flag to disable transaction grouping in tests
 
   /**
    * Initialize the history module
@@ -83,8 +84,24 @@ const History = (function () {
         entry.layerState = Layers._createLayerSnapshot();
       }
 
+      // Validate history index before modifying
+      if (historyIndex < -1 || historyIndex >= history.length) {
+        logger.error('Invalid history index before save:', historyIndex, history.length);
+        // Reset to valid state
+        historyIndex = history.length > 0 ? history.length - 1 : -1;
+      }
+
       // Remove any redo states
       history = history.slice(0, historyIndex + 1);
+
+      // Validate layer state if present
+      if (useLayers && entry.layerState) {
+        if (!entry.layerState.layers || !Array.isArray(entry.layerState.layers)) {
+          logger.error('Invalid layer state in history entry: layers is not an array');
+          // Remove invalid layer state
+          entry.layerState = undefined;
+        }
+      }
 
       // Add new state
       history.push(entry);
@@ -192,6 +209,12 @@ const History = (function () {
    * Groups rapid consecutive actions (e.g., drawing strokes) into single undo units
    */
   function save(): void {
+    // In test mode, save immediately without grouping
+    if (testMode) {
+      saveInternal();
+      return;
+    }
+
     // Clear existing grouping timer
     if (transactionGroupingTimer) {
       clearTimeout(transactionGroupingTimer);
@@ -212,6 +235,14 @@ const History = (function () {
       transactionGroupingTimer = null;
       pendingSave = null;
     }, TRANSACTION_GROUPING_DELAY);
+  }
+
+  /**
+   * Set test mode (disables transaction grouping for immediate saves)
+   * Only use in test environments
+   */
+  function setTestMode(enabled: boolean): void {
+    testMode = enabled;
   }
 
   /**
@@ -339,6 +370,50 @@ const History = (function () {
   }
 
   /**
+   * Save initial state (for initialization)
+   * Ensures layers are rendered before capturing state
+   */
+  async function saveInitialState(): Promise<void> {
+    if (!isInitializedFlag) {
+      logger.warn('History not initialized, cannot save initial state');
+      return;
+    }
+
+    // If layers are enabled, ensure main canvas is updated before capturing state
+    if (useLayers) {
+      await Layers.renderSync();
+    }
+
+    // Save immediately (synchronously, no requestIdleCallback)
+    let imageData: ImageData;
+    try {
+      imageData = Canvas.getImageData();
+    } catch (error) {
+      logger.error('Failed to get canvas image data for initial history state:', error);
+      // Don't save history if canvas data unavailable
+      return;
+    }
+    const entry: HistoryEntry = { imageData };
+
+    // If layers are enabled, also save layer state
+    if (useLayers) {
+      entry.layerState = Layers._createLayerSnapshot();
+    }
+
+    // Initialize history with initial state
+    history = [entry];
+    historyIndex = 0;
+
+    // Emit event for history change
+    EventEmitter.emit('history:save', {
+      index: historyIndex,
+      length: history.length,
+      canUndo: canUndo(),
+      canRedo: canRedo(),
+    });
+  }
+
+  /**
    * Load history entry from IndexedDB if cached
    */
   async function loadCachedEntry(targetIndex: number): Promise<HistoryEntry | null> {
@@ -450,11 +525,22 @@ const History = (function () {
 
       historyIndex = targetIndex;
 
-      // Restore layer state if available
+      // Validate layer state before restoration
       if (useLayers && entry.layerState) {
-        Layers._restoreLayersFromState(entry.layerState);
-        // Wait for rendering to complete before emitting event
-        await Layers.renderSync();
+        if (!entry.layerState.layers || !Array.isArray(entry.layerState.layers)) {
+          logger.error('Invalid layer state in undoAsync entry, falling back to image data');
+          Canvas.putImageData(entry.imageData);
+        } else {
+          try {
+            Layers._restoreLayersFromState(entry.layerState);
+            // Wait for rendering to complete before emitting event
+            await Layers.renderSync();
+          } catch (error) {
+            logger.error('Failed to restore layer state in undoAsync:', error);
+            // Fall back to image data restoration
+            Canvas.putImageData(entry.imageData);
+          }
+        }
       } else {
         Canvas.putImageData(entry.imageData);
       }
@@ -477,41 +563,77 @@ const History = (function () {
    * Now async to ensure rendering completes before returning
    */
   async function undo(): Promise<boolean> {
-    if (historyIndex > 0) {
-      const targetIndex = historyIndex - 1;
-      const entry = history[targetIndex];
-
-      if (entry) {
-        // Entry is in memory, restore immediately
-        historyIndex = targetIndex;
-        if (useLayers && entry.layerState) {
-          Layers._restoreLayersFromState(entry.layerState);
-          // Wait for rendering to complete
-          await Layers.renderSync();
-        } else {
-          Canvas.putImageData(entry.imageData);
-        }
-        EventEmitter.emit('history:undo', {
-          index: historyIndex,
-          length: history.length,
-          canUndo: canUndo(),
-          canRedo: canRedo(),
-        });
-        return true;
-      } else if (cachedEntries.has(targetIndex)) {
-        // Entry is cached, load asynchronously
-        return await undoAsync();
-      } else {
-        // Entry doesn't exist
-        logger.error('History entry not found at index:', targetIndex);
-        EventEmitter.emit('history:error', {
-          message: 'History entry not available. It may have been cleared.',
-          index: targetIndex,
-        });
-        return false;
-      }
+    // Validate history state before undo
+    if (!isInitializedFlag) {
+      logger.error('History not initialized, cannot undo');
+      return false;
     }
-    return false;
+
+    if (historyIndex <= 0) {
+      // Nothing to undo
+      return false;
+    }
+
+    // Validate history index bounds
+    if (historyIndex < 0 || historyIndex >= history.length) {
+      logger.error('Invalid history index in undo:', historyIndex, history.length);
+      // Reset to valid state
+      historyIndex = history.length > 0 ? history.length - 1 : -1;
+      return false;
+    }
+
+    const targetIndex = historyIndex - 1;
+
+    // Validate target index
+    if (targetIndex < 0 || targetIndex >= history.length) {
+      logger.error('Invalid target index in undo:', targetIndex, history.length);
+      return false;
+    }
+
+    const entry = history[targetIndex];
+
+    if (entry) {
+      // Entry is in memory, restore immediately
+      historyIndex = targetIndex;
+
+      // Validate layer state before restoration
+      if (useLayers && entry.layerState) {
+        if (!entry.layerState.layers || !Array.isArray(entry.layerState.layers)) {
+          logger.error('Invalid layer state in undo entry, falling back to image data');
+          Canvas.putImageData(entry.imageData);
+        } else {
+          try {
+            Layers._restoreLayersFromState(entry.layerState);
+            // Wait for rendering to complete
+            await Layers.renderSync();
+          } catch (error) {
+            logger.error('Failed to restore layer state in undo:', error);
+            // Fall back to image data restoration
+            Canvas.putImageData(entry.imageData);
+          }
+        }
+      } else {
+        Canvas.putImageData(entry.imageData);
+      }
+      EventEmitter.emit('history:undo', {
+        index: historyIndex,
+        length: history.length,
+        canUndo: canUndo(),
+        canRedo: canRedo(),
+      });
+      return true;
+    } else if (cachedEntries.has(targetIndex)) {
+      // Entry is cached, load asynchronously
+      return await undoAsync();
+    } else {
+      // Entry doesn't exist
+      logger.error('History entry not found at index:', targetIndex);
+      EventEmitter.emit('history:error', {
+        message: 'History entry not available. It may have been cleared.',
+        index: targetIndex,
+      });
+      return false;
+    }
   }
 
   /**
@@ -584,41 +706,77 @@ const History = (function () {
    * Now async to ensure rendering completes before returning
    */
   async function redo(): Promise<boolean> {
-    if (historyIndex < history.length - 1) {
-      const targetIndex = historyIndex + 1;
-      const entry = history[targetIndex];
-
-      if (entry) {
-        // Entry is in memory, restore immediately
-        historyIndex = targetIndex;
-        if (useLayers && entry.layerState) {
-          Layers._restoreLayersFromState(entry.layerState);
-          // Wait for rendering to complete
-          await Layers.renderSync();
-        } else {
-          Canvas.putImageData(entry.imageData);
-        }
-        EventEmitter.emit('history:redo', {
-          index: historyIndex,
-          length: history.length,
-          canUndo: canUndo(),
-          canRedo: canRedo(),
-        });
-        return true;
-      } else if (cachedEntries.has(targetIndex)) {
-        // Entry is cached, load asynchronously
-        return await redoAsync();
-      } else {
-        // Entry doesn't exist
-        logger.error('History entry not found at index:', targetIndex);
-        EventEmitter.emit('history:error', {
-          message: 'History entry not available. It may have been cleared.',
-          index: targetIndex,
-        });
-        return false;
-      }
+    // Validate history state before redo
+    if (!isInitializedFlag) {
+      logger.error('History not initialized, cannot redo');
+      return false;
     }
-    return false;
+
+    if (historyIndex >= history.length - 1) {
+      // Nothing to redo
+      return false;
+    }
+
+    // Validate history index bounds
+    if (historyIndex < -1 || historyIndex >= history.length) {
+      logger.error('Invalid history index in redo:', historyIndex, history.length);
+      // Reset to valid state
+      historyIndex = history.length > 0 ? history.length - 1 : -1;
+      return false;
+    }
+
+    const targetIndex = historyIndex + 1;
+
+    // Validate target index
+    if (targetIndex < 0 || targetIndex >= history.length) {
+      logger.error('Invalid target index in redo:', targetIndex, history.length);
+      return false;
+    }
+
+    const entry = history[targetIndex];
+
+    if (entry) {
+      // Entry is in memory, restore immediately
+      historyIndex = targetIndex;
+
+      // Validate layer state before restoration
+      if (useLayers && entry.layerState) {
+        if (!entry.layerState.layers || !Array.isArray(entry.layerState.layers)) {
+          logger.error('Invalid layer state in redo entry, falling back to image data');
+          Canvas.putImageData(entry.imageData);
+        } else {
+          try {
+            Layers._restoreLayersFromState(entry.layerState);
+            // Wait for rendering to complete
+            await Layers.renderSync();
+          } catch (error) {
+            logger.error('Failed to restore layer state in redo:', error);
+            // Fall back to image data restoration
+            Canvas.putImageData(entry.imageData);
+          }
+        }
+      } else {
+        Canvas.putImageData(entry.imageData);
+      }
+      EventEmitter.emit('history:redo', {
+        index: historyIndex,
+        length: history.length,
+        canUndo: canUndo(),
+        canRedo: canRedo(),
+      });
+      return true;
+    } else if (cachedEntries.has(targetIndex)) {
+      // Entry is cached, load asynchronously
+      return await redoAsync();
+    } else {
+      // Entry doesn't exist
+      logger.error('History entry not found at index:', targetIndex);
+      EventEmitter.emit('history:error', {
+        message: 'History entry not available. It may have been cleared.',
+        index: targetIndex,
+      });
+      return false;
+    }
   }
 
   /**
@@ -690,6 +848,7 @@ const History = (function () {
     init,
     save,
     saveImmediate, // Force immediate save (bypasses transaction grouping)
+    saveInitialState, // Save initial state (for initialization)
     undo,
     redo,
     canUndo,
@@ -699,6 +858,7 @@ const History = (function () {
     getIndex,
     getLength,
     setLayersEnabled,
+    setTestMode, // Set test mode (disables transaction grouping)
     // Expose event emitter for components to subscribe
     on: EventEmitter.on.bind(EventEmitter),
     off: EventEmitter.off.bind(EventEmitter),

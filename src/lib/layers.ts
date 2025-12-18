@@ -519,6 +519,9 @@ const Layers = (function () {
     }));
     StateManager.setLayers(layers);
     StateManager.setActiveLayerId(state.activeLayerId);
+
+    // Note: Context cache will be automatically cleared for old canvases via WeakMap garbage collection
+    // New canvases will be cached when first accessed via getCachedContext()
   }
 
   /**

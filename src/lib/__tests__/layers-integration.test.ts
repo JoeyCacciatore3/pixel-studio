@@ -208,33 +208,33 @@ describe('Layer System Integration', () => {
   });
 
   describe('History Integration', () => {
-    it('should save layer state in history', () => {
+    it('should save layer state in history', async () => {
       // History is already initialized in beforeEach
       // Create a layer first (this automatically sets it as active)
       const layer = Layers.createLayer('Test Layer');
       Layers.setActiveLayer(layer.id);
 
-      // Now save - this should work because we have an active layer
-      History.save();
+      // Use saveImmediate for tests that need immediate execution
+      await History.saveImmediate();
 
       // History should contain layer state
       // Note: History implementation details are tested in history tests
       expect(History.getLength()).toBeGreaterThan(0);
     });
 
-    it('should restore layer state on undo', () => {
+    it('should restore layer state on undo', async () => {
       // History is already initialized in beforeEach
       // Create first layer and save
       const layer1 = Layers.createLayer('Layer 1');
       Layers.setActiveLayer(layer1.id);
-      History.save();
+      await History.saveImmediate();
 
       // Create second layer and save
       Layers.createLayer('Layer 2');
-      History.save();
+      await History.saveImmediate();
 
-      // Undo should restore to state with 1 layer
-      History.undo();
+      // Await the async undo operation
+      await History.undo();
 
       // Layer state should be restored to state with 1 layer
       const layers = Layers.getAllLayers();
@@ -242,19 +242,19 @@ describe('Layer System Integration', () => {
       expect(layers[0]?.name).toBe('Layer 1');
     });
 
-    it('should restore layer state on redo', () => {
+    it('should restore layer state on redo', async () => {
       // History is already initialized in beforeEach
       // Save initial empty state first
-      History.save();
+      await History.saveImmediate();
 
       const layer1 = Layers.createLayer('Layer 1');
-      History.save();
+      await History.saveImmediate();
 
       Layers.createLayer('Layer 2');
-      History.save();
+      await History.saveImmediate();
 
-      History.undo();
-      History.redo();
+      await History.undo();
+      await History.redo();
 
       // Layer state should be restored to state with 2 layers
       const layers = Layers.getAllLayers();
