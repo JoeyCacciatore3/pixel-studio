@@ -30,6 +30,7 @@ export default function ProgressIndicator({
       const timer = setTimeout(() => setMounted(false), 300);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [isVisible]);
 
   if (!mounted) return null;
