@@ -53,7 +53,7 @@ import { logger } from '../utils/logger';
         useLab: true,
       };
 
-      const finalOptions = options || defaultOptions;
+      const finalOptions = { ...defaultOptions, ...options };
 
       const result = await reduceColorNoise(imageData, finalOptions);
       Canvas.putImageData(result, 0, 0);

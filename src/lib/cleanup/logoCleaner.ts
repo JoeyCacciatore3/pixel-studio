@@ -25,6 +25,7 @@ export interface LogoCleanerOptions {
   edgeCrispening?: EdgeCrispenerOptions;
   edgeSmoothing?: EdgeSmootherOptions;
   outlinePerfecting?: OutlinePerfecterOptions;
+  onProgress?: (progress: number, stage: string) => void;
 }
 
 /**
@@ -78,7 +79,12 @@ function getPresetConfig(preset: LogoCleanerPreset): LogoCleanerOptions {
         strayRemoval: { minSize: 2, merge: false, useWorker: true },
         colorReduction: { mode: 'quantize', nColors: 16, useWorker: true, useLab: true },
         edgeCrispening: { method: 'threshold', threshold: 220, useWorker: true },
-        edgeSmoothing: { mode: 'pixel-perfect', strength: 20, preserveCorners: true, useWorker: true },
+        edgeSmoothing: {
+          mode: 'pixel-perfect',
+          strength: 20,
+          preserveCorners: true,
+          useWorker: true,
+        },
         outlinePerfecting: { closeGaps: true, maxGapSize: 1 },
       };
 
@@ -95,7 +101,11 @@ function getPresetConfig(preset: LogoCleanerPreset): LogoCleanerOptions {
       return {
         strayRemoval: { minSize: 4, merge: false, useWorker: true },
         colorReduction: { mode: 'auto-clean', threshold: 8, useWorker: true, useLab: true },
-        edgeCrispening: { method: 'decontaminate', backgroundColor: { r: 255, g: 255, b: 255 }, useWorker: true },
+        edgeCrispening: {
+          method: 'decontaminate',
+          backgroundColor: { r: 255, g: 255, b: 255 },
+          useWorker: true,
+        },
         edgeSmoothing: { mode: 'smooth', strength: 60, preserveCorners: true, useWorker: true },
         outlinePerfecting: {
           closeGaps: true,
@@ -116,13 +126,21 @@ function getPresetConfig(preset: LogoCleanerPreset): LogoCleanerOptions {
 
 /**
  * Clean logo using preset or custom options
+ * Optimized for large images with progress reporting
  */
 export async function cleanLogo(
   imageData: ImageData,
   options: LogoCleanerOptions
 ): Promise<ImageData> {
-  const { preset, strayRemoval, colorReduction, edgeCrispening, edgeSmoothing, outlinePerfecting } =
-    options;
+  const {
+    preset,
+    strayRemoval,
+    colorReduction,
+    edgeCrispening,
+    edgeSmoothing,
+    outlinePerfecting,
+    onProgress,
+  } = options;
 
   let result = imageData;
 
@@ -136,35 +154,68 @@ export async function cleanLogo(
   const finalEdgeSmoothing = edgeSmoothing || presetConfig.edgeSmoothing;
   const finalOutlinePerfecting = outlinePerfecting || presetConfig.outlinePerfecting;
 
+  // Count active stages for progress calculation
+  const stages = [
+    finalStrayRemoval,
+    finalColorReduction,
+    finalEdgeCrispening,
+    finalEdgeSmoothing,
+    finalOutlinePerfecting,
+  ].filter(Boolean);
+  const totalStages = stages.length;
+  let currentStage = 0;
+
+  // Early exit: if image is very small, skip some operations
+  const isLargeImage = imageData.width * imageData.height > 1024 * 1024;
+
   try {
     // Pipeline: Stray removal → Color reduction → Edge crispening → Edge smoothing → Outline perfecting
 
     if (finalStrayRemoval) {
+      const stageProgress = (currentStage / totalStages) * 100;
+      onProgress?.(stageProgress, 'Removing stray pixels...');
       logger.debug('Logo cleaner: Removing stray pixels');
       result = await removeStrayPixels(result, finalStrayRemoval);
+      currentStage++;
     }
 
     if (finalColorReduction) {
+      const stageProgress = (currentStage / totalStages) * 100;
+      onProgress?.(stageProgress, 'Reducing color noise...');
       logger.debug('Logo cleaner: Reducing color noise');
       result = await reduceColorNoise(result, finalColorReduction);
+      currentStage++;
     }
 
     if (finalEdgeCrispening) {
+      const stageProgress = (currentStage / totalStages) * 100;
+      onProgress?.(stageProgress, 'Crisping edges...');
       logger.debug('Logo cleaner: Crisping edges');
       result = await crispEdges(result, finalEdgeCrispening);
+      currentStage++;
     }
 
     if (finalEdgeSmoothing) {
+      const stageProgress = (currentStage / totalStages) * 100;
+      onProgress?.(stageProgress, 'Smoothing edges...');
       logger.debug('Logo cleaner: Smoothing edges');
       result = await smoothEdges(result, finalEdgeSmoothing);
+      currentStage++;
     }
 
     if (finalOutlinePerfecting) {
+      const stageProgress = (currentStage / totalStages) * 100;
+      onProgress?.(stageProgress, 'Perfecting outline...');
       logger.debug('Logo cleaner: Perfecting outline');
       result = await perfectOutline(result, finalOutlinePerfecting);
+      currentStage++;
     }
+
+    // Report completion
+    onProgress?.(100, 'Complete');
   } catch (error) {
     logger.error('Logo cleaner pipeline failed:', error);
+    onProgress?.(0, 'Error occurred');
     throw error;
   }
 

@@ -5,6 +5,7 @@ This directory contains performance baseline configurations for Pixel Studio tes
 ## Structure
 
 Performance baselines are stored as JSON files:
+
 - `canvas-drawing.json` - Baseline for canvas drawing operations
 - `page-load.json` - Baseline for page load performance
 - `layer-rendering.json` - Baseline for layer rendering performance
@@ -40,10 +41,7 @@ await savePerformanceBaseline('canvas-drawing', {
 ### Using Baselines
 
 ```typescript
-import {
-  getPerformanceBaseline,
-  checkPerformanceRegression,
-} from './helpers/performance-helpers';
+import { getPerformanceBaseline, checkPerformanceRegression } from './helpers/performance-helpers';
 
 const baseline = await getPerformanceBaseline('canvas-drawing');
 if (baseline) {
@@ -55,6 +53,7 @@ if (baseline) {
 ### Updating Baselines
 
 When performance changes are acceptable:
+
 1. Measure new performance
 2. Update the baseline file
 3. Commit the updated baseline

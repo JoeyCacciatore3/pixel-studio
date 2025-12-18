@@ -19,11 +19,7 @@ export interface EdgeSmootherOptions {
 /**
  * Detect staircase patterns in edges
  */
-function detectStaircasePatterns(
-  edgeMap: Float32Array,
-  width: number,
-  height: number
-): Uint8Array {
+function detectStaircasePatterns(edgeMap: Float32Array, width: number, height: number): Uint8Array {
   const patterns = new Uint8Array(width * height);
 
   for (let y = 1; y < height - 1; y++) {
@@ -166,7 +162,12 @@ export async function smoothEdges(
   imageData: ImageData,
   options: EdgeSmootherOptions
 ): Promise<ImageData> {
-  const { mode, strength = 50, preserveCorners: _preserveCorners = true, useWorker = true } = options;
+  const {
+    mode,
+    strength = 50,
+    preserveCorners: _preserveCorners = true,
+    useWorker = true,
+  } = options;
 
   // Use worker for edge detection if available
   let edgeMap: Float32Array;

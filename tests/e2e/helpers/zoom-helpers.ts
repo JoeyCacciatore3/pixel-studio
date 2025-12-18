@@ -270,12 +270,17 @@ export async function verifyCanvasZoomed(
  * Reset zoom to 100%
  */
 export async function resetZoom(page: Page): Promise<void> {
-  const resetZoomBtn = page.locator('button[aria-label*="Reset zoom"], button[aria-label*="reset"], #resetZoomBtn');
+  const resetZoomBtn = page.locator(
+    'button[aria-label*="Reset zoom"], button[aria-label*="reset"], #resetZoomBtn'
+  );
   const zoomLevel = await getZoomLevel(page);
 
   if (zoomLevel !== 100) {
     // Try to find reset button
-    const resetBtn = page.locator('button').filter({ hasText: /reset|100%/i }).first();
+    const resetBtn = page
+      .locator('button')
+      .filter({ hasText: /reset|100%/i })
+      .first();
     if (await resetBtn.isVisible().catch(() => false)) {
       await resetBtn.click();
     } else {

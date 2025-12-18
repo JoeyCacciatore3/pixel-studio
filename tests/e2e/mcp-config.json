@@ -11,12 +11,7 @@
     "context7": {
       "enabled": true,
       "apiKey": "${CONTEXT7_API_KEY}",
-      "libraries": [
-        "playwright",
-        "react",
-        "next.js",
-        "typescript"
-      ]
+      "libraries": ["playwright", "react", "next.js", "typescript"]
     },
     "memory": {
       "enabled": true,

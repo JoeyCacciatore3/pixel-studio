@@ -4,12 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  getCanvas,
-  selectTool,
-  drawStroke,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, getCanvas, selectTool, drawStroke } from './helpers/canvas-helpers';
 import {
   isOffscreenCanvasSupported,
   isWorkersSupported,

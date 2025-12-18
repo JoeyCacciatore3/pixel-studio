@@ -32,7 +32,7 @@ function thresholdEdges(imageData: ImageData, threshold: number): ImageData {
       result.data[i - 3] = 0; // R
       result.data[i - 2] = 0; // G
       result.data[i - 1] = 0; // B
-      result.data[i] = 0;     // A
+      result.data[i] = 0; // A
     } else {
       // Make fully opaque
       result.data[i] = 255;

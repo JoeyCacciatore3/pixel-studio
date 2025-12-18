@@ -68,7 +68,6 @@ function HomeContent() {
     };
   }, []);
 
-
   return (
     <MobileLayout>
       <div className="app-container">

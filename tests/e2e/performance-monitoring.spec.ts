@@ -4,12 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  selectTool,
-  drawStroke,
-  APP_URL,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, selectTool, drawStroke, APP_URL } from './helpers/canvas-helpers';
 import {
   measureLoadTime,
   measureFCP,
@@ -113,10 +108,14 @@ test.describe('Performance Monitoring', () => {
       expect(initialMemory).not.toBeNull();
 
       // Detect memory leaks
-      const leakResult = await detectMemoryLeak(page, async () => {
-        await drawStroke(page, { x: 50, y: 50 }, { x: 100, y: 100 });
-        await page.waitForTimeout(100);
-      }, 20);
+      const leakResult = await detectMemoryLeak(
+        page,
+        async () => {
+          await drawStroke(page, { x: 50, y: 50 }, { x: 100, y: 100 });
+          await page.waitForTimeout(100);
+        },
+        20
+      );
 
       expect(leakResult.hasLeak).toBe(false);
       expect(leakResult.memoryGrowth).toBeLessThan(10 * 1024 * 1024); // Less than 10MB growth
@@ -182,7 +181,8 @@ test.describe('Performance Monitoring', () => {
 
       // Calculate variance
       const average = durations.reduce((a, b) => a + b, 0) / durations.length;
-      const variance = durations.reduce((sum, d) => sum + Math.pow(d - average, 2), 0) / durations.length;
+      const variance =
+        durations.reduce((sum, d) => sum + Math.pow(d - average, 2), 0) / durations.length;
       const stdDev = Math.sqrt(variance);
 
       // Standard deviation should be less than 30% of average (consistent performance)

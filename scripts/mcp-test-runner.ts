@@ -6,7 +6,11 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { selectAffectedTests, executeTestsViaMCP, getTestStatistics } from '../tests/e2e/helpers/mcp-playwright-helpers';
+import {
+  selectAffectedTests,
+  executeTestsViaMCP,
+  getTestStatistics,
+} from '../tests/e2e/helpers/mcp-playwright-helpers';
 
 const execAsync = promisify(exec);
 
@@ -37,7 +41,7 @@ async function runTests(options: TestRunnerOptions = {}): Promise<void> {
 
     if (affectedTests.length > 0) {
       console.log(`✅ Found ${affectedTests.length} affected test files:`);
-      affectedTests.forEach(test => console.log(`   - ${test}`));
+      affectedTests.forEach((test) => console.log(`   - ${test}`));
       testPattern = affectedTests.join('|');
     } else {
       console.log('ℹ️  No affected tests found. Running all tests.');
@@ -56,16 +60,21 @@ async function runTests(options: TestRunnerOptions = {}): Promise<void> {
       maxBuffer: 10 * 1024 * 1024,
     });
 
-    const testLines = stdout.split('\n').filter(line =>
-      line.trim() &&
-      !line.includes('Listing tests') &&
-      !line.includes('Total:') &&
-      line.includes('.spec.ts')
-    );
+    const testLines = stdout
+      .split('\n')
+      .filter(
+        (line) =>
+          line.trim() &&
+          !line.includes('Listing tests') &&
+          !line.includes('Total:') &&
+          line.includes('.spec.ts')
+      );
     const testCount = testLines.length;
 
     if (testCount === 0 && !testPattern) {
-      console.error('  ❌ No tests discovered. Check testMatch patterns and testIgnore settings.\n');
+      console.error(
+        '  ❌ No tests discovered. Check testMatch patterns and testIgnore settings.\n'
+      );
       process.exit(1);
     } else if (testCount === 0 && testPattern) {
       console.warn(`  ⚠️  No tests found matching pattern: ${testPattern}\n`);
@@ -94,7 +103,7 @@ async function runTests(options: TestRunnerOptions = {}): Promise<void> {
       console.log(`   Average Duration: ${stats.averageDuration.toFixed(2)}ms`);
       if (stats.flakyTests.length > 0) {
         console.log(`   ⚠️  Flaky Tests: ${stats.flakyTests.length}`);
-        stats.flakyTests.slice(0, 5).forEach(test => console.log(`      - ${test}`));
+        stats.flakyTests.slice(0, 5).forEach((test) => console.log(`      - ${test}`));
       }
       console.log('');
     }
@@ -124,7 +133,7 @@ async function runTests(options: TestRunnerOptions = {}): Promise<void> {
 
   if (result.errors.length > 0) {
     console.log('\n❌ Errors:');
-    result.errors.slice(0, 10).forEach(error => console.log(`   ${error}`));
+    result.errors.slice(0, 10).forEach((error) => console.log(`   ${error}`));
     if (result.errors.length > 10) {
       console.log(`   ... and ${result.errors.length - 10} more`);
     }
@@ -132,7 +141,7 @@ async function runTests(options: TestRunnerOptions = {}): Promise<void> {
 
   if (result.warnings.length > 0) {
     console.log('\n⚠️  Warnings:');
-    result.warnings.slice(0, 5).forEach(warning => console.log(`   ${warning}`));
+    result.warnings.slice(0, 5).forEach((warning) => console.log(`   ${warning}`));
   }
 
   // Exit with appropriate code
@@ -164,7 +173,7 @@ function parseArgs(): TestRunnerOptions {
     } else if (arg === '--watch' || arg === '-W') {
       options.watch = true;
     } else if (arg === '--changed-files') {
-      const files = args[++i].split(',').map(f => f.trim());
+      const files = args[++i].split(',').map((f) => f.trim());
       options.changedFiles = files;
     }
   }
@@ -178,7 +187,7 @@ function parseArgs(): TestRunnerOptions {
 async function getChangedFiles(): Promise<string[]> {
   try {
     const { stdout } = await execAsync('git diff --name-only HEAD');
-    const files = stdout.split('\n').filter(f => f.trim());
+    const files = stdout.split('\n').filter((f) => f.trim());
     return files;
   } catch (error) {
     console.warn('Could not get changed files from git:', error);

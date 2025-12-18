@@ -4,12 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  selectTool,
-  drawStroke,
-  APP_URL,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, selectTool, drawStroke, APP_URL } from './helpers/canvas-helpers';
 import { waitForAppReady } from './helpers/app-readiness';
 import {
   captureVisualBaseline,
@@ -57,7 +52,12 @@ test.describe('Visual Regression Tests', () => {
       await drawStroke(page, { x: 50, y: 150 }, { x: 100, y: 200 });
       await page.waitForTimeout(500);
 
-      const result = await compareVisualState(page, 'canvas-multiple-strokes', undefined, defaultVisualConfig);
+      const result = await compareVisualState(
+        page,
+        'canvas-multiple-strokes',
+        undefined,
+        defaultVisualConfig
+      );
       expect(result.match).toBe(true);
     });
 
@@ -73,7 +73,12 @@ test.describe('Visual Regression Tests', () => {
       await page.waitForTimeout(500);
 
       // Compare - should detect the change
-      const result = await compareVisualState(page, 'canvas-change-detection', undefined, defaultVisualConfig);
+      const result = await compareVisualState(
+        page,
+        'canvas-change-detection',
+        undefined,
+        defaultVisualConfig
+      );
       // This test expects a change, so we check that comparison works
       // In a real scenario, you'd update the baseline if the change is intentional
       expect(result).toBeDefined();
@@ -161,7 +166,12 @@ test.describe('Visual Regression Tests', () => {
         maxDiffPixelRatio: 0.01,
       });
 
-      const result = await compareVisualState(page, 'tool-eraser-active', undefined, defaultVisualConfig);
+      const result = await compareVisualState(
+        page,
+        'tool-eraser-active',
+        undefined,
+        defaultVisualConfig
+      );
       expect(result.match).toBe(true);
     });
   });
@@ -170,7 +180,7 @@ test.describe('Visual Regression Tests', () => {
     test('should match baseline for layer panel', async ({ page }) => {
       // Wait for layer panel to be visible
       const layerPanel = page.locator('.layer-panel, .layer-list').first();
-      if (await layerPanel.count() > 0) {
+      if ((await layerPanel.count()) > 0) {
         await expect(layerPanel).toBeVisible({ timeout: 5000 });
 
         const result = await compareElementVisualState(

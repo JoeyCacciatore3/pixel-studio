@@ -149,10 +149,10 @@ tsx scripts/mcp-test-generator.ts "Test layer creation" --use-patterns --categor
 ```typescript
 // Generate test code
 const testCode = await generateTestFromDescription({
-  description: "Test that eraser tool removes drawing from canvas",
-  testFile: "eraser-tests.spec.ts",
-  category: "tool-testing",
-  tags: ["eraser", "canvas"],
+  description: 'Test that eraser tool removes drawing from canvas',
+  testFile: 'eraser-tests.spec.ts',
+  category: 'tool-testing',
+  tags: ['eraser', 'canvas'],
   usePatterns: true,
 });
 ```
@@ -180,11 +180,7 @@ test('should match canvas visual baseline', async ({ page }) => {
 import { compareElementVisualState } from './helpers/visual-regression-helpers';
 
 test('should match toolbar visual baseline', async ({ page }) => {
-  const result = await compareElementVisualState(
-    page,
-    '.extended-toolbar',
-    'toolbar'
-  );
+  const result = await compareElementVisualState(page, '.extended-toolbar', 'toolbar');
   expect(result.match).toBe(true);
 });
 ```
@@ -200,13 +196,9 @@ test('should match baselines across viewports', async ({ page }) => {
     { width: 1920, height: 1080, name: 'desktop' },
   ];
 
-  const results = await compareResponsiveVisualStates(
-    page,
-    'responsive-layout',
-    viewports
-  );
+  const results = await compareResponsiveVisualStates(page, 'responsive-layout', viewports);
 
-  results.forEach(result => {
+  results.forEach((result) => {
     expect(result.match).toBe(true);
   });
 });
@@ -308,10 +300,7 @@ if (baseline) {
 Use MCP debugging tools for comprehensive failure analysis:
 
 ```typescript
-import {
-  captureDebugInfo,
-  analyzeTestFailure,
-} from './helpers/mcp-playwright-helpers';
+import { captureDebugInfo, analyzeTestFailure } from './helpers/mcp-playwright-helpers';
 
 test('debug test failure', async ({ page, testInfo }) => {
   try {
@@ -329,11 +318,7 @@ test('debug test failure', async ({ page, testInfo }) => {
     });
 
     // Analyze failure
-    const analysis = await analyzeTestFailure(
-      testInfo.title,
-      error as Error,
-      debugInfo
-    );
+    const analysis = await analyzeTestFailure(testInfo.title, error as Error, debugInfo);
 
     console.log('Possible causes:', analysis.possibleCauses);
     console.log('Suggestions:', analysis.suggestions);
@@ -352,16 +337,12 @@ Start an interactive debugging session:
 import { startDebugSession } from './helpers/mcp-playwright-helpers';
 
 // Start debug session for a specific test
-await startDebugSession(
-  'canvas-operations.spec.ts',
-  'should handle resize',
-  {
-    captureScreenshots: true,
-    captureVideo: true,
-    analyzeNetwork: true,
-    profilePerformance: true,
-  }
-);
+await startDebugSession('canvas-operations.spec.ts', 'should handle resize', {
+  captureScreenshots: true,
+  captureVideo: true,
+  analyzeNetwork: true,
+  profilePerformance: true,
+});
 ```
 
 ## Reporting
@@ -376,6 +357,7 @@ tsx scripts/mcp-report-generator.ts
 ```
 
 The report includes:
+
 - Test execution summary
 - Failure analysis
 - Flaky test detection
@@ -586,7 +568,9 @@ import {
 } from './helpers/mcp-memory-helpers';
 
 // Store pattern
-await storeTestPattern({ /* ... */ });
+await storeTestPattern({
+  /* ... */
+});
 
 // Find similar patterns
 const similar = await findSimilarPatterns('test description');
@@ -605,6 +589,7 @@ const patterns = await getTestPatterns({ category: 'canvas' });
 ## Support
 
 For issues or questions:
+
 1. Check test logs and reports
 2. Review MCP configuration
 3. Consult the troubleshooting section

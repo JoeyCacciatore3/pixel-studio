@@ -100,11 +100,12 @@ body {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 0%,
-      rgba(255, 255, 255, 0.08) 0,
-      rgba(255, 255, 255, 0.02) 35%,
-      rgba(0, 0, 0, 0.95) 100%);
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(255, 255, 255, 0.08) 0,
+    rgba(255, 255, 255, 0.02) 35%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
   scrollbar-gutter: stable;
 }
 
@@ -114,7 +115,7 @@ body {
 }
 
 /* Main section */
-main[role="main"] {
+main[role='main'] {
   position: absolute;
   top: 0;
   left: 0;
@@ -215,8 +216,7 @@ main[role="main"] {
     /* Strong 3D raised shadow */
     8px 8px 16px rgba(0, 0, 0, 0.6),
     -4px -4px 8px rgba(255, 255, 255, 0.05),
-    /* Inner bevel */
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    /* Inner bevel */ inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 1px 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.4),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
@@ -355,11 +355,9 @@ main[role="main"] {
     /* Strong raised shadow - realistic depth */
     8px 8px 16px rgba(0, 0, 0, 0.6),
     -4px -4px 8px rgba(255, 255, 255, 0.05),
-    /* Inner bevel highlight */
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    /* Inner bevel highlight */ inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 1px 1px 0 rgba(255, 255, 255, 0.08),
-    /* Inner bevel shadow */
-    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    /* Inner bevel shadow */ inset 0 -1px 0 rgba(0, 0, 0, 0.4),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
 }
 
@@ -412,9 +410,7 @@ main[role="main"] {
 .tool-btn svg {
   width: 25px;
   height: 25px;
-  filter:
-    drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3))
-    drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3)) drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.5));
   stroke-width: 2.5;
 }
 
@@ -492,11 +488,12 @@ main[role="main"] {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 0%,
-      rgba(255, 255, 255, 0.08) 0,
-      rgba(255, 255, 255, 0.02) 35%,
-      rgba(0, 0, 0, 0.95) 100%);
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(255, 255, 255, 0.08) 0,
+    rgba(255, 255, 255, 0.02) 35%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -627,8 +624,7 @@ main[role="main"] {
     /* Strong 3D raised shadow */
     8px 8px 16px rgba(0, 0, 0, 0.6),
     -4px -4px 8px rgba(255, 255, 255, 0.05),
-    /* Inner bevel */
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    /* Inner bevel */ inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 1px 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.4),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
@@ -724,8 +720,7 @@ main[role="main"] {
     /* Strong 3D raised shadow */
     8px 8px 16px rgba(0, 0, 0, 0.6),
     -4px -4px 8px rgba(255, 255, 255, 0.05),
-    /* Inner bevel */
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    /* Inner bevel */ inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 1px 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.4),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
@@ -764,7 +759,7 @@ main[role="main"] {
     2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.brush-controls-toggle[aria-expanded="true"] {
+.brush-controls-toggle[aria-expanded='true'] {
   background: rgba(99, 102, 241, 0.2);
   border-color: var(--accent);
 }
@@ -855,8 +850,7 @@ main[role="main"] {
     /* Strong 3D raised shadow */
     8px 8px 16px rgba(0, 0, 0, 0.6),
     -4px -4px 8px rgba(255, 255, 255, 0.05),
-    /* Inner bevel */
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    /* Inner bevel */ inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 1px 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.4),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
@@ -895,7 +889,7 @@ main[role="main"] {
     2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.color-palette-toggle[aria-expanded="true"] {
+.color-palette-toggle[aria-expanded='true'] {
   background: rgba(99, 102, 241, 0.2);
   border-color: var(--accent);
 }
@@ -995,8 +989,7 @@ main[role="main"] {
     /* Strong 3D raised shadow */
     8px 8px 16px rgba(0, 0, 0, 0.6),
     -4px -4px 8px rgba(255, 255, 255, 0.05),
-    /* Inner bevel */
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    /* Inner bevel */ inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 1px 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.4),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
@@ -1035,7 +1028,7 @@ main[role="main"] {
     2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.layers-controls-toggle[aria-expanded="true"] {
+.layers-controls-toggle[aria-expanded='true'] {
   background: rgba(99, 102, 241, 0.2);
   border-color: var(--accent);
 }
@@ -1159,7 +1152,6 @@ main[role="main"] {
 .canvas-wrapper::after {
   display: none; /* Remove reflective light effects */
 }
-
 
 #mainCanvas {
   display: block;
@@ -2172,7 +2164,6 @@ input[type='range']::-moz-range-thumb:hover {
     min-height: calc(100vh - 52px - 72px - 16px); /* Account for header, toolbar, and margins */
     overflow: visible; /* Allow zoom controls to be visible outside wrapper */
   }
-
 
   .status-bar {
     padding: 10px 12px;

@@ -11,6 +11,48 @@
  */
 export function getCleanupWorkerCode(): string {
   return `
+// LAB Color Space Conversion (for perceptual color accuracy)
+// Convert RGB to LAB color space
+function rgbToLab(r, g, b) {
+  // Normalize to 0-1
+  let rNorm = r / 255;
+  let gNorm = g / 255;
+  let bNorm = b / 255;
+
+  // Convert to linear RGB
+  rNorm = rNorm > 0.04045 ? Math.pow((rNorm + 0.055) / 1.055, 2.4) : rNorm / 12.92;
+  gNorm = gNorm > 0.04045 ? Math.pow((gNorm + 0.055) / 1.055, 2.4) : gNorm / 12.92;
+  bNorm = bNorm > 0.04045 ? Math.pow((bNorm + 0.055) / 1.055, 2.4) : bNorm / 12.92;
+
+  // Convert to XYZ (using D65 illuminant)
+  let x = (rNorm * 0.4124564 + gNorm * 0.3575761 + bNorm * 0.1804375) / 0.95047;
+  let y = (rNorm * 0.2126729 + gNorm * 0.7151522 + bNorm * 0.072175) / 1.0;
+  let z = (rNorm * 0.0193339 + gNorm * 0.119192 + bNorm * 0.9503041) / 1.08883;
+
+  // Convert to LAB
+  x = x > 0.008856 ? Math.pow(x, 1 / 3) : (7.787 * x + 16 / 116);
+  y = y > 0.008856 ? Math.pow(y, 1 / 3) : (7.787 * y + 16 / 116);
+  z = z > 0.008856 ? Math.pow(z, 1 / 3) : (7.787 * z + 16 / 116);
+
+  const l = 116 * y - 16;
+  const a = 500 * (x - y);
+  const labB = 200 * (y - z);
+
+  return { l, a, b: labB };
+}
+
+// Calculate Delta E (CIE76) - perceptual color difference
+function deltaE(r1, g1, b1, r2, g2, b2) {
+  const lab1 = rgbToLab(r1, g1, b1);
+  const lab2 = rgbToLab(r2, g2, b2);
+
+  const dl = lab1.l - lab2.l;
+  const da = lab1.a - lab2.a;
+  const db = lab1.b - lab2.b;
+
+  return Math.sqrt(dl * dl + da * da + db * db);
+}
+
 // Connected Component Analysis
 function findConnectedComponents(imageData, isForeground, connectivity = 8) {
   const { width, height, data } = imageData;
@@ -83,8 +125,8 @@ function findConnectedComponents(imageData, isForeground, connectivity = 8) {
   return components;
 }
 
-// K-means clustering for color quantization
-function kmeansClustering(imageData, k, maxIterations = 10) {
+// K-means clustering for color quantization (using LAB color space for perceptual accuracy)
+function kmeansClustering(imageData, k, maxIterations = 20) {
   const { width, height, data } = imageData;
   const pixels = [];
 
@@ -103,7 +145,7 @@ function kmeansClustering(imageData, k, maxIterations = 10) {
 
   if (pixels.length === 0) return [];
 
-  // Initialize centroids randomly
+  // Initialize centroids randomly (k-means++ style would be better but random is acceptable)
   const centroids = [];
   for (let i = 0; i < k; i++) {
     const randomPixel = pixels[Math.floor(Math.random() * pixels.length)];
@@ -111,9 +153,10 @@ function kmeansClustering(imageData, k, maxIterations = 10) {
   }
 
   let assignments = new Array(pixels.length);
+  const convergenceThreshold = 0.5; // As per G'MIC best practices
 
   for (let iter = 0; iter < maxIterations; iter++) {
-    // Assign pixels to nearest centroid
+    // Assign pixels to nearest centroid using LAB color space (Delta E)
     for (let i = 0; i < pixels.length; i++) {
       const pixel = pixels[i];
       let minDist = Infinity;
@@ -121,10 +164,8 @@ function kmeansClustering(imageData, k, maxIterations = 10) {
 
       for (let j = 0; j < centroids.length; j++) {
         const centroid = centroids[j];
-        const dr = pixel.r - centroid.r;
-        const dg = pixel.g - centroid.g;
-        const db = pixel.b - centroid.b;
-        const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+        // Use Delta E for perceptual color distance
+        const dist = deltaE(pixel.r, pixel.g, pixel.b, centroid.r, centroid.g, centroid.b);
 
         if (dist < minDist) {
           minDist = dist;
@@ -135,7 +176,7 @@ function kmeansClustering(imageData, k, maxIterations = 10) {
       assignments[i] = nearest;
     }
 
-    // Update centroids
+    // Update centroids using weighted averages (pixel count weighting)
     const newCentroids = centroids.map(() => ({ r: 0, g: 0, b: 0, count: 0 }));
 
     for (let i = 0; i < pixels.length; i++) {
@@ -147,6 +188,8 @@ function kmeansClustering(imageData, k, maxIterations = 10) {
       newCentroids[cluster].count++;
     }
 
+    // Calculate average difference for convergence check
+    let totalDiff = 0;
     let converged = true;
     for (let j = 0; j < centroids.length; j++) {
       const newCentroid = newCentroids[j];
@@ -158,15 +201,19 @@ function kmeansClustering(imageData, k, maxIterations = 10) {
         centroids[j].g = Math.round(newCentroid.g / newCentroid.count);
         centroids[j].b = Math.round(newCentroid.b / newCentroid.count);
 
-        if (Math.abs(oldR - centroids[j].r) > 1 ||
-            Math.abs(oldG - centroids[j].g) > 1 ||
-            Math.abs(oldB - centroids[j].b) > 1) {
+        // Calculate difference in LAB space for accurate convergence check
+        const diff = deltaE(oldR, oldG, oldB, centroids[j].r, centroids[j].g, centroids[j].b);
+        totalDiff += diff;
+
+        if (diff > convergenceThreshold) {
           converged = false;
         }
       }
     }
 
-    if (converged) break;
+    // Check average difference across all centroids
+    const avgDiff = totalDiff / centroids.length;
+    if (converged || avgDiff < convergenceThreshold) break;
   }
 
   return centroids;
@@ -334,7 +381,14 @@ self.onmessage = async (e) => {
         const { imageData, minSize, merge } = data;
         const isForeground = (r, g, b, a) => a >= 128;
 
+        // Report progress: 0% - Starting
+        self.postMessage({ type: 'progress', progress: 0, stage: 'Analyzing components...', id });
+        
         const components = findConnectedComponents(imageData, isForeground, 8);
+        
+        // Report progress: 50% - Processing
+        self.postMessage({ type: 'progress', progress: 50, stage: 'Removing stray pixels...', id });
+        
         const result = new ImageData(imageData.width, imageData.height);
         result.data.set(imageData.data);
 
@@ -392,6 +446,9 @@ self.onmessage = async (e) => {
           }
         }
 
+        // Report progress: 100% - Complete
+        self.postMessage({ type: 'progress', progress: 100, stage: 'Complete', id });
+        
         self.postMessage(
           { type: 'success', data: { imageData: result }, id },
           [result.data.buffer]
@@ -401,11 +458,19 @@ self.onmessage = async (e) => {
 
       case 'quantize-colors': {
         const { imageData, nColors } = data;
-        const palette = kmeansClustering(imageData, nColors, 10);
+        
+        // Report progress: 0% - Starting
+        self.postMessage({ type: 'progress', progress: 0, stage: 'Initializing K-means...', id });
+        
+        // Report progress: 25% - Clustering
+        const palette = kmeansClustering(imageData, nColors, 20);
+        self.postMessage({ type: 'progress', progress: 50, stage: 'Generating palette...', id });
 
         const result = new ImageData(imageData.width, imageData.height);
         result.data.set(imageData.data);
 
+        // Assign pixels to nearest palette color using LAB color space
+        const totalPixels = imageData.data.length / 4;
         for (let i = 0; i < imageData.data.length; i += 4) {
           const a = imageData.data[i + 3];
           if (a < 128) continue;
@@ -418,7 +483,8 @@ self.onmessage = async (e) => {
           let nearest = palette[0];
 
           for (const color of palette) {
-            const dist = rgbDistance(r, g, b, color.r, color.g, color.b);
+            // Use Delta E for perceptual color matching
+            const dist = deltaE(r, g, b, color.r, color.g, color.b);
             if (dist < minDist) {
               minDist = dist;
               nearest = color;
@@ -428,8 +494,17 @@ self.onmessage = async (e) => {
           result.data[i] = nearest.r;
           result.data[i + 1] = nearest.g;
           result.data[i + 2] = nearest.b;
+          
+          // Report progress: 50-95% - Assigning colors
+          if ((i / 4) % Math.floor(totalPixels / 10) === 0) {
+            const progress = 50 + Math.floor((i / imageData.data.length) * 45);
+            self.postMessage({ type: 'progress', progress, stage: 'Assigning colors...', id });
+          }
         }
 
+        // Report progress: 100% - Complete
+        self.postMessage({ type: 'progress', progress: 100, stage: 'Complete', id });
+        
         self.postMessage(
           { type: 'success', data: { imageData: result, palette }, id },
           [result.data.buffer]
@@ -479,5 +554,5 @@ self.onmessage = async (e) => {
     });
   }
 };
-`
+`;
 }

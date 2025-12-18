@@ -4,11 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  isCanvasInitialized,
-  getCanvas,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, isCanvasInitialized, getCanvas } from './helpers/canvas-helpers';
 import {
   checkErrorBoundaryRendered,
   checkErrorRecoveryPossible,
@@ -52,7 +48,7 @@ test.describe('Initialization Tests', () => {
       // Trigger a React error by throwing in a component context
       setTimeout(() => {
         const event = new CustomEvent('react-error', {
-          detail: { error: new Error('Canvas element missing') }
+          detail: { error: new Error('Canvas element missing') },
         });
         window.dispatchEvent(event);
       }, 100);
@@ -64,7 +60,11 @@ test.describe('Initialization Tests', () => {
     await page.waitForTimeout(1000);
     const errorBoundary = await checkErrorBoundaryRendered(page);
     const hasError = await page.evaluate(() => {
-      return document.querySelector('.app-error, .error-display, .error-boundary, .canvas-error-boundary, .loading-overlay') !== null;
+      return (
+        document.querySelector(
+          '.app-error, .error-display, .error-boundary, .canvas-error-boundary, .loading-overlay'
+        ) !== null
+      );
     });
 
     // App should handle error gracefully - either show error boundary or recover
@@ -110,7 +110,7 @@ test.describe('Initialization Tests', () => {
       // Trigger a React error
       setTimeout(() => {
         const event = new CustomEvent('react-error', {
-          detail: { error: new Error('Canvas context creation failed') }
+          detail: { error: new Error('Canvas context creation failed') },
         });
         window.dispatchEvent(event);
       }, 100);
@@ -199,7 +199,7 @@ test.describe('Initialization Tests', () => {
       setTimeout(() => {
         const error = new Error('Critical component error');
         const event = new CustomEvent('react-error', {
-          detail: { error, errorInfo: { componentStack: 'TestComponent' } }
+          detail: { error, errorInfo: { componentStack: 'TestComponent' } },
         });
         window.dispatchEvent(event);
 
@@ -217,7 +217,10 @@ test.describe('Initialization Tests', () => {
 
   test('should display loading state during initialization', async ({ page }) => {
     // Check for loading state
-    const loadingState = await page.locator('.loading-overlay, .loading-state').isVisible().catch(() => false);
+    const loadingState = await page
+      .locator('.loading-overlay, .loading-state')
+      .isVisible()
+      .catch(() => false);
 
     // Loading state may appear briefly or not at all if initialization is fast
     expect(typeof loadingState).toBe('boolean');
@@ -227,10 +230,8 @@ test.describe('Initialization Tests', () => {
     const errors = await collectConsoleErrors(page, 3000);
 
     // Filter out non-critical errors
-    const criticalErrors = errors.filter((e) =>
-      !e.includes('favicon') &&
-      !e.includes('sourcemap') &&
-      !e.includes('DevTools')
+    const criticalErrors = errors.filter(
+      (e) => !e.includes('favicon') && !e.includes('sourcemap') && !e.includes('DevTools')
     );
 
     expect(criticalErrors.length).toBe(0);
@@ -248,7 +249,8 @@ test.describe('Initialization Tests', () => {
     const modulesReady = await page.evaluate(() => {
       try {
         const pixelStudio = (window as any).PixelStudio;
-        const hasRequiredMethods = pixelStudio &&
+        const hasRequiredMethods =
+          pixelStudio &&
           typeof pixelStudio.getState === 'function' &&
           typeof pixelStudio.registerTool === 'function';
 

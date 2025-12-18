@@ -56,9 +56,7 @@ export default function Header() {
           logger.debug('[Header] Image validation result', validation);
         } catch (validationError) {
           const errorMessage =
-            validationError instanceof Error
-              ? validationError.message
-              : 'Image validation failed';
+            validationError instanceof Error ? validationError.message : 'Image validation failed';
           logger.error('[Header] Image validation failed', validationError);
           setUploadError(errorMessage);
           if (fileInputRef.current) {
@@ -84,14 +82,20 @@ export default function Header() {
         };
         img.onerror = () => {
           URL.revokeObjectURL(objectURL);
-          reject(new Error('Failed to load image. The file may be corrupted or in an unsupported format.'));
+          reject(
+            new Error(
+              'Failed to load image. The file may be corrupted or in an unsupported format.'
+            )
+          );
         };
         img.src = objectURL;
       });
 
       // Verify canvas is initialized before loading image
       if (!Canvas.isInitialized()) {
-        throw new Error('Canvas is not initialized. Please wait for the application to finish loading.');
+        throw new Error(
+          'Canvas is not initialized. Please wait for the application to finish loading.'
+        );
       }
 
       // Create new layer with image (use filename if available)

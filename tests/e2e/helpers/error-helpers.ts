@@ -5,11 +5,7 @@
  */
 
 import { Page, TestInfo } from '@playwright/test';
-import {
-  captureDebugInfo,
-  analyzeTestFailure,
-  defaultMCPConfig,
-} from './mcp-playwright-helpers';
+import { captureDebugInfo, analyzeTestFailure, defaultMCPConfig } from './mcp-playwright-helpers';
 
 /**
  * Inject error into StateManager
@@ -83,10 +79,7 @@ export async function injectHistoryError(page: Page): Promise<void> {
 /**
  * Check for console errors
  */
-export async function collectConsoleErrors(
-  page: Page,
-  duration: number = 5000
-): Promise<string[]> {
+export async function collectConsoleErrors(page: Page, duration: number = 5000): Promise<string[]> {
   const errors: string[] = [];
 
   page.on('console', (msg) => {
@@ -201,11 +194,11 @@ export async function checkErrorRecoveryPossible(page: Page): Promise<boolean> {
     const retryLocators = [
       page.locator('button').filter({ hasText: 'Retry' }),
       page.locator('button').filter({ hasText: 'Try Again' }),
-      page.locator('[onclick*="retry"]')
+      page.locator('[onclick*="retry"]'),
     ];
 
     for (const locator of retryLocators) {
-      if (await locator.count() > 0) {
+      if ((await locator.count()) > 0) {
         return true;
       }
     }
@@ -219,8 +212,10 @@ export async function checkErrorRecoveryPossible(page: Page): Promise<boolean> {
  * Trigger error recovery
  */
 export async function triggerErrorRecovery(page: Page): Promise<void> {
-  const retryButton = page.locator('button:has-text("Retry"), button:has-text("Try Again")').first();
-  if (await retryButton.count() > 0) {
+  const retryButton = page
+    .locator('button:has-text("Retry"), button:has-text("Try Again")')
+    .first();
+  if ((await retryButton.count()) > 0) {
     await retryButton.click();
     await page.waitForTimeout(1000);
   }
@@ -298,11 +293,7 @@ export async function captureAndAnalyzeErrors(
         consoleLogs: true,
       });
 
-      const analysis = await analyzeTestFailure(
-        testInfo.title,
-        error as Error,
-        debugInfo
-      );
+      const analysis = await analyzeTestFailure(testInfo.title, error as Error, debugInfo);
 
       return { errors, analysis };
     }

@@ -192,7 +192,12 @@ export async function compareImages(
               beforeCtx.drawImage(beforeImg, 0, 0);
               afterCtx.drawImage(afterImg, 0, 0);
 
-              const beforeData = beforeCtx.getImageData(0, 0, beforeCanvas.width, beforeCanvas.height);
+              const beforeData = beforeCtx.getImageData(
+                0,
+                0,
+                beforeCanvas.width,
+                beforeCanvas.height
+              );
               const afterData = afterCtx.getImageData(0, 0, afterCanvas.width, afterCanvas.height);
 
               let differentPixels = 0;

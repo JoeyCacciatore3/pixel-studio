@@ -38,11 +38,15 @@ export function createTestImageFile(): string {
  */
 export async function uploadTestImage(page: Page, imagePath: string): Promise<void> {
   // Wait for upload button to be ready
-  const uploadBtn = page.locator('[data-testid="testid-upload-btn"], #uploadBtn, button[aria-label*="Upload"]').first();
+  const uploadBtn = page
+    .locator('[data-testid="testid-upload-btn"], #uploadBtn, button[aria-label*="Upload"]')
+    .first();
   await expect(uploadBtn).toBeVisible({ timeout: 10000 });
 
   // Try direct setInputFiles first (most reliable across browsers)
-  const fileInput = page.locator('input[type="file"][data-testid="file-input"], input[type="file"]#imageUpload').first();
+  const fileInput = page
+    .locator('input[type="file"][data-testid="file-input"], input[type="file"]#imageUpload')
+    .first();
 
   try {
     // Direct approach: set files on input element
@@ -86,7 +90,12 @@ export async function uploadTestImage(page: Page, imagePath: string): Promise<vo
         if (canvas) {
           const ctx = canvas.getContext('2d');
           if (ctx) {
-            const imageData = ctx.getImageData(0, 0, Math.min(canvas.width, 10), Math.min(canvas.height, 10));
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              Math.min(canvas.width, 10),
+              Math.min(canvas.height, 10)
+            );
             for (let i = 3; i < imageData.data.length; i += 4) {
               if (imageData.data[i]! > 0) {
                 return true; // Canvas has content

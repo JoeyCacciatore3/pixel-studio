@@ -11,10 +11,12 @@ This document summarizes the comprehensive audit of state management and error h
 **Issue**: `StateManager.getState()` throws when not initialized, but some code catches and continues silently.
 
 **Location**:
+
 - `src/lib/stateManager.ts:34-38`
 - `src/lib/layers.ts:97-104`
 
 **Fix Applied**:
+
 - Added `isInitialized()` method to StateManager for proper initialization checks
 - Updated Layers module to throw errors instead of returning empty arrays/null
 - Improved error propagation throughout the codebase
@@ -28,6 +30,7 @@ This document summarizes the comprehensive audit of state management and error h
 **Location**: `src/lib/canvas.ts:150-200`
 
 **Fix Applied**:
+
 - Simplified error handling logic
 - Removed silent fallbacks that could mask errors
 - Ensured locked layer errors are always thrown
@@ -40,10 +43,12 @@ This document summarizes the comprehensive audit of state management and error h
 **Issue**: Canvas initialization depends on refs, tools can register before StateManager.
 
 **Location**:
+
 - `src/components/Canvas.tsx:360-409`
 - `src/lib/app.ts:48-58`
 
 **Fix Applied**:
+
 - Added `StateManager.isInitialized()` check in `registerTool()`
 - Tools now only initialize if StateManager is ready
 - Improved initialization sequencing
@@ -57,6 +62,7 @@ This document summarizes the comprehensive audit of state management and error h
 **Location**: `src/lib/layers.ts:97-116`
 
 **Fix Applied**:
+
 - Changed `getLayers()` and `getActiveLayerId()` to throw errors instead of returning safe defaults
 - Added proper StateManager initialization checks
 - Improved error messages
@@ -68,6 +74,7 @@ This document summarizes the comprehensive audit of state management and error h
 ### Test Infrastructure
 
 Created comprehensive test helpers:
+
 - **state-helpers.ts**: State management test utilities
 - **error-helpers.ts**: Error injection and detection
 - **canvas-helpers.ts**: Canvas operation helpers
@@ -162,6 +169,7 @@ Created comprehensive test helpers:
 ## Browser Compatibility Matrix
 
 ### Tested Browsers
+
 - Chromium (Desktop)
 - Firefox (Desktop)
 - WebKit/Safari (Desktop)
@@ -171,15 +179,15 @@ Created comprehensive test helpers:
 
 ### Feature Support Matrix
 
-| Feature | Chromium | Firefox | WebKit | Mobile Chrome | Mobile Safari |
-|---------|----------|---------|--------|---------------|---------------|
-| OffscreenCanvas | ✅ | ✅ | ⚠️ | ✅ | ⚠️ |
-| Workers | ✅ | ✅ | ✅ | ✅ | ✅ |
-| IndexedDB | ✅ | ✅ | ✅ | ✅ | ✅ |
-| localStorage | ✅ | ✅ | ✅ | ✅ | ✅ |
-| requestIdleCallback | ✅ | ✅ | ⚠️ | ✅ | ⚠️ |
-| Touch Events | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Pointer Events | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Feature             | Chromium | Firefox | WebKit | Mobile Chrome | Mobile Safari |
+| ------------------- | -------- | ------- | ------ | ------------- | ------------- |
+| OffscreenCanvas     | ✅       | ✅      | ⚠️     | ✅            | ⚠️            |
+| Workers             | ✅       | ✅      | ✅     | ✅            | ✅            |
+| IndexedDB           | ✅       | ✅      | ✅     | ✅            | ✅            |
+| localStorage        | ✅       | ✅      | ✅     | ✅            | ✅            |
+| requestIdleCallback | ✅       | ✅      | ⚠️     | ✅            | ⚠️            |
+| Touch Events        | ✅       | ✅      | ✅     | ✅            | ✅            |
+| Pointer Events      | ✅       | ✅      | ✅     | ✅            | ✅            |
 
 ✅ = Fully Supported
 ⚠️ = Partially Supported or Requires Polyfill

@@ -73,6 +73,7 @@ interface ImageWorkerResponse {
 type BlendCallback = (result: ImageData | null, error: string | null) => void;
 type HistoryCallback = (result: ArrayBuffer | ImageData | null, error: string | null) => void;
 type ImageCallback = (result: ImageWorkerResponse['data'] | null, error: string | null) => void;
+type ProgressCallback = (progress: number, stage?: string) => void;
 
 /**
  * Worker Manager Module
@@ -90,7 +91,16 @@ const WorkerManager = (function () {
   let pendingBlends: Map<string, BlendCallback> = new Map();
   let pendingHistoryOps: Map<string, HistoryCallback> = new Map();
   let pendingImageOps: Map<string, ImageCallback> = new Map();
-  let pendingCleanupOps: Map<string, (result: ImageData | Float32Array | null, error: string | null) => void> = new Map();
+  let pendingCleanupOps: Map<
+    string,
+    (
+      result: ImageData | Float32Array | null,
+      error: string | null
+    ) => void | {
+      callback: (result: ImageData | Float32Array | null, error: string | null) => void;
+      progressCallback?: ProgressCallback;
+    }
+  > = new Map();
   let blendIdCounter = 0;
   let historyIdCounter = 0;
   let imageIdCounter = 0;
@@ -146,9 +156,12 @@ const WorkerManager = (function () {
 
         // Construct informative error message
         const errorMessage = `Blend worker error - Message: ${message}, File: ${filename}, Line: ${lineno}, Column: ${colno}`;
-        const errorDetails = error instanceof Error
-          ? `Error: ${error.message}${error.stack ? `\nStack: ${error.stack}` : ''}`
-          : error ? `Error object: ${String(error)}` : 'No error object available';
+        const errorDetails =
+          error instanceof Error
+            ? `Error: ${error.message}${error.stack ? `\nStack: ${error.stack}` : ''}`
+            : error
+              ? `Error object: ${String(error)}`
+              : 'No error object available';
 
         // Log with separate arguments for better visibility
         logger.error(errorMessage);
@@ -216,9 +229,12 @@ const WorkerManager = (function () {
 
         // Construct informative error message
         const errorMessage = `History worker error - Message: ${message}, File: ${filename}, Line: ${lineno}, Column: ${colno}`;
-        const errorDetails = error instanceof Error
-          ? `Error: ${error.message}${error.stack ? `\nStack: ${error.stack}` : ''}`
-          : error ? `Error object: ${String(error)}` : 'No error object available';
+        const errorDetails =
+          error instanceof Error
+            ? `Error: ${error.message}${error.stack ? `\nStack: ${error.stack}` : ''}`
+            : error
+              ? `Error object: ${String(error)}`
+              : 'No error object available';
 
         // Log with separate arguments for better visibility
         logger.error(errorMessage);
@@ -459,9 +475,12 @@ const WorkerManager = (function () {
 
         // Construct informative error message
         const errorMessage = `Image worker error - Message: ${message}, File: ${filename}, Line: ${lineno}, Column: ${colno}`;
-        const errorDetails = error instanceof Error
-          ? `Error: ${error.message}${error.stack ? `\nStack: ${error.stack}` : ''}`
-          : error ? `Error object: ${String(error)}` : 'No error object available';
+        const errorDetails =
+          error instanceof Error
+            ? `Error: ${error.message}${error.stack ? `\nStack: ${error.stack}` : ''}`
+            : error
+              ? `Error object: ${String(error)}`
+              : 'No error object available';
 
         // Log with separate arguments for better visibility
         logger.error(errorMessage);
@@ -490,20 +509,20 @@ const WorkerManager = (function () {
    * Validate image file using image worker (async)
    */
   async function validateImageAsync(file: File): Promise<{
-    valid: boolean
-    width?: number
-    height?: number
-    format?: string
+    valid: boolean;
+    width?: number;
+    height?: number;
+    format?: string;
   }> {
     if (!imageWorkerAvailable || !imageWorker) {
       throw new Error('Image worker is not available. Call initImageWorker() first.');
     }
 
     return new Promise<{
-      valid: boolean
-      width?: number
-      height?: number
-      format?: string
+      valid: boolean;
+      width?: number;
+      height?: number;
+      format?: string;
     }>((resolve, reject) => {
       const id = `validate_${imageIdCounter++}_${Date.now()}`;
 
@@ -556,20 +575,20 @@ const WorkerManager = (function () {
    * Process image file using image worker (async)
    */
   async function processImageAsync(file: File): Promise<{
-    imageData: ImageData
-    width: number
-    height: number
-    format: string
+    imageData: ImageData;
+    width: number;
+    height: number;
+    format: string;
   }> {
     if (!imageWorkerAvailable || !imageWorker) {
       throw new Error('Image worker is not available. Call initImageWorker() first.');
     }
 
     return new Promise<{
-      imageData: ImageData
-      width: number
-      height: number
-      format: string
+      imageData: ImageData;
+      width: number;
+      height: number;
+      format: string;
     }>((resolve, reject) => {
       const id = `process_${imageIdCounter++}_${Date.now()}`;
 
@@ -634,14 +653,50 @@ const WorkerManager = (function () {
       const workerCode = getCleanupWorkerCode();
       cleanupWorker = createWorkerFromCode(workerCode);
 
-      cleanupWorker.onmessage = (e: MessageEvent<{
-        type: 'success' | 'error';
-        data?: { imageData?: ImageData; edgeMap?: Float32Array; palette?: Array<{ r: number; g: number; b: number }> };
-        error?: string;
-        id: string;
-      }>) => {
-        const { id, type, data, error } = e.data;
-        const callback = pendingCleanupOps.get(id);
+      cleanupWorker.onmessage = (
+        e: MessageEvent<{
+          type: 'success' | 'error' | 'progress';
+          data?: {
+            imageData?: ImageData;
+            edgeMap?: Float32Array;
+            palette?: Array<{ r: number; g: number; b: number }>;
+          };
+          error?: string;
+          progress?: number;
+          stage?: string;
+          id: string;
+        }>
+      ) => {
+        const { id, type, data, error, progress, stage } = e.data;
+        const callbackData = pendingCleanupOps.get(id);
+
+        if (type === 'progress') {
+          // Handle progress updates
+          if (
+            callbackData &&
+            typeof callbackData === 'object' &&
+            'progressCallback' in callbackData
+          ) {
+            const { progressCallback } = callbackData as { progressCallback?: ProgressCallback };
+            if (progressCallback && progress !== undefined) {
+              progressCallback(progress, stage);
+            }
+          }
+          return;
+        }
+
+        const callback =
+          typeof callbackData === 'function'
+            ? callbackData
+            : (
+                callbackData as {
+                  callback?: (
+                    result: ImageData | Float32Array | null,
+                    error: string | null
+                  ) => void;
+                }
+              )?.callback;
+
         if (callback) {
           pendingCleanupOps.delete(id);
           if (type === 'success' && data) {
@@ -683,7 +738,8 @@ const WorkerManager = (function () {
       nColors?: number;
       operation?: 'erode' | 'dilate';
       kernelSize?: number;
-    }
+    },
+    progressCallback?: ProgressCallback
   ): Promise<ImageData | Float32Array> {
     if (!cleanupWorkerAvailable || !cleanupWorker) {
       throw new Error('Cleanup worker is not available. Call initCleanupWorker() first.');
@@ -700,7 +756,7 @@ const WorkerManager = (function () {
         }
       }, 30000); // 30 second timeout for cleanup operations
 
-      pendingCleanupOps.set(id, (result, error) => {
+      const callback = (result: ImageData | Float32Array | null, error: string | null) => {
         clearTimeout(timeout);
         if (error) {
           reject(new Error(`Cleanup operation failed: ${error}`));
@@ -709,7 +765,13 @@ const WorkerManager = (function () {
         } else {
           reject(new Error('No result from cleanup worker'));
         }
-      });
+      };
+
+      if (progressCallback) {
+        pendingCleanupOps.set(id, { callback, progressCallback });
+      } else {
+        pendingCleanupOps.set(id, callback);
+      }
 
       try {
         if (!cleanupWorker) {

@@ -50,11 +50,7 @@ test.describe('Performance & Memory Tests', () => {
     await selectTool(page, 'pencil');
     const performance = await measureOperationPerformance(page, async () => {
       for (let i = 0; i < 50; i++) {
-        await drawStroke(
-          page,
-          { x: 100 + i, y: 100 },
-          { x: 150 + i, y: 150 }
-        );
+        await drawStroke(page, { x: 100 + i, y: 100 }, { x: 150 + i, y: 150 });
         await page.waitForTimeout(10);
       }
     });
@@ -73,11 +69,7 @@ test.describe('Performance & Memory Tests', () => {
 
     // Reduce number of operations to prevent timeout
     for (let i = 0; i < 50; i++) {
-      await drawStroke(
-        page,
-        { x: 100 + i, y: 100 },
-        { x: 150 + i, y: 150 }
-      );
+      await drawStroke(page, { x: 100 + i, y: 100 }, { x: 150 + i, y: 150 });
       // Use smaller delay and check page is still open
       try {
         await page.waitForTimeout(30);
@@ -99,11 +91,7 @@ test.describe('Performance & Memory Tests', () => {
 
     const performance = await measureCanvasOperationPerformance(page, async () => {
       for (let i = 0; i < 20; i++) {
-        await drawStroke(
-          page,
-          { x: 100 + i * 5, y: 100 },
-          { x: 150 + i * 5, y: 150 }
-        );
+        await drawStroke(page, { x: 100 + i * 5, y: 100 }, { x: 150 + i * 5, y: 150 });
         await page.waitForTimeout(10);
       }
     });
@@ -118,10 +106,14 @@ test.describe('Performance & Memory Tests', () => {
   test('should detect memory leaks', async ({ page }) => {
     await selectTool(page, 'pencil');
 
-    const leak = await detectMemoryLeak(page, async () => {
-      await drawStroke(page, { x: 100, y: 100 }, { x: 150, y: 150 });
-      await page.waitForTimeout(100);
-    }, 10);
+    const leak = await detectMemoryLeak(
+      page,
+      async () => {
+        await drawStroke(page, { x: 100, y: 100 }, { x: 150, y: 150 });
+        await page.waitForTimeout(100);
+      },
+      10
+    );
 
     // Should not have significant leaks
     expect(leak.hasLeak).toBe(false);

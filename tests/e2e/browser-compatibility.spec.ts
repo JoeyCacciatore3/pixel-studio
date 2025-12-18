@@ -24,7 +24,7 @@ const browsers = ['chromium', 'firefox', 'webkit'];
 // Application Load & Initialization tests with Desktop Chrome configuration
 // Note: test.use() at top level applies to all subsequent tests until next test.use()
 // This overrides project-level configuration for these specific test groups
-test.use({ ...devices['Desktop Chrome'] })
+test.use({ ...devices['Desktop Chrome'] });
 
 test.describe('Application Load & Initialization', () => {
   for (const browserName of browsers) {
@@ -127,7 +127,7 @@ test.describe('Responsive Layout Tests', () => {
 
 // Canvas Functionality tests with Desktop Chrome configuration
 // Note: This test.use() applies to all tests below until next test.use() call
-test.use({ ...devices['Desktop Chrome'] })
+test.use({ ...devices['Desktop Chrome'] });
 
 test.describe('Canvas Functionality', () => {
   test('should initialize canvas with correct dimensions', async ({ page }) => {
@@ -165,7 +165,7 @@ test.describe('Canvas Functionality', () => {
 
 // Browser-Specific Features - Safari/WebKit tests with iPhone 12 configuration
 // Note: This switches to mobile device configuration for mobile-specific tests
-test.use({ ...devices['iPhone 12'] })
+test.use({ ...devices['iPhone 12'] });
 
 test.describe('Browser-Specific Features', () => {
   test.describe('Safari/WebKit', () => {
@@ -184,8 +184,10 @@ test.describe('Browser-Specific Features', () => {
 
       // Check if we're on iOS/Safari
       const isIOS = await page.evaluate(() => {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        return (
+          /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        );
       });
 
       // If on iOS, --vh should be set. If not on iOS, it's okay if it's empty
@@ -226,7 +228,7 @@ test.describe('Browser-Specific Features', () => {
 });
 
 // Performance Metrics tests with Desktop Chrome configuration
-test.use({ ...devices['Desktop Chrome'] })
+test.use({ ...devices['Desktop Chrome'] });
 
 test.describe('Performance Metrics', () => {
   test('should load within acceptable time', async ({ page }) => {
@@ -265,7 +267,7 @@ test.describe('Performance Metrics', () => {
 });
 
 // Accessibility Tests with Desktop Chrome configuration
-test.use({ ...devices['Desktop Chrome'] })
+test.use({ ...devices['Desktop Chrome'] });
 
 test.describe('Accessibility Tests', () => {
   test('should have ARIA labels on interactive elements', async ({ page }) => {
@@ -310,7 +312,7 @@ test.describe('Accessibility Tests', () => {
 });
 
 // PWA Tests with Desktop Chrome configuration
-test.use({ ...devices['Desktop Chrome'] })
+test.use({ ...devices['Desktop Chrome'] });
 
 test.describe('PWA Tests', () => {
   test('should have manifest.json', async ({ page }) => {

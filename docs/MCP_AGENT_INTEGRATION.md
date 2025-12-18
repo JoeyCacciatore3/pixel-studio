@@ -11,19 +11,24 @@ This guide documents the actual MCP agent integration in Pixel Studio's test inf
 **Purpose**: Look up Playwright, React, and Next.js documentation and best practices.
 
 **Functions**:
+
 - `lookupPlaywrightBestPractices(topic: string)` - Gets best practices for Playwright topics
 - `getReactTestingPatterns(pattern: string)` - Gets React/Next.js testing patterns
 - `getPlaywrightAPIReference(method: string)` - Gets API documentation for Playwright methods
 
 **Implementation**:
+
 ```typescript
 // Tries Context7 MCP first
-const libraryId = await mcp_context7_resolve-library-id({ libraryName: 'playwright' })
-const docs = await mcp_context7_get-library-docs({
-  context7CompatibleLibraryID: libraryId,
-  topic: 'timeouts',
-  mode: 'code',
-})
+const libraryId = (await mcp_context7_resolve) - library - id({ libraryName: 'playwright' });
+const docs =
+  (await mcp_context7_get) -
+  library -
+  docs({
+    context7CompatibleLibraryID: libraryId,
+    topic: 'timeouts',
+    mode: 'code',
+  });
 
 // Falls back to enhanced cached documentation if MCP unavailable
 // Returns real best practices, not placeholders
@@ -36,6 +41,7 @@ const docs = await mcp_context7_get-library-docs({
 **Purpose**: Store and retrieve test patterns, learn from test results.
 
 **Functions**:
+
 - `storeTestPattern(pattern)` - Stores a test pattern
 - `getTestPatterns(filters?)` - Retrieves test patterns with optional filters
 - `findSimilarPatterns(description)` - Finds similar patterns by description
@@ -43,21 +49,25 @@ const docs = await mcp_context7_get-library-docs({
 - `learnFromFailure(testName, error)` - Learns from test failures
 
 **Implementation**:
+
 ```typescript
 // Tries Memory MCP first
 await mcp_memory_create_entities({
-  entities: [{
-    name: pattern.name,
-    entityType: 'TestPattern',
-    observations: [pattern.description, pattern.code, ...pattern.tags]
-  }]
-})
+  entities: [
+    {
+      name: pattern.name,
+      entityType: 'TestPattern',
+      observations: [pattern.description, pattern.code, ...pattern.tags],
+    },
+  ],
+});
 
 // Falls back to enhanced file-based storage with full-text search
 // All operations are fast (< 100ms) and produce real data
 ```
 
 **Fallback**: Enhanced file-based storage with:
+
 - Full-text search indexing
 - Pattern similarity matching
 - Fast retrieval (< 100ms)
@@ -68,23 +78,28 @@ await mcp_memory_create_entities({
 **Purpose**: Analyze test failures and create prioritized action plans.
 
 **Functions**:
+
 - `createActionPlanWithSequentialThinking(failures)` - Analyzes failures and creates action plan
 
 **Implementation**:
+
 ```typescript
 // Tries Sequential-Thinking MCP first
-const analysis = await mcp_sequential-thinking_sequentialthinking({
-  thought: `Analyze these test failures: ${JSON.stringify(failures)}. Create a prioritized fix plan.`,
-  nextThoughtNeeded: true,
-  thoughtNumber: 1,
-  totalThoughts: 5,
-})
+const analysis =
+  (await mcp_sequential) -
+  thinking_sequentialthinking({
+    thought: `Analyze these test failures: ${JSON.stringify(failures)}. Create a prioritized fix plan.`,
+    nextThoughtNeeded: true,
+    thoughtNumber: 1,
+    totalThoughts: 5,
+  });
 
 // Falls back to rule-based analysis
 // Produces actionable plans with real priorities and actions
 ```
 
 **Fallback**: Rule-based analyzer that:
+
 - Analyzes failure categories and counts
 - Applies priority rules (Configuration > State > Timeout > Selector)
 - Generates actionable plans
@@ -95,18 +110,22 @@ const analysis = await mcp_sequential-thinking_sequentialthinking({
 **Purpose**: Generate fix suggestions and find similar code patterns.
 
 **Functions**:
+
 - `generateFixSuggestions(failures)` - Generates fix suggestions for test failures
 - Used in test generation for code suggestions
 
 **Implementation**:
+
 ```typescript
 // Tries Coding-Agent MCP first
-const searchResult = await mcp_coding-agent_search_text({
-  pattern: failure.errorMessage,
-  directory: 'tests/e2e',
-  filePattern: '*.spec.ts',
-  maxResults: 5,
-})
+const searchResult =
+  (await mcp_coding) -
+  agent_search_text({
+    pattern: failure.errorMessage,
+    directory: 'tests/e2e',
+    filePattern: '*.spec.ts',
+    maxResults: 5,
+  });
 
 // Falls back to pattern matcher
 // Uses grep/ripgrep to find similar patterns
@@ -114,6 +133,7 @@ const searchResult = await mcp_coding-agent_search_text({
 ```
 
 **Fallback**: Pattern matcher that:
+
 - Searches codebase for similar error patterns
 - Analyzes existing test patterns
 - Generates fix suggestions with actual code
@@ -153,16 +173,16 @@ npx tsx scripts/test-mcp-integration.ts
 ### Using Context7 for Best Practices
 
 ```typescript
-import { lookupPlaywrightBestPractices } from './helpers/mcp-context7-helpers'
+import { lookupPlaywrightBestPractices } from './helpers/mcp-context7-helpers';
 
-const bestPractice = await lookupPlaywrightBestPractices('timeouts')
+const bestPractice = await lookupPlaywrightBestPractices('timeouts');
 // Returns real best practices, either from Context7 or enhanced fallback
 ```
 
 ### Using Memory MCP for Patterns
 
 ```typescript
-import { storeTestPattern, getTestPatterns } from './helpers/mcp-memory-helpers'
+import { storeTestPattern, getTestPatterns } from './helpers/mcp-memory-helpers';
 
 // Store a pattern
 await storeTestPattern({
@@ -172,19 +192,21 @@ await storeTestPattern({
   code: 'await drawStroke(page, start, end)',
   category: 'canvas',
   tags: ['canvas', 'drawing'],
-})
+});
 
 // Retrieve patterns
-const patterns = await getTestPatterns({ category: 'canvas' })
+const patterns = await getTestPatterns({ category: 'canvas' });
 ```
 
 ### Using Sequential-Thinking for Analysis
 
 ```typescript
-import { createActionPlanWithSequentialThinking } from './scripts/mcp-enhanced-test-runner'
+import { createActionPlanWithSequentialThinking } from './scripts/mcp-enhanced-test-runner';
 
-const failures = [/* test failures */]
-const actionPlan = await createActionPlanWithSequentialThinking(failures)
+const failures = [
+  /* test failures */
+];
+const actionPlan = await createActionPlanWithSequentialThinking(failures);
 // Returns prioritized action plan with real actions
 ```
 
@@ -204,6 +226,7 @@ If MCP agents are not available, the system automatically uses functional fallba
 ### Slow Performance
 
 If operations are slow:
+
 1. Check MCP agent availability: `npx tsx scripts/verify-mcp-agents.ts`
 2. Verify caching is working
 3. Check timeout settings (should be 2-5s for MCP, < 100ms for fallbacks)
@@ -211,6 +234,7 @@ If operations are slow:
 ### Placeholder Text in Output
 
 If you see placeholder text like "Error details not available":
+
 1. This should never happen - report as a bug
 2. All fallbacks are designed to produce real data
 3. Check that fallback implementations are being used correctly
@@ -218,23 +242,27 @@ If you see placeholder text like "Error details not available":
 ## Configuration
 
 MCP agents are configured in `tests/e2e/mcp-config.json`. Environment variables may be needed:
+
 - `CONTEXT7_API_KEY` (for Context7)
 - `FIRECRAWL_API_KEY` (for Firecrawl, optional)
 
 ## Testing
 
 Unit tests are in `tests/e2e/helpers/mcp-helpers.test.ts`:
+
 - Tests MCP agent functionality
 - Tests fallback functionality
 - Verifies no placeholder text
 - Performance benchmarks
 
 Integration tests are in `scripts/test-mcp-integration.ts`:
+
 - Tests full integration
 - Verifies MCP and fallback modes
 - Performance testing
 
 Run tests:
+
 ```bash
 npm test mcp-helpers
 npx tsx scripts/test-mcp-integration.ts

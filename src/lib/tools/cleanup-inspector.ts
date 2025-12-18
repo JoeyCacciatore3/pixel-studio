@@ -86,7 +86,14 @@ type HighlightMode = 'stray' | 'jaggies' | 'color-noise' | 'fuzzy-edges' | 'thic
   };
 
   function cycleHighlightMode(): void {
-    const modes: HighlightMode[] = ['none', 'stray', 'jaggies', 'color-noise', 'fuzzy-edges', 'thickness'];
+    const modes: HighlightMode[] = [
+      'none',
+      'stray',
+      'jaggies',
+      'color-noise',
+      'fuzzy-edges',
+      'thickness',
+    ];
     const currentIndex = modes.indexOf(highlightMode);
     highlightMode = modes[(currentIndex + 1) % modes.length]!;
     updateHighlights();
@@ -237,7 +244,7 @@ type HighlightMode = 'stray' | 'jaggies' | 'color-noise' | 'fuzzy-edges' | 'thic
       // Highlight colors that appear very few times (likely noise)
       if (count < 10) {
         const x = (i / 4) % _width;
-        const y = Math.floor((i / 4) / _width);
+        const y = Math.floor(i / 4 / _width);
         overlayCtx.fillRect(x, y, 1, 1);
       }
     }
@@ -256,7 +263,7 @@ type HighlightMode = 'stray' | 'jaggies' | 'color-noise' | 'fuzzy-edges' | 'thic
       // Highlight semi-transparent pixels (fuzzy edges)
       if (a > 0 && a < 255) {
         const x = (i / 4) % _width;
-        const y = Math.floor((i / 4) / _width);
+        const y = Math.floor(i / 4 / _width);
         overlayCtx.fillRect(x, y, 1, 1);
       }
     }

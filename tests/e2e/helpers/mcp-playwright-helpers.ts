@@ -115,16 +115,20 @@ export async function executeTestsViaMCP(
 
     // Parse output for errors and warnings
     if (stderr) {
-      const errorLines = stderr.split('\n').filter(line =>
-        line.includes('Error') || line.includes('FAILED') || line.includes('failed')
-      );
+      const errorLines = stderr
+        .split('\n')
+        .filter(
+          (line) => line.includes('Error') || line.includes('FAILED') || line.includes('failed')
+        );
       errors.push(...errorLines);
     }
 
     if (stdout) {
-      const warningLines = stdout.split('\n').filter(line =>
-        line.includes('Warning') || line.includes('warning') || line.includes('WARN')
-      );
+      const warningLines = stdout
+        .split('\n')
+        .filter(
+          (line) => line.includes('Warning') || line.includes('warning') || line.includes('WARN')
+        );
       warnings.push(...warningLines);
     }
 
@@ -186,10 +190,7 @@ export async function captureDebugInfo(
   try {
     // Capture screenshot
     if (config.captureScreenshots) {
-      const screenshotPath = join(
-        testInfo.outputDir,
-        `debug-screenshot-${Date.now()}.png`
-      );
+      const screenshotPath = join(testInfo.outputDir, `debug-screenshot-${Date.now()}.png`);
       await page.screenshot({ path: screenshotPath, fullPage: true });
       debugInfo.screenshots.push(screenshotPath);
     }
@@ -226,11 +227,14 @@ export async function captureDebugInfo(
     // Profile performance
     if (config.profilePerformance) {
       const performanceMetrics = await page.evaluate(() => {
-        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        const navigation = performance.getEntriesByType(
+          'navigation'
+        )[0] as PerformanceNavigationTiming;
         const paint = performance.getEntriesByType('paint');
 
         return {
-          domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+          domContentLoaded:
+            navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
           loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
           firstPaint: paint.find((p) => p.name === 'first-paint')?.startTime,
           firstContentfulPaint: paint.find((p) => p.name === 'first-contentful-paint')?.startTime,
@@ -293,12 +297,15 @@ export async function analyzeTestFailure(
   }
 
   // Analyze debug info
-  if (debugInfo.consoleLogs && debugInfo.consoleLogs.some(log => log.includes('error'))) {
+  if (debugInfo.consoleLogs && debugInfo.consoleLogs.some((log) => log.includes('error'))) {
     possibleCauses.push('JavaScript errors in console');
     suggestions.push('Check browser console for errors');
   }
 
-  if (debugInfo.networkLogs && debugInfo.networkLogs.some(log => log.status && log.status >= 400)) {
+  if (
+    debugInfo.networkLogs &&
+    debugInfo.networkLogs.some((log) => log.status && log.status >= 400)
+  ) {
     possibleCauses.push('Failed network requests');
     suggestions.push('Check network tab for failed requests');
   }
@@ -355,9 +362,7 @@ export async function startDebugSession(
 /**
  * Monitor test execution in real-time
  */
-export async function monitorTestExecution(
-  testPattern: string
-): Promise<TestExecutionResult> {
+export async function monitorTestExecution(testPattern: string): Promise<TestExecutionResult> {
   // This would integrate with Playwright MCP to get real-time updates
   // For now, we'll use standard execution with progress tracking
   return executeTestsViaMCP(testPattern);

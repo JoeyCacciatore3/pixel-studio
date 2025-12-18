@@ -70,9 +70,14 @@ test.describe('Canvas Clear Function Tests', () => {
     const afterClear = await getCanvasDataURL(page);
 
     // Canvas should remain in same state (already clear)
-    const stateUnchangedResult = await compareCanvasStatesWithTolerance(page, initialState, afterClear, {
-      tolerance: 0.01,
-    });
+    const stateUnchangedResult = await compareCanvasStatesWithTolerance(
+      page,
+      initialState,
+      afterClear,
+      {
+        tolerance: 0.01,
+      }
+    );
     expect(stateUnchangedResult.match).toBe(true); // States should match (both empty)
 
     // Canvas should still be functional
@@ -130,9 +135,14 @@ test.describe('Canvas Undo/Redo Function Tests', () => {
       tolerance: 0.05, // Allow 5% difference for rendering variations
     });
     // If exact match fails, at least verify canvas is different from afterDraw
-    const stillHasDrawingResult = await compareCanvasStatesWithTolerance(page, afterDraw, afterUndo, {
-      tolerance: 0.01,
-    });
+    const stillHasDrawingResult = await compareCanvasStatesWithTolerance(
+      page,
+      afterDraw,
+      afterUndo,
+      {
+        tolerance: 0.01,
+      }
+    );
     expect(stillHasDrawingResult.match).toBe(false); // After undo, should be different from afterDraw
   });
 
@@ -172,9 +182,14 @@ test.describe('Canvas Undo/Redo Function Tests', () => {
     if (!redoResult.match) {
       // At least verify redo changed something
       const afterUndo = await getCanvasDataURL(page);
-      const changedAfterRedoResult = await compareCanvasStatesWithTolerance(page, afterUndo, afterRedo, {
-        tolerance: 0.01,
-      });
+      const changedAfterRedoResult = await compareCanvasStatesWithTolerance(
+        page,
+        afterUndo,
+        afterRedo,
+        {
+          tolerance: 0.01,
+        }
+      );
       expect(changedAfterRedoResult.match).toBe(false); // Should be different after redo
     } else {
       expect(redoResult.match).toBe(true);
@@ -211,9 +226,14 @@ test.describe('Canvas Undo/Redo Function Tests', () => {
     });
     // If exact match fails, at least verify canvas is different from final drawn state
     if (!allUndoneResult.match) {
-      const differentFromFinalResult = await compareCanvasStatesWithTolerance(page, states[states.length - 1]!, afterUndos, {
-        tolerance: 0.01,
-      });
+      const differentFromFinalResult = await compareCanvasStatesWithTolerance(
+        page,
+        states[states.length - 1]!,
+        afterUndos,
+        {
+          tolerance: 0.01,
+        }
+      );
       expect(differentFromFinalResult.match).toBe(false); // Should be different from final drawn state
     } else {
       expect(allUndoneResult.match).toBe(true);
@@ -231,9 +251,14 @@ test.describe('Canvas Undo/Redo Function Tests', () => {
     // Should be back to final drawn state (or close to it)
     await page.waitForTimeout(1000);
     const afterRedos = await getCanvasDataURL(page);
-    const allRedoneResult = await compareCanvasStatesWithTolerance(page, states[states.length - 1]!, afterRedos, {
-      tolerance: 0.05, // Allow 5% difference for rendering variations
-    });
+    const allRedoneResult = await compareCanvasStatesWithTolerance(
+      page,
+      states[states.length - 1]!,
+      afterRedos,
+      {
+        tolerance: 0.05, // Allow 5% difference for rendering variations
+      }
+    );
     // If exact match fails, at least verify canvas has content
     if (!allRedone) {
       const hasContent = await page.evaluate(() => {
@@ -258,8 +283,9 @@ test.describe('Canvas Undo/Redo Function Tests', () => {
     await expect(undoButton).toBeVisible({ timeout: 5000 });
 
     // Undo button should be disabled initially (no actions to undo)
-    const isDisabled = await undoButton.getAttribute('disabled') !== null ||
-                       await undoButton.getAttribute('aria-disabled') === 'true';
+    const isDisabled =
+      (await undoButton.getAttribute('disabled')) !== null ||
+      (await undoButton.getAttribute('aria-disabled')) === 'true';
     expect(isDisabled).toBe(true);
   });
 
@@ -271,8 +297,9 @@ test.describe('Canvas Undo/Redo Function Tests', () => {
     await expect(redoButton).toBeVisible({ timeout: 5000 });
 
     // Redo button should be disabled initially (no actions to redo)
-    const isDisabled = await redoButton.getAttribute('disabled') !== null ||
-                       await redoButton.getAttribute('aria-disabled') === 'true';
+    const isDisabled =
+      (await redoButton.getAttribute('disabled')) !== null ||
+      (await redoButton.getAttribute('aria-disabled')) === 'true';
     expect(isDisabled).toBe(true);
   });
 });
@@ -293,13 +320,14 @@ test.describe('Canvas Upload Function Tests', () => {
     const initialState = await getCanvasDataURL(page);
 
     // Create a small test image (1x1 pixel PNG in base64)
-    const testImageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const testImageBase64 =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
     // Set up file upload by creating a data URL and using it
     await page.setInputFiles('input[type="file"]#imageUpload', {
       name: 'test-image.png',
       mimeType: 'image/png',
-      buffer: Buffer.from(testImageBase64.split(',')[1], 'base64')
+      buffer: Buffer.from(testImageBase64.split(',')[1], 'base64'),
     });
 
     // Wait for image to load
@@ -309,9 +337,14 @@ test.describe('Canvas Upload Function Tests', () => {
     const afterUpload = await getCanvasDataURL(page);
 
     // Verify image was loaded (canvas state changed)
-    const imageLoadedResult = await compareCanvasStatesWithTolerance(page, initialState, afterUpload, {
-      tolerance: 0.01,
-    });
+    const imageLoadedResult = await compareCanvasStatesWithTolerance(
+      page,
+      initialState,
+      afterUpload,
+      {
+        tolerance: 0.01,
+      }
+    );
     const imageLoaded = !imageLoadedResult.match;
     expect(imageLoaded).toBe(true);
 
@@ -332,7 +365,7 @@ test.describe('Canvas Upload Function Tests', () => {
     await page.setInputFiles('input[type="file"]#imageUpload', {
       name: 'test.txt',
       mimeType: 'text/plain',
-      buffer: Buffer.from('This is not an image')
+      buffer: Buffer.from('This is not an image'),
     });
 
     // Wait a bit
@@ -342,9 +375,14 @@ test.describe('Canvas Upload Function Tests', () => {
     const afterAttempt = await getCanvasDataURL(page);
 
     // Canvas state should remain unchanged
-    const stateUnchangedResult = await compareCanvasStatesWithTolerance(page, initialState, afterAttempt, {
-      tolerance: 0.01,
-    });
+    const stateUnchangedResult = await compareCanvasStatesWithTolerance(
+      page,
+      initialState,
+      afterAttempt,
+      {
+        tolerance: 0.01,
+      }
+    );
     const stateUnchanged = stateUnchangedResult.match;
     expect(stateUnchanged).toBe(true);
 
@@ -359,10 +397,11 @@ test.describe('Canvas Upload Function Tests', () => {
     await page.waitForTimeout(500);
 
     // Allow some non-critical errors but check for major upload errors
-    const criticalErrors = errors.filter((e) =>
-      e.includes('Failed to load image') ||
-      e.includes('Invalid image') ||
-      e.includes('Unsupported file type')
+    const criticalErrors = errors.filter(
+      (e) =>
+        e.includes('Failed to load image') ||
+        e.includes('Invalid image') ||
+        e.includes('Unsupported file type')
     );
 
     expect(criticalErrors.length).toBe(0);
@@ -395,7 +434,7 @@ test.describe('Canvas Upload Function Tests', () => {
     await page.setInputFiles('input[type="file"]#imageUpload', {
       name: 'large-test-image.png',
       mimeType: 'image/png',
-      buffer: imageBuffer
+      buffer: imageBuffer,
     });
 
     // Wait for image to load and be processed
@@ -405,9 +444,14 @@ test.describe('Canvas Upload Function Tests', () => {
     const afterUpload = await getCanvasDataURL(page);
 
     // Verify image was loaded
-    const imageLoadedResult = await compareCanvasStatesWithTolerance(page, initialState, afterUpload, {
-      tolerance: 0.01,
-    });
+    const imageLoadedResult = await compareCanvasStatesWithTolerance(
+      page,
+      initialState,
+      afterUpload,
+      {
+        tolerance: 0.01,
+      }
+    );
     const imageLoaded = !imageLoadedResult.match;
     expect(imageLoaded).toBe(true);
 
@@ -497,7 +541,9 @@ test.describe('Canvas Functions Integration Tests', () => {
     }
 
     // Final clear - wait for button to be available
-    const clearButton = page.locator('button[data-action="clear"], .clear-btn, [aria-label*="clear"], #clearBtn').first();
+    const clearButton = page
+      .locator('button[data-action="clear"], .clear-btn, [aria-label*="clear"], #clearBtn')
+      .first();
     await expect(clearButton).toBeVisible({ timeout: 10000 });
     await expect(clearButton).toBeEnabled({ timeout: 5000 });
     await clearButton.click({ timeout: 10000 });

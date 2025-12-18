@@ -53,7 +53,13 @@ const allTools: readonly ToolConfig[] = [
     category: 'drawing',
   },
   // Selection Tools
-  { name: 'selection', key: 'M', icon: '/icons.jpg', iconPosition: '0px -44px', category: 'selection' },
+  {
+    name: 'selection',
+    key: 'M',
+    icon: '/icons.jpg',
+    iconPosition: '0px -44px',
+    category: 'selection',
+  },
   {
     name: 'lasso',
     key: 'L',
@@ -284,11 +290,18 @@ function ExtendedToolbar() {
   };
 
   return (
-    <aside className="extended-toolbar" role="toolbar" aria-label="Extended drawing tools" data-testid="extended-toolbar">
+    <aside
+      className="extended-toolbar"
+      role="toolbar"
+      aria-label="Extended drawing tools"
+      data-testid="extended-toolbar"
+    >
       <div className="extended-toolbar-content">
         {Object.entries(toolsByCategory).map(([category, tools]) => (
           <div key={category} className="tool-category">
-            <div className="tool-category-title">{category.charAt(0).toUpperCase() + category.slice(1)}</div>
+            <div className="tool-category-title">
+              {category.charAt(0).toUpperCase() + category.slice(1)}
+            </div>
             <div className="tool-category-buttons">
               {tools.map((tool) => (
                 <ToolButton

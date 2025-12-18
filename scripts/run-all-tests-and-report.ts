@@ -98,7 +98,11 @@ async function checkPrerequisites(): Promise<void> {
 /**
  * Validate test discovery before execution
  */
-async function validateTestDiscovery(): Promise<{ success: boolean; testCount: number; error?: string }> {
+async function validateTestDiscovery(): Promise<{
+  success: boolean;
+  testCount: number;
+  error?: string;
+}> {
   console.log('🔍 Validating test discovery...\n');
 
   try {
@@ -108,7 +112,9 @@ async function validateTestDiscovery(): Promise<{ success: boolean; testCount: n
     });
 
     // Count tests from output
-    const testLines = stdout.split('\n').filter(line => line.trim() && !line.includes('Listing tests'));
+    const testLines = stdout
+      .split('\n')
+      .filter((line) => line.trim() && !line.includes('Listing tests'));
     const testCount = testLines.length;
 
     if (testCount === 0) {
@@ -134,11 +140,13 @@ async function validateTestDiscovery(): Promise<{ success: boolean; testCount: n
 /**
  * Execute all tests with proper configuration
  */
-async function executeAllTests(options: {
-  workers?: number;
-  timeout?: number;
-  cleanReports?: boolean;
-} = {}): Promise<TestExecutionResult> {
+async function executeAllTests(
+  options: {
+    workers?: number;
+    timeout?: number;
+    cleanReports?: boolean;
+  } = {}
+): Promise<TestExecutionResult> {
   const {
     workers = 1,
     timeout = 2 * 60 * 60 * 1000, // 2 hours default
@@ -183,19 +191,23 @@ async function executeAllTests(options: {
   console.log('  This may take a while. Please wait...\n');
 
   return new Promise((resolve) => {
-    const childProcess = spawn('npx', [
-      'playwright',
-      'test',
-      `--config=${configPath}`,
-      `--workers=${workers}`,
-      '--reporter=json',
-      '--reporter=html',
-      '--reporter=junit'
-    ], {
-      cwd: process.cwd(),
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: true,
-    });
+    const childProcess = spawn(
+      'npx',
+      [
+        'playwright',
+        'test',
+        `--config=${configPath}`,
+        `--workers=${workers}`,
+        '--reporter=json',
+        '--reporter=html',
+        '--reporter=junit',
+      ],
+      {
+        cwd: process.cwd(),
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: true,
+      }
+    );
 
     let stdout = '';
     let stderr = '';
@@ -346,13 +358,16 @@ async function generateDetailedReport(): Promise<void> {
 /**
  * Print summary and next steps
  */
-function printSummary(testResult: TestExecutionResult, reports: {
-  jsonReport: boolean;
-  htmlReport: boolean;
-  junitReport: boolean;
-  jsonReportPath: string;
-  htmlReportPath: string;
-}): void {
+function printSummary(
+  testResult: TestExecutionResult,
+  reports: {
+    jsonReport: boolean;
+    htmlReport: boolean;
+    junitReport: boolean;
+    jsonReportPath: string;
+    htmlReportPath: string;
+  }
+): void {
   console.log('\n' + '='.repeat(60));
   console.log('📊 Test Execution Summary');
   console.log('='.repeat(60) + '\n');

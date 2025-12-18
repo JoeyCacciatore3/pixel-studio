@@ -35,7 +35,12 @@ interface ToolConfig {
 // All 30 tools organized by category with unique skeuomorphic icons
 const allTools = [
   // Drawing Tools (11 total - split into left/right)
-  { name: 'pencil', key: 'B', icon: 'M18 2L4 16l2 2 2 2L22 4l-2-2z M16 4l-2 2M6 18l2 2', category: 'drawing' },
+  {
+    name: 'pencil',
+    key: 'B',
+    icon: 'M18 2L4 16l2 2 2 2L22 4l-2-2z M16 4l-2 2M6 18l2 2',
+    category: 'drawing',
+  },
   {
     name: 'eraser',
     key: 'E',
@@ -67,7 +72,13 @@ const allTools = [
     category: 'drawing',
   },
   // Selection Tools
-  { name: 'selection', key: 'M', icon: 'M3 3h18v18H3V3z M5 5v14h14V5H5z', strokeDasharray: '2 2', category: 'selection' },
+  {
+    name: 'selection',
+    key: 'M',
+    icon: 'M3 3h18v18H3V3z M5 5v14h14V5H5z',
+    strokeDasharray: '2 2',
+    category: 'selection',
+  },
   {
     name: 'lasso',
     key: 'L',
@@ -248,7 +259,8 @@ const ToolButton = memo(function ToolButton({
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        {...('strokeDasharray' in tool && tool.strokeDasharray && { strokeDasharray: tool.strokeDasharray })}
+        {...('strokeDasharray' in tool &&
+          tool.strokeDasharray && { strokeDasharray: tool.strokeDasharray })}
         aria-hidden="true"
       >
         <path d={tool.icon} />
@@ -619,30 +631,30 @@ export default function CanvasComponent() {
       <LoadingState isInitialized={isInitialized} error={initError} onRetry={handleRetry} />
       <div className="canvas-area">
         <div className="canvas-wrapper" ref={canvasWrapperRef}>
-            <div className="canvas-content">
-              <div className="top-controls-group">
-                <BrushControlsPanel />
-                <ColorPalettePanel />
-              </div>
-              <LayersControlsPanel />
-              <HistoryControls />
-              <CanvasTools activeTool={state.currentTool || 'pencil'} />
+          <div className="canvas-content">
+            <div className="top-controls-group">
+              <BrushControlsPanel />
+              <ColorPalettePanel />
+            </div>
+            <LayersControlsPanel />
+            <HistoryControls />
+            <CanvasTools activeTool={state.currentTool || 'pencil'} />
+            <div
+              className="canvas-zoom-container"
+              style={{
+                width: `${canvasWidth}px`,
+                height: `${canvasHeight}px`,
+              }}
+            >
               <div
-                className="canvas-zoom-container"
+                className="canvas-zoom-content"
                 style={{
-                  width: `${canvasWidth}px`,
-                  height: `${canvasHeight}px`,
+                  transform: `scale(${state.zoom})`,
+                  transformOrigin: 'center',
+                  width: `${contentWidth}px`,
+                  height: `${contentHeight}px`,
                 }}
               >
-                <div
-                  className="canvas-zoom-content"
-                  style={{
-                    transform: `scale(${state.zoom})`,
-                    transformOrigin: 'center',
-                    width: `${contentWidth}px`,
-                    height: `${contentHeight}px`,
-                  }}
-                >
                 <div
                   className="checkerboard"
                   style={{ width: contentWidth, height: contentHeight }}
@@ -697,12 +709,12 @@ export default function CanvasComponent() {
                     pixelSize={8}
                   />
                 )}
-                </div>
               </div>
-              <ZoomControls />
             </div>
+            <ZoomControls />
+          </div>
         </div>
-        </div>
+      </div>
     </>
   );
 }

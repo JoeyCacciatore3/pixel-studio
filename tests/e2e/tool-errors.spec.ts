@@ -4,16 +4,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  getCanvas,
-  selectTool,
-  drawStroke,
-} from './helpers/canvas-helpers';
-import {
-  injectCanvasContextError,
-  injectLayerError,
-} from './helpers/error-helpers';
+import { waitForCanvasReady, getCanvas, selectTool, drawStroke } from './helpers/canvas-helpers';
+import { injectCanvasContextError, injectLayerError } from './helpers/error-helpers';
 import { waitForStateManagerReady } from './helpers/state-helpers';
 import { APP_URL } from './helpers/test-constants';
 

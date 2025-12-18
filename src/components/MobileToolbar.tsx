@@ -33,8 +33,16 @@ const tools = [
     icon: 'M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20',
   },
   // Cleanup tools
-  { name: 'cleanup-logo', key: '', icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' },
-  { name: 'cleanup-inspector', key: '', icon: 'M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M12.2 11.8L11 13M12.2 6.2L11 5M3 21l9-9' },
+  {
+    name: 'cleanup-logo',
+    key: '',
+    icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+  },
+  {
+    name: 'cleanup-inspector',
+    key: '',
+    icon: 'M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M12.2 11.8L11 13M12.2 6.2L11 5M3 21l9-9',
+  },
 ];
 
 export default function MobileToolbar() {
@@ -84,7 +92,14 @@ export default function MobileToolbar() {
             onClick={() => handleToolSelect(tool.name)}
             aria-label={`${tool.name} tool`}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...('strokeDasharray' in tool && tool.strokeDasharray && { strokeDasharray: tool.strokeDasharray })}>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              {...('strokeDasharray' in tool &&
+                tool.strokeDasharray && { strokeDasharray: tool.strokeDasharray })}
+            >
               <path d={tool.icon} />
             </svg>
           </button>

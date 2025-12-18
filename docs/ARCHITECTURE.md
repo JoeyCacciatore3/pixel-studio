@@ -261,6 +261,7 @@ The cleanup tools system provides professional-grade image cleanup capabilities:
 ### Cleanup Worker
 
 The cleanup worker (`src/lib/workers/cleanupWorker.ts`) handles:
+
 - Connected component analysis for stray pixel removal
 - K-means clustering for color quantization
 - Edge detection (Sobel operator)
@@ -269,6 +270,7 @@ The cleanup worker (`src/lib/workers/cleanupWorker.ts`) handles:
 ### Tool Categories
 
 Cleanup tools are categorized as:
+
 - **Action Tools**: Execute immediately on click (stray pixels, color reducer, edge crispener, logo cleaner)
 - **Interactive Tools**: Use pointer events for preview/application (edge smoother, line normalizer, outline perfecter)
 - **Inspector Tool**: Visualization overlay tool (pixel-perfect zoom)

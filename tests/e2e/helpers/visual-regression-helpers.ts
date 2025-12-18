@@ -170,7 +170,9 @@ export async function compareVisualState(
   } catch (error) {
     // Screenshot doesn't match
     // Playwright automatically generates diff, but we need to handle it
-    const diffExists = await access(diffPath).then(() => true).catch(() => false);
+    const diffExists = await access(diffPath)
+      .then(() => true)
+      .catch(() => false);
 
     return {
       match: false,
@@ -184,10 +186,7 @@ export async function compareVisualState(
 /**
  * Update visual baseline (approve changes)
  */
-export async function updateVisualBaseline(
-  testName: string,
-  variant?: string
-): Promise<void> {
+export async function updateVisualBaseline(testName: string, variant?: string): Promise<void> {
   const actualPath = getActualPath(testName, variant);
   const baselinePath = getBaselinePath(testName, variant);
 
@@ -343,33 +342,49 @@ export async function generateVisualTestReport(
   <h1>Visual Regression Test Report</h1>
   <p>Generated: ${new Date().toISOString()}</p>
 
-  ${results.map(({ testName, result }) => `
+  ${results
+    .map(
+      ({ testName, result }) => `
     <div class="test ${result.match ? 'match' : 'mismatch'}">
       <h2>${testName} - ${result.match ? '✓ Match' : '✗ Mismatch'}</h2>
       <div class="images">
-        ${result.baseline ? `
+        ${
+          result.baseline
+            ? `
           <div class="image">
             <h3>Baseline</h3>
             <img src="${result.baseline}" alt="Baseline" />
           </div>
-        ` : ''}
-        ${result.actual ? `
+        `
+            : ''
+        }
+        ${
+          result.actual
+            ? `
           <div class="image">
             <h3>Actual</h3>
             <img src="${result.actual}" alt="Actual" />
           </div>
-        ` : ''}
-        ${result.diff ? `
+        `
+            : ''
+        }
+        ${
+          result.diff
+            ? `
           <div class="image">
             <h3>Diff</h3>
             <img src="${result.diff}" alt="Diff" />
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
       ${result.diffPixels !== undefined ? `<p>Diff Pixels: ${result.diffPixels}</p>` : ''}
       ${result.diffRatio !== undefined ? `<p>Diff Ratio: ${(result.diffRatio * 100).toFixed(2)}%</p>` : ''}
     </div>
-  `).join('')}
+  `
+    )
+    .join('')}
 </body>
 </html>
   `;

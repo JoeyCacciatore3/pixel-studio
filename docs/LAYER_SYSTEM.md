@@ -88,11 +88,13 @@ Initialize layers module with main canvas and context.
 ### Layer Management
 
 #### `create(name: string, imageData?: ImageData, backgroundColor?: string): Layer`
+
 #### `createLayer(name: string, imageData?: ImageData, backgroundColor?: string): Layer`
 
 Create a new layer with optional initial image data and background color.
 
 **Parameters**:
+
 - `name`: Layer name
 - `imageData`: Optional ImageData to initialize the layer with
 - `backgroundColor`: Optional background color (hex format, e.g., '#FFFFFF'). If omitted, layer is transparent.

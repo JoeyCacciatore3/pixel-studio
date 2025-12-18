@@ -1,4 +1,5 @@
 # Test Findings Report
+
 ## Comprehensive Cross-Browser and Mobile Testing
 
 **Date**: Generated during test run
@@ -20,6 +21,7 @@
 ### Chromium (Desktop) - ✅ 15/15 Passing
 
 All tests passing:
+
 1. ✅ Upload image file successfully
 2. ✅ Handle upload errors gracefully
 3. ✅ Export canvas as PNG
@@ -43,6 +45,7 @@ All tests passing (same as Chromium).
 ### WebKit (Desktop) - ⚠️ 14/15 Passing
 
 **Failures**:
+
 1. ❌ Upload image file successfully - File upload handling issue
 
 **Passing**: All other 14 tests pass.
@@ -50,6 +53,7 @@ All tests passing (same as Chromium).
 ### Mobile Chrome - ⚠️ 11/15 Passing
 
 **Failures**:
+
 1. ❌ Upload image file successfully - File upload handling issue
 2. ❌ Redo undone action - Timing/state issue
 3. ❌ Toggle layers panel - Timeout (1 minute)
@@ -60,6 +64,7 @@ All tests passing (same as Chromium).
 ### Mobile Safari - ⚠️ 14/15 Passing
 
 **Failures**:
+
 1. ❌ Upload image file successfully - File upload handling issue
 
 **Passing**: All other 14 tests pass.
@@ -71,11 +76,13 @@ All tests passing (same as Chromium).
 **Error**: `page.evaluate: Target page, context or browser has been closed`
 
 **Root Cause**:
+
 - The `waitForAppReady` function was trying to do too many checks in parallel
 - Page was closing during readiness checks
 - Error handling wasn't robust enough
 
 **Fix Applied**:
+
 - Simplified readiness check to focus on critical checks (canvas, state manager)
 - Added proper error handling for page closure
 - Made checks more resilient with try-catch blocks
@@ -88,11 +95,13 @@ All tests passing (same as Chromium).
 **Error**: Canvas comparison showing no change after drawing
 
 **Root Cause**:
+
 - Tests were just clicking canvas instead of actually drawing
 - No tool was selected before drawing
 - Canvas might be empty initially
 
 **Fix Applied**:
+
 - Added `selectTool()` before drawing operations
 - Used `drawStroke()` helper for proper drawing
 - Made tests more lenient - verify functionality even if visual change isn't detected
@@ -105,11 +114,13 @@ All tests passing (same as Chromium).
 **Error**: Upload tests failing on WebKit and mobile devices
 
 **Affected Browsers**:
+
 - WebKit (Desktop)
 - Mobile Chrome
 - Mobile Safari
 
 **Possible Causes**:
+
 - File chooser handling differences across browsers
 - Mobile file input behavior
 - Timing issues with file upload
@@ -121,10 +132,12 @@ All tests passing (same as Chromium).
 **Error**: Panel toggle tests timing out on Mobile Chrome (1 minute timeout)
 
 **Affected Tests**:
+
 - Toggle layers panel
 - Toggle brush+ panel
 
 **Possible Causes**:
+
 - Panel selectors not visible on mobile
 - Different UI structure on mobile
 - Touch event handling issues
@@ -136,6 +149,7 @@ All tests passing (same as Chromium).
 **Error**: Redo test failing on Mobile Chrome
 
 **Possible Causes**:
+
 - Timing issue with history state updates
 - Async operation not completing
 - Mobile-specific state management issue
@@ -181,16 +195,19 @@ All tests passing (same as Chromium).
 ## Files Created/Modified
 
 ### Test Files Created
+
 1. `tests/e2e/basic-functions-cross-browser.spec.ts` - Main test suite (17 tests)
 2. `tests/e2e/zoom-visual-regression.spec.ts` - Visual regression tests
 3. `tests/e2e/mobile-basic-functions.spec.ts` - Mobile-specific tests
 
 ### Helper Files Created
+
 1. `tests/e2e/helpers/zoom-helpers.ts` - Zoom testing utilities
 2. `tests/e2e/helpers/upload-helpers.ts` - Upload testing utilities
 3. `tests/e2e/helpers/export-helpers.ts` - Export testing utilities
 
 ### Files Modified
+
 1. `tests/e2e/helpers/app-readiness.ts` - Simplified and made more resilient
 2. `tests/e2e/helpers/state-helpers.ts` - Added error handling
 3. `src/components/LayersControlsPanel.tsx` - Added `data-testid`
@@ -200,6 +217,7 @@ All tests passing (same as Chromium).
 ## Recommendations
 
 ### High Priority
+
 1. **Fix File Upload on WebKit/Mobile**
    - Investigate file chooser handling
    - Test file input behavior across browsers
@@ -216,6 +234,7 @@ All tests passing (same as Chromium).
    - Verify async operations complete
 
 ### Medium Priority
+
 1. **Visual Regression Baselines**
    - Generate baseline screenshots for zoom tests
    - Set up visual regression workflow
@@ -229,6 +248,7 @@ All tests passing (same as Chromium).
    - Add more context to failures
 
 ### Low Priority
+
 1. **Test Coverage**
    - Add more edge case tests
    - Test error scenarios more thoroughly
@@ -260,6 +280,7 @@ All tests passing (same as Chromium).
 The comprehensive test suite is working well overall, with 87.3% of tests passing. Desktop browsers (Chromium, Firefox) have 100% pass rates.
 
 **UPDATE (2024-12-18)**: All planned fixes have been implemented:
+
 - ✅ File upload handling improved with cross-browser support
 - ✅ Mobile panel visibility and selectors fixed
 - ✅ Redo async timing issues resolved
@@ -267,6 +288,7 @@ The comprehensive test suite is working well overall, with 87.3% of tests passin
 - ✅ Timeout waits optimized
 
 **Current Status**:
+
 - Chromium: 16/17 tests passing (94.1%) - 1 upload test timeout needs investigation
 - All critical functionality (zoom, export, clear, undo) working correctly
 - Remaining work: Full cross-browser verification needed

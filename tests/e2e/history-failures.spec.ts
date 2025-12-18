@@ -4,11 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  drawStroke,
-  selectTool,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, drawStroke, selectTool } from './helpers/canvas-helpers';
 import {
   simulateStorageQuotaExceeded,
   simulateIndexedDBFailure,
@@ -164,11 +160,7 @@ test.describe('History Failures Tests', () => {
     // Create many history entries
     await selectTool(page, 'pencil');
     for (let i = 0; i < 30; i++) {
-      await drawStroke(
-        page,
-        { x: 100 + i * 5, y: 100 },
-        { x: 150 + i * 5, y: 150 }
-      );
+      await drawStroke(page, { x: 100 + i * 5, y: 100 }, { x: 150 + i * 5, y: 150 });
       await page.waitForTimeout(100);
     }
 

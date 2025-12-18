@@ -30,7 +30,11 @@ async function getSystemResources(): Promise<{ cpuCount: number; memoryGB: numbe
 /**
  * Calculate safe worker count
  */
-function calculateSafeWorkers(cpuCount: number, memoryGB: number, projectCount: number = 1): number {
+function calculateSafeWorkers(
+  cpuCount: number,
+  memoryGB: number,
+  projectCount: number = 1
+): number {
   // Base workers on CPU cores, but consider memory
   // Each worker can use ~500MB-1GB, so limit based on available memory
   const memoryBasedWorkers = Math.floor(memoryGB / 2); // Conservative: 2GB per worker
@@ -114,10 +118,10 @@ async function runProjectTests(
  */
 async function main() {
   const args = process.argv.slice(2);
-  const project = args.find(arg => arg.startsWith('--project='))?.split('=')[1];
-  const workersArg = args.find(arg => arg.startsWith('--workers='))?.split('=')[1];
+  const project = args.find((arg) => arg.startsWith('--project='))?.split('=')[1];
+  const workersArg = args.find((arg) => arg.startsWith('--workers='))?.split('=')[1];
   const allProjects = args.includes('--all-projects');
-  const shardArg = args.find(arg => arg.startsWith('--shard='))?.split('=')[1];
+  const shardArg = args.find((arg) => arg.startsWith('--shard='))?.split('=')[1];
 
   console.log('🧪 Safe Test Execution\n');
   console.log('='.repeat(60) + '\n');
@@ -132,8 +136,8 @@ async function main() {
   const projects = allProjects
     ? ['chromium', 'firefox', 'webkit', 'Mobile Chrome', 'Mobile Safari', 'Tablet']
     : project
-    ? [project]
-    : ['chromium']; // Default to chromium only
+      ? [project]
+      : ['chromium']; // Default to chromium only
 
   console.log(`📋 Running tests for: ${projects.join(', ')}\n`);
 
@@ -157,10 +161,12 @@ async function main() {
   for (const proj of projects) {
     console.log(`\n🚀 Running tests for ${proj}...\n`);
 
-    const shard = shardArg ? {
-      current: parseInt(shardArg.split('/')[0], 10),
-      total: parseInt(shardArg.split('/')[1], 10),
-    } : undefined;
+    const shard = shardArg
+      ? {
+          current: parseInt(shardArg.split('/')[0], 10),
+          total: parseInt(shardArg.split('/')[1], 10),
+        }
+      : undefined;
 
     const result = await runProjectTests(proj, {
       workers: safeWorkers,
@@ -169,7 +175,9 @@ async function main() {
 
     results.push({ project: proj, ...result });
 
-    console.log(`\n${result.success ? '✅' : '❌'} ${proj}: ${(result.duration / 1000).toFixed(2)}s`);
+    console.log(
+      `\n${result.success ? '✅' : '❌'} ${proj}: ${(result.duration / 1000).toFixed(2)}s`
+    );
   }
 
   // Summary
@@ -178,14 +186,16 @@ async function main() {
   console.log('='.repeat(60) + '\n');
 
   const totalDuration = results.reduce((sum, r) => sum + r.duration, 0);
-  const successCount = results.filter(r => r.success).length;
+  const successCount = results.filter((r) => r.success).length;
 
   console.log(`Total Duration: ${(totalDuration / 1000 / 60).toFixed(2)} minutes`);
   console.log(`Projects Passed: ${successCount}/${results.length}`);
   console.log(`Projects Failed: ${results.length - successCount}/${results.length}\n`);
 
-  results.forEach(result => {
-    console.log(`${result.success ? '✅' : '❌'} ${result.project}: ${(result.duration / 1000).toFixed(2)}s`);
+  results.forEach((result) => {
+    console.log(
+      `${result.success ? '✅' : '❌'} ${result.project}: ${(result.duration / 1000).toFixed(2)}s`
+    );
   });
 
   process.exit(successCount === results.length ? 0 : 1);

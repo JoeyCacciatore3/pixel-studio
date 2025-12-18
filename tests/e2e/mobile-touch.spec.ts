@@ -24,7 +24,7 @@ test.describe('Mobile Touch Interactions', () => {
       test('should display mobile toolbar', async ({ page }) => {
         // Set viewport for this test
         if (device.viewport) {
-          await page.setViewportSize(device.viewport)
+          await page.setViewportSize(device.viewport);
         }
         await page.goto(APP_URL);
         await waitForAppReady(page);
@@ -45,10 +45,10 @@ test.describe('Mobile Touch Interactions', () => {
       test('should allow tool selection via touch', async ({ page }) => {
         // Set viewport for this test
         if (device.viewport) {
-          await page.setViewportSize(device.viewport)
+          await page.setViewportSize(device.viewport);
         }
-        await page.goto(APP_URL)
-        await waitForAppReady(page)
+        await page.goto(APP_URL);
+        await waitForAppReady(page);
 
         // Find a tool button in mobile toolbar using data-testid
         const toolButton = await getByTestId(page, 'testid-mobile-toolbar-pencil', {
@@ -67,10 +67,10 @@ test.describe('Mobile Touch Interactions', () => {
       test('should support single touch drawing', async ({ page }) => {
         // Set viewport for this test
         if (device.viewport) {
-          await page.setViewportSize(device.viewport)
+          await page.setViewportSize(device.viewport);
         }
-        await page.goto(APP_URL)
-        await waitForAppReady(page)
+        await page.goto(APP_URL);
+        await waitForAppReady(page);
 
         const canvas = page.locator('#mainCanvas');
         await expect(canvas).toBeVisible();
@@ -96,10 +96,10 @@ test.describe('Mobile Touch Interactions', () => {
       test('should support pinch-to-zoom gesture', async ({ page }) => {
         // Set viewport for this test
         if (device.viewport) {
-          await page.setViewportSize(device.viewport)
+          await page.setViewportSize(device.viewport);
         }
-        await page.goto(APP_URL)
-        await waitForAppReady(page)
+        await page.goto(APP_URL);
+        await waitForAppReady(page);
 
         const canvas = page.locator('#mainCanvas');
         await expect(canvas).toBeVisible();
@@ -122,10 +122,10 @@ test.describe('Mobile Touch Interactions', () => {
       test('should prevent default touch behaviors', async ({ page }) => {
         // Set viewport for this test
         if (device.viewport) {
-          await page.setViewportSize(device.viewport)
+          await page.setViewportSize(device.viewport);
         }
-        await page.goto(APP_URL)
-        await waitForAppReady(page)
+        await page.goto(APP_URL);
+        await waitForAppReady(page);
 
         const canvas = page.locator('#mainCanvas');
         const touchAction = await canvas.evaluate((el) => {
@@ -133,15 +133,15 @@ test.describe('Mobile Touch Interactions', () => {
         });
 
         // Touch action should be 'none' or 'manipulation' to prevent scrolling
-        expect(['none', 'manipulation']).toContain(touchAction)
-      })
-    })
+        expect(['none', 'manipulation']).toContain(touchAction);
+      });
+    });
   }
-})
+});
 
 // Mobile UI Components tests with iPhone 12 configuration
 // Note: test.use() at top level applies to all subsequent tests until next test.use()
-test.use({ ...devices['iPhone 12'] })
+test.use({ ...devices['iPhone 12'] });
 
 test.describe('Mobile UI Components', () => {
   test('should show/hide right panel on mobile', async ({ page }) => {
@@ -214,7 +214,7 @@ test.describe('Mobile UI Components', () => {
 });
 
 // Mobile Performance tests with iPhone 12 configuration
-test.use({ ...devices['iPhone 12'] })
+test.use({ ...devices['iPhone 12'] });
 
 test.describe('Mobile Performance', () => {
   test('should load efficiently on mobile', async ({ page }) => {
@@ -246,7 +246,7 @@ test.describe('Mobile Performance', () => {
 });
 
 // Touch Gesture Recognition tests with iPhone 12 configuration
-test.use({ ...devices['iPhone 12'] })
+test.use({ ...devices['iPhone 12'] });
 
 test.describe('Touch Gesture Recognition', () => {
   test('should handle tap gestures', async ({ page }) => {

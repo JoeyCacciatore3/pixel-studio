@@ -6,11 +6,7 @@
 
 import { Page, Locator, expect, TestInfo } from '@playwright/test';
 import { APP_URL } from './test-constants';
-import {
-  captureDebugInfo,
-  analyzeTestFailure,
-  defaultMCPConfig,
-} from './mcp-playwright-helpers';
+import { captureDebugInfo, analyzeTestFailure, defaultMCPConfig } from './mcp-playwright-helpers';
 
 // Re-export APP_URL for backward compatibility
 export { APP_URL };
@@ -24,17 +20,22 @@ export async function isMobileProject(page: Page): Promise<boolean> {
 
   // Check viewport size and user agent
   const isMobile = await page.evaluate(() => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-           window.innerWidth < 768;
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.innerWidth < 768
+    );
   });
 
-  return isMobile || (viewport.width < 768);
+  return isMobile || viewport.width < 768;
 }
 
 /**
  * Ensure desktop viewport if needed for toolbar visibility
  */
-export async function ensureDesktopViewportIfNeeded(page: Page, forceDesktop: boolean = false): Promise<void> {
+export async function ensureDesktopViewportIfNeeded(
+  page: Page,
+  forceDesktop: boolean = false
+): Promise<void> {
   const viewport = page.viewportSize();
   const isMobile = await isMobileProject(page);
 
@@ -85,12 +86,16 @@ export async function waitForCanvasReady(page: Page, maxWait: number = 10000): P
 
     if (!isReady) {
       const dimensions = await getCanvasDimensions(page);
-      throw new Error(`Canvas not ready after ${maxWait}ms. Dimensions: ${dimensions.width}x${dimensions.height}`);
+      throw new Error(
+        `Canvas not ready after ${maxWait}ms. Dimensions: ${dimensions.width}x${dimensions.height}`
+      );
     }
   } catch (error) {
     const elapsed = Date.now() - startTime;
     const dimensions = await getCanvasDimensions(page).catch(() => ({ width: 0, height: 0 }));
-    throw new Error(`Canvas not ready after ${elapsed}ms (max: ${maxWait}ms). Dimensions: ${dimensions.width}x${dimensions.height}. Error: ${error}`);
+    throw new Error(
+      `Canvas not ready after ${elapsed}ms (max: ${maxWait}ms). Dimensions: ${dimensions.width}x${dimensions.height}. Error: ${error}`
+    );
   }
 }
 
@@ -141,7 +146,10 @@ export async function getCanvasDimensions(page: Page): Promise<{ width: number; 
 /**
  * Get canvas info including bounding box for coordinate calculations
  */
-export async function getCanvasInfo(page: Page, timeout: number = 10000): Promise<{ box: { x: number; y: number; width: number; height: number } }> {
+export async function getCanvasInfo(
+  page: Page,
+  timeout: number = 10000
+): Promise<{ box: { x: number; y: number; width: number; height: number } }> {
   const canvas = getCanvas(page);
   await expect(canvas).toBeVisible({ timeout });
 
@@ -156,11 +164,7 @@ export async function getCanvasInfo(page: Page, timeout: number = 10000): Promis
 /**
  * Resize canvas
  */
-export async function resizeCanvas(
-  page: Page,
-  width: number,
-  height: number
-): Promise<void> {
+export async function resizeCanvas(page: Page, width: number, height: number): Promise<void> {
   await page.evaluate(
     ({ width, height }) => {
       const widthInput = document.getElementById('canvasWidth') as HTMLInputElement;
@@ -217,7 +221,9 @@ export async function drawStroke(
       const viewport = page.viewportSize();
       if (viewport) {
         if (startX < 0 || startY < 0 || endX > viewport.width || endY > viewport.height) {
-          throw new Error(`Stroke coordinates out of bounds: start(${startX}, ${startY}), end(${endX}, ${endY}), viewport(${viewport.width}x${viewport.height})`);
+          throw new Error(
+            `Stroke coordinates out of bounds: start(${startX}, ${startY}), end(${endX}, ${endY}), viewport(${viewport.width}x${viewport.height})`
+          );
         }
       }
 
@@ -248,7 +254,9 @@ export async function drawStroke(
   }
 
   // All retries failed
-  throw new Error(`Failed to draw stroke after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`);
+  throw new Error(
+    `Failed to draw stroke after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`
+  );
 }
 
 /**
@@ -277,65 +285,65 @@ export interface CanvasComparisonOptions {
    * Maximum percentage of pixels that can differ (0-1)
    * @default 0.01 (1%)
    */
-  tolerance?: number
+  tolerance?: number;
 
   /**
    * Maximum number of pixels that can differ
    * If set, overrides tolerance percentage
    */
-  maxDiffPixels?: number
+  maxDiffPixels?: number;
 
   /**
    * Region to compare (optional)
    * If not provided, compares entire canvas
    */
   region?: {
-    x: number
-    y: number
-    width: number
-    height: number
-  }
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
 
   /**
    * Whether to return detailed diff information
    * @default false
    */
-  detailed?: boolean
+  detailed?: boolean;
 }
 
 export interface CanvasComparisonResult {
   /**
    * Whether the canvases match within tolerance
    */
-  match: boolean
+  match: boolean;
 
   /**
    * Number of different pixels
    */
-  diffPixels: number
+  diffPixels: number;
 
   /**
    * Total number of pixels compared
    */
-  totalPixels: number
+  totalPixels: number;
 
   /**
    * Percentage of pixels that differ (0-1)
    */
-  diffPercentage: number
+  diffPercentage: number;
 
   /**
    * Detailed diff information (if detailed=true)
    */
   diffDetails?: {
     regions: Array<{
-      x: number
-      y: number
-      width: number
-      height: number
-      diffPixels: number
-    }>
-  }
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      diffPixels: number;
+    }>;
+  };
 }
 
 /**
@@ -361,7 +369,7 @@ export async function compareCanvasStatesWithTolerance(
     maxDiffPixels,
     region,
     detailed = false,
-  } = options
+  } = options;
 
   // Handle null states
   if (!state1 || !state2) {
@@ -370,7 +378,7 @@ export async function compareCanvasStatesWithTolerance(
       diffPixels: state1 === state2 ? 0 : 1,
       totalPixels: 1,
       diffPercentage: state1 === state2 ? 0 : 1,
-    }
+    };
   }
 
   // If both are data URLs and identical, return early
@@ -380,103 +388,103 @@ export async function compareCanvasStatesWithTolerance(
       diffPixels: 0,
       totalPixels: 0,
       diffPercentage: 0,
-    }
+    };
   }
 
   // Perform pixel-level comparison
   const result = await page.evaluate(
     ({ state1, state2, region, tolerance, maxDiffPixels, detailed }) => {
       // Create image elements from data URLs
-      const img1 = new Image()
-      const img2 = new Image()
+      const img1 = new Image();
+      const img2 = new Image();
 
       return new Promise<CanvasComparisonResult>((resolve) => {
-        let loaded = 0
+        let loaded = 0;
         const onLoad = () => {
-          loaded++
+          loaded++;
           if (loaded === 2) {
             // Both images loaded, compare them
-            const canvas = document.createElement('canvas')
-            const ctx = canvas.getContext('2d')
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
             if (!ctx) {
               resolve({
                 match: false,
                 diffPixels: 1,
                 totalPixels: 1,
                 diffPercentage: 1,
-              })
-              return
+              });
+              return;
             }
 
             // Set canvas dimensions
-            const width = region ? region.width : Math.max(img1.width, img2.width)
-            const height = region ? region.height : Math.max(img1.height, img2.height)
-            canvas.width = width
-            canvas.height = height
+            const width = region ? region.width : Math.max(img1.width, img2.width);
+            const height = region ? region.height : Math.max(img1.height, img2.height);
+            canvas.width = width;
+            canvas.height = height;
 
             // Draw both images
-            ctx.drawImage(img1, region ? -region.x : 0, region ? -region.y : 0)
-            const imageData1 = ctx.getImageData(0, 0, width, height)
+            ctx.drawImage(img1, region ? -region.x : 0, region ? -region.y : 0);
+            const imageData1 = ctx.getImageData(0, 0, width, height);
 
-            ctx.clearRect(0, 0, width, height)
-            ctx.drawImage(img2, region ? -region.x : 0, region ? -region.y : 0)
-            const imageData2 = ctx.getImageData(0, 0, width, height)
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(img2, region ? -region.x : 0, region ? -region.y : 0);
+            const imageData2 = ctx.getImageData(0, 0, width, height);
 
             // Compare pixels
-            let diffPixels = 0
-            const data1 = imageData1.data
-            const data2 = imageData2.data
-            const totalPixels = width * height
+            let diffPixels = 0;
+            const data1 = imageData1.data;
+            const data2 = imageData2.data;
+            const totalPixels = width * height;
 
             // Compare pixel by pixel (RGBA)
             for (let i = 0; i < data1.length; i += 4) {
-              const r1 = data1[i]!
-              const g1 = data1[i + 1]!
-              const b1 = data1[i + 2]!
-              const a1 = data1[i + 3]!
+              const r1 = data1[i]!;
+              const g1 = data1[i + 1]!;
+              const b1 = data1[i + 2]!;
+              const a1 = data1[i + 3]!;
 
-              const r2 = data2[i]!
-              const g2 = data2[i + 1]!
-              const b2 = data2[i + 2]!
-              const a2 = data2[i + 3]!
+              const r2 = data2[i]!;
+              const g2 = data2[i + 1]!;
+              const b2 = data2[i + 2]!;
+              const a2 = data2[i + 3]!;
 
               // Check if pixels differ (with small tolerance for anti-aliasing)
               const diff =
                 Math.abs(r1 - r2) > 1 ||
                 Math.abs(g1 - g2) > 1 ||
                 Math.abs(b1 - b2) > 1 ||
-                Math.abs(a1 - a2) > 1
+                Math.abs(a1 - a2) > 1;
 
               if (diff) {
-                diffPixels++
+                diffPixels++;
               }
             }
 
-            const diffPercentage = diffPixels / totalPixels
+            const diffPercentage = diffPixels / totalPixels;
             const match =
               (maxDiffPixels !== undefined
                 ? diffPixels <= maxDiffPixels
-                : diffPercentage <= tolerance) && diffPixels < totalPixels * 0.5 // Never match if >50% different
+                : diffPercentage <= tolerance) && diffPixels < totalPixels * 0.5; // Never match if >50% different
 
             resolve({
               match,
               diffPixels,
               totalPixels,
               diffPercentage,
-            })
+            });
           }
-        }
+        };
 
-        img1.onload = onLoad
-        img2.onload = onLoad
-        img1.src = state1
-        img2.src = state2
-      })
+        img1.onload = onLoad;
+        img2.onload = onLoad;
+        img1.src = state1;
+        img2.src = state2;
+      });
     },
     { state1, state2, region, tolerance, maxDiffPixels, detailed }
-  )
+  );
 
-  return result
+  return result;
 }
 
 /**
@@ -549,7 +557,7 @@ export async function clearCanvas(page: Page): Promise<void> {
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      if (await clearButton.count() === 0) {
+      if ((await clearButton.count()) === 0) {
         throw new Error('Clear button not found');
       }
 
@@ -583,7 +591,11 @@ export async function clearCanvas(page: Page): Promise<void> {
  * First tries to call PixelStudio.selectTool() directly via JavaScript for reliability,
  * then falls back to clicking UI buttons if needed.
  */
-export async function selectTool(page: Page, toolName: string, maxRetries: number = 3): Promise<void> {
+export async function selectTool(
+  page: Page,
+  toolName: string,
+  maxRetries: number = 3
+): Promise<void> {
   let retries = 0;
   const timeout = 10000;
   const maxTotalTime = 30000; // Maximum total time for all retries
@@ -599,7 +611,9 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
 
   // Fallback: try by aria-label if data-tool not found (for backward compatibility)
   const desktopToolButtonByLabel = page.locator(`.tool-btn[aria-label*="${toolName}"]`).first();
-  const mobileToolButtonByLabel = page.locator(`.mobile-tool-btn[aria-label*="${toolName}"]`).first();
+  const mobileToolButtonByLabel = page
+    .locator(`.mobile-tool-btn[aria-label*="${toolName}"]`)
+    .first();
 
   // Tools are rendered in canvas area (.canvas-tools-left, .canvas-tools-right, .canvas-tools-bottom)
   // or in mobile toolbar (.mobile-toolbar). Extended toolbar is hidden by CSS.
@@ -617,7 +631,9 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
       } else {
         // For mobile, wait for mobile toolbar
         const mobileToolbar = page.locator('.mobile-toolbar').first();
-        await expect(mobileToolbar).toBeVisible({ timeout: 5000 }).catch(() => {});
+        await expect(mobileToolbar)
+          .toBeVisible({ timeout: 5000 })
+          .catch(() => {});
       }
 
       // First, try to call PixelStudio.selectTool() directly via JavaScript
@@ -625,7 +641,10 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
       try {
         const toolSelected = await page.evaluate((toolName) => {
           try {
-            if ((window as any).PixelStudio && typeof (window as any).PixelStudio.selectTool === 'function') {
+            if (
+              (window as any).PixelStudio &&
+              typeof (window as any).PixelStudio.selectTool === 'function'
+            ) {
               (window as any).PixelStudio.selectTool(toolName);
               // Verify it was set
               const state = (window as any).PixelStudio.getState?.();
@@ -640,14 +659,16 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
         if (toolSelected) {
           // Verify tool is active in UI
           await page.waitForTimeout(300);
-          const stateActive = await page.evaluate((toolName) => {
-            try {
-              const state = (window as any).PixelStudio?.getState?.();
-              return state?.currentTool === toolName;
-            } catch {
-              return false;
-            }
-          }, toolName).catch(() => false);
+          const stateActive = await page
+            .evaluate((toolName) => {
+              try {
+                const state = (window as any).PixelStudio?.getState?.();
+                return state?.currentTool === toolName;
+              } catch {
+                return false;
+              }
+            }, toolName)
+            .catch(() => false);
 
           if (stateActive) {
             return; // Success - tool selected via API
@@ -666,7 +687,7 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
       try {
         await page.waitForSelector('.tool-btn[data-tool], .mobile-tool-btn[data-tool]', {
           state: 'attached',
-          timeout: 5000
+          timeout: 5000,
         });
       } catch {
         // If no tool buttons found, wait a bit more for React to render
@@ -744,19 +765,20 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
 
       // Verify tool is active - check both class and state
       const isActive = await toolButton.evaluate((el) => {
-        return el.classList.contains('active') ||
-               el.getAttribute('aria-pressed') === 'true';
+        return el.classList.contains('active') || el.getAttribute('aria-pressed') === 'true';
       });
 
       // Also verify via app state if available
-      const stateActive = await page.evaluate((toolName) => {
-        try {
-          const state = (window as any).PixelStudio?.getState?.();
-          return state?.currentTool === toolName;
-        } catch {
-          return false;
-        }
-      }, toolName).catch(() => false);
+      const stateActive = await page
+        .evaluate((toolName) => {
+          try {
+            const state = (window as any).PixelStudio?.getState?.();
+            return state?.currentTool === toolName;
+          } catch {
+            return false;
+          }
+        }, toolName)
+        .catch(() => false);
 
       if (isActive || stateActive) {
         return; // Success
@@ -777,8 +799,16 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
           : 'No viewport set';
 
         // Check if canvas tools or mobile toolbar are visible
-        const canvasToolsVisible = await page.locator('.canvas-tools-left, .canvas-tools-right, .canvas-tools-bottom').first().isVisible().catch(() => false);
-        const mobileToolbarVisible = await page.locator('.mobile-toolbar').first().isVisible().catch(() => false);
+        const canvasToolsVisible = await page
+          .locator('.canvas-tools-left, .canvas-tools-right, .canvas-tools-bottom')
+          .first()
+          .isVisible()
+          .catch(() => false);
+        const mobileToolbarVisible = await page
+          .locator('.mobile-toolbar')
+          .first()
+          .isVisible()
+          .catch(() => false);
         const toolbarVisible = canvasToolsVisible || mobileToolbarVisible;
 
         // Check all possible button locations
@@ -788,13 +818,15 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
         const mobileLabelCount = await mobileToolButtonByLabel.count().catch(() => 0);
 
         // Get current tool state
-        const currentTool = await page.evaluate(() => {
-          try {
-            return (window as any).PixelStudio?.getState?.()?.currentTool || 'unknown';
-          } catch {
-            return 'unknown';
-          }
-        }).catch(() => 'unknown');
+        const currentTool = await page
+          .evaluate(() => {
+            try {
+              return (window as any).PixelStudio?.getState?.()?.currentTool || 'unknown';
+            } catch {
+              return 'unknown';
+            }
+          })
+          .catch(() => 'unknown');
 
         const errorDetails = [
           `Failed to select tool "${toolName}" after ${retries} attempts`,
@@ -816,7 +848,9 @@ export async function selectTool(page: Page, toolName: string, maxRetries: numbe
     }
   }
 
-  throw new Error(`Failed to select tool "${toolName}" - exceeded maximum time limit (${maxTotalTime}ms) or retries (${maxRetries})`);
+  throw new Error(
+    `Failed to select tool "${toolName}" - exceeded maximum time limit (${maxTotalTime}ms) or retries (${maxRetries})`
+  );
 }
 
 /**
@@ -882,11 +916,7 @@ export async function drawStrokeWithDebug(
         consoleLogs: true,
       });
 
-      const analysis = await analyzeTestFailure(
-        testInfo.title,
-        error as Error,
-        debugInfo
-      );
+      const analysis = await analyzeTestFailure(testInfo.title, error as Error, debugInfo);
 
       console.error('Drawing failed. Analysis:', analysis);
     }

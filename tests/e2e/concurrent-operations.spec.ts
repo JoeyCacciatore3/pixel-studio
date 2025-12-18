@@ -4,12 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  getCanvas,
-  selectTool,
-  drawStroke,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, getCanvas, selectTool, drawStroke } from './helpers/canvas-helpers';
 import { waitForStateManagerReady } from './helpers/state-helpers';
 import { APP_URL } from './helpers/test-constants';
 
@@ -126,11 +121,7 @@ test.describe('Concurrent Operations Tests', () => {
     // Draw multiple strokes rapidly
     await selectTool(page, 'pencil');
     for (let i = 0; i < 5; i++) {
-      await drawStroke(
-        page,
-        { x: 100 + i * 10, y: 100 },
-        { x: 150 + i * 10, y: 150 }
-      );
+      await drawStroke(page, { x: 100 + i * 10, y: 100 }, { x: 150 + i * 10, y: 150 });
       await page.waitForTimeout(50);
     }
 

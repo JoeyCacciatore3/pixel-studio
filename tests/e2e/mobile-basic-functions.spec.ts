@@ -5,8 +5,18 @@
 
 import { test, expect } from '@playwright/test';
 import { waitForAppReady } from './helpers/app-readiness';
-import { testPinchZoom, getCanvasContainerBounds, verifyContainerStationary, getZoomLevel } from './helpers/zoom-helpers';
-import { uploadTestImage, verifyImageLoaded, createTestImageFile, cleanupTestImage } from './helpers/upload-helpers';
+import {
+  testPinchZoom,
+  getCanvasContainerBounds,
+  verifyContainerStationary,
+  getZoomLevel,
+} from './helpers/zoom-helpers';
+import {
+  uploadTestImage,
+  verifyImageLoaded,
+  createTestImageFile,
+  cleanupTestImage,
+} from './helpers/upload-helpers';
 import { triggerExport, verifyExportDownloaded } from './helpers/export-helpers';
 
 test.describe('Mobile Basic Functions', () => {

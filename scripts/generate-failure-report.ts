@@ -70,25 +70,55 @@ function categorizeError(errorMessage: string): string {
   if (lower.includes('timeout') || lower.includes('timed out') || lower.includes('exceeded')) {
     return 'Timeout';
   }
-  if (lower.includes('locator') || lower.includes('selector') || lower.includes('element not found') || lower.includes('not visible')) {
+  if (
+    lower.includes('locator') ||
+    lower.includes('selector') ||
+    lower.includes('element not found') ||
+    lower.includes('not visible')
+  ) {
     return 'Selector';
   }
-  if (lower.includes('expect') || lower.includes('assertion') || lower.includes('expected') || lower.includes('to be')) {
+  if (
+    lower.includes('expect') ||
+    lower.includes('assertion') ||
+    lower.includes('expected') ||
+    lower.includes('to be')
+  ) {
     return 'Assertion';
   }
-  if (lower.includes('network') || lower.includes('fetch') || lower.includes('connection') || lower.includes('econnrefused')) {
+  if (
+    lower.includes('network') ||
+    lower.includes('fetch') ||
+    lower.includes('connection') ||
+    lower.includes('econnrefused')
+  ) {
     return 'Network';
   }
   if (lower.includes('canvas') || lower.includes('context') || lower.includes('getcontext')) {
     return 'Canvas';
   }
-  if (lower.includes('statemanager') || lower.includes('state') || lower.includes('initialized') || lower.includes('not initialized')) {
+  if (
+    lower.includes('statemanager') ||
+    lower.includes('state') ||
+    lower.includes('initialized') ||
+    lower.includes('not initialized')
+  ) {
     return 'State';
   }
-  if (lower.includes('test.use') || lower.includes('cannot use') || lower.includes('worker') || lower.includes('describe group')) {
+  if (
+    lower.includes('test.use') ||
+    lower.includes('cannot use') ||
+    lower.includes('worker') ||
+    lower.includes('describe group')
+  ) {
     return 'Configuration';
   }
-  if (lower.includes('cannot find module') || lower.includes('import') || lower.includes('require') || lower.includes('module')) {
+  if (
+    lower.includes('cannot find module') ||
+    lower.includes('import') ||
+    lower.includes('require') ||
+    lower.includes('module')
+  ) {
     return 'Import';
   }
   if (lower.includes('screenshot') || lower.includes('visual') || lower.includes('baseline')) {
@@ -215,7 +245,7 @@ async function parseJsonReport(reportPath: string): Promise<{
           const fileName = path.basename(testFile);
           const descriptions = fileDescriptions.get(testFile) || new Map();
 
-          let suiteSummary: TestSuiteSummary | undefined = suites.find(s => s.file === testFile);
+          let suiteSummary: TestSuiteSummary | undefined = suites.find((s) => s.file === testFile);
           if (!suiteSummary) {
             suiteSummary = {
               file: testFile,
@@ -249,7 +279,9 @@ async function parseJsonReport(reportPath: string): Promise<{
                 // Extract attachments (screenshots, videos, traces)
                 const attachments = result.attachments || [];
                 const screenshots = attachments
-                  .filter((a: any) => a.name === 'screenshot' || a.contentType?.startsWith('image/'))
+                  .filter(
+                    (a: any) => a.name === 'screenshot' || a.contentType?.startsWith('image/')
+                  )
                   .map((a: any) => a.path || a.name);
                 const videos = attachments
                   .filter((a: any) => a.name === 'video' || a.contentType?.startsWith('video/'))
@@ -273,22 +305,27 @@ async function parseJsonReport(reportPath: string): Promise<{
                   duration: result.duration || 0,
                   browser: spec.projectName,
                   stack: error.stack,
-                  location: location ? {
-                    file: location.file || testFile,
-                    line: location.line || 0,
-                    column: location.column || 0,
-                  } : undefined,
+                  location: location
+                    ? {
+                        file: location.file || testFile,
+                        line: location.line || 0,
+                        column: location.column || 0,
+                      }
+                    : undefined,
                   retries: retries > 0 ? retries : undefined,
                   artifacts: {
                     screenshots: screenshots.length > 0 ? screenshots : undefined,
                     videos: videos.length > 0 ? videos : undefined,
                     traces: traces.length > 0 ? traces : undefined,
                   },
-                  attachments: attachments.length > 0 ? attachments.map((a: any) => ({
-                    name: a.name || 'attachment',
-                    path: a.path || a.name || '',
-                    contentType: a.contentType || 'unknown',
-                  })) : undefined,
+                  attachments:
+                    attachments.length > 0
+                      ? attachments.map((a: any) => ({
+                          name: a.name || 'attachment',
+                          path: a.path || a.name || '',
+                          contentType: a.contentType || 'unknown',
+                        }))
+                      : undefined,
                 };
 
                 suiteSummary.failures.push(failure);
@@ -426,7 +463,7 @@ function generateMarkdownReport(data: {
   if (patterns.length > 0) {
     markdown += `- **Most Common Error**: ${patterns[0].category} (${patterns[0].count} tests)\n`;
     markdown += `- **Total Test Suites**: ${suites.length}\n`;
-    markdown += `- **Suites with Failures**: ${suites.filter(s => s.failed > 0).length}\n`;
+    markdown += `- **Suites with Failures**: ${suites.filter((s) => s.failed > 0).length}\n`;
   }
   markdown += `\n---\n\n`;
 
@@ -438,9 +475,10 @@ function generateMarkdownReport(data: {
 
     for (const pattern of patterns) {
       const percentage = ((pattern.count / failedTests) * 100).toFixed(1);
-      const commonMsg = pattern.commonMessage.length > 60
-        ? pattern.commonMessage.substring(0, 60) + '...'
-        : pattern.commonMessage;
+      const commonMsg =
+        pattern.commonMessage.length > 60
+          ? pattern.commonMessage.substring(0, 60) + '...'
+          : pattern.commonMessage;
       markdown += `| ${pattern.category} | ${pattern.count} | ${percentage}% | ${commonMsg} |\n`;
     }
 
@@ -463,8 +501,8 @@ function generateMarkdownReport(data: {
   // Test Suite Summaries
   markdown += `## Failure Summary by Test Suite\n\n`;
 
-  const suitesWithFailures = suites.filter(s => s.failed > 0);
-  const suitesWithoutFailures = suites.filter(s => s.failed === 0);
+  const suitesWithFailures = suites.filter((s) => s.failed > 0);
+  const suitesWithoutFailures = suites.filter((s) => s.failed === 0);
 
   if (suitesWithFailures.length > 0) {
     markdown += `### Suites with Failures\n\n`;
@@ -472,7 +510,8 @@ function generateMarkdownReport(data: {
     markdown += `|-----------|-------|--------|--------|---------|-----------|\n`;
 
     for (const suite of suitesWithFailures.sort((a, b) => b.failed - a.failed)) {
-      const suitePassRate = suite.total > 0 ? ((suite.passed / suite.total) * 100).toFixed(1) : '0.0';
+      const suitePassRate =
+        suite.total > 0 ? ((suite.passed / suite.total) * 100).toFixed(1) : '0.0';
       markdown += `| [${suite.fileName}](tests/e2e/${suite.fileName}) | ${suite.total} | ${suite.passed} | **${suite.failed}** | ${suite.skipped} | ${suitePassRate}% |\n`;
     }
     markdown += `\n`;
@@ -530,13 +569,13 @@ function generateMarkdownReport(data: {
         if (hasArtifacts) {
           markdown += `- **Artifacts**:\n`;
           if (failure.artifacts.screenshots && failure.artifacts.screenshots.length > 0) {
-            markdown += `  - Screenshots: ${failure.artifacts.screenshots.map(s => `\`${s}\``).join(', ')}\n`;
+            markdown += `  - Screenshots: ${failure.artifacts.screenshots.map((s) => `\`${s}\``).join(', ')}\n`;
           }
           if (failure.artifacts.videos && failure.artifacts.videos.length > 0) {
-            markdown += `  - Videos: ${failure.artifacts.videos.map(v => `\`${v}\``).join(', ')}\n`;
+            markdown += `  - Videos: ${failure.artifacts.videos.map((v) => `\`${v}\``).join(', ')}\n`;
           }
           if (failure.artifacts.traces && failure.artifacts.traces.length > 0) {
-            markdown += `  - Traces: ${failure.artifacts.traces.map(t => `\`${t}\``).join(', ')}\n`;
+            markdown += `  - Traces: ${failure.artifacts.traces.map((t) => `\`${t}\``).join(', ')}\n`;
           }
           markdown += `\n`;
         }
@@ -557,7 +596,7 @@ function generateMarkdownReport(data: {
   for (const suite of suitesWithFailures) {
     allFailures.push(...suite.failures);
   }
-  const configFailures = allFailures.filter(f => f.errorCategory === 'Configuration');
+  const configFailures = allFailures.filter((f) => f.errorCategory === 'Configuration');
   if (configFailures.length > 0) {
     markdown += `## Configuration Issues\n\n`;
     markdown += `The following tests failed due to configuration problems:\n\n`;
@@ -629,7 +668,7 @@ async function buildReportFromTestFiles(): Promise<{
   skippedTests: number;
 }> {
   const testDir = path.join(process.cwd(), 'tests/e2e');
-  const specFiles = (await readdir(testDir)).filter(f => f.endsWith('.spec.ts'));
+  const specFiles = (await readdir(testDir)).filter((f) => f.endsWith('.spec.ts'));
 
   const suites: TestSuiteSummary[] = [];
   const knownResults: { [key: string]: { passed: number; failed: number } } = {
@@ -693,7 +732,12 @@ async function buildReportFromTestFiles(): Promise<{
 
   // Create basic patterns from known data
   const patterns: FailurePattern[] = [
-    { category: 'Unknown', count: 86, tests: [], commonMessage: 'Run tests to get detailed error information' },
+    {
+      category: 'Unknown',
+      count: 86,
+      tests: [],
+      commonMessage: 'Run tests to get detailed error information',
+    },
   ];
 
   return {
@@ -743,10 +787,10 @@ async function main() {
       }
 
       // Run tests with JSON reporter (Playwright config should handle output)
-      await execAsync(
-        'npx playwright test --reporter=json',
-        { cwd: process.cwd(), maxBuffer: 10 * 1024 * 1024 }
-      );
+      await execAsync('npx playwright test --reporter=json', {
+        cwd: process.cwd(),
+        maxBuffer: 10 * 1024 * 1024,
+      });
 
       // Check for report in expected locations
       for (const possiblePath of possibleReportPaths) {

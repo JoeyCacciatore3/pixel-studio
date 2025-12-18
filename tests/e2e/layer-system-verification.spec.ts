@@ -20,7 +20,14 @@ function createTestImage(): Buffer {
   // Create a simple 100x100 PNG with red square
   // This is a minimal valid PNG
   const pngHeader = Buffer.from([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
+    0x89,
+    0x50,
+    0x4e,
+    0x47,
+    0x0d,
+    0x0a,
+    0x1a,
+    0x0a, // PNG signature
   ]);
 
   // For simplicity, we'll use a data URL approach instead
@@ -60,7 +67,10 @@ test.describe('Layer System Verification', () => {
 
       // Open layers panel if not already open
       const layersToggle = page.locator('.layers-controls-toggle');
-      const isPanelOpen = await page.locator('.layers-controls-content').isVisible().catch(() => false);
+      const isPanelOpen = await page
+        .locator('.layers-controls-content')
+        .isVisible()
+        .catch(() => false);
       if (!isPanelOpen) {
         await expect(layersToggle).toBeVisible({ timeout: 10000 });
         await layersToggle.click({ timeout: 10000 });

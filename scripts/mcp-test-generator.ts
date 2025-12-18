@@ -10,9 +10,7 @@ import {
   getRecommendedPatterns,
   validateTestAgainstBestPractices,
 } from '../tests/e2e/helpers/mcp-context7-helpers';
-import {
-  findSimilarPatterns,
-} from '../tests/e2e/helpers/mcp-memory-helpers';
+import { findSimilarPatterns } from '../tests/e2e/helpers/mcp-memory-helpers';
 
 interface TestGenerationOptions {
   description: string;
@@ -26,45 +24,43 @@ interface TestGenerationOptions {
 /**
  * Generate test code from description
  */
-async function generateTestFromDescription(
-  options: TestGenerationOptions
-): Promise<string> {
+async function generateTestFromDescription(options: TestGenerationOptions): Promise<string> {
   const { description, testName, category, tags, usePatterns } = options;
 
   console.log('🤖 Generating test from description...');
   console.log(`Description: ${description}\n`);
 
   // Find similar patterns if enabled (uses Memory MCP with fallback)
-  let similarPatterns: any[] = []
+  let similarPatterns: any[] = [];
   if (usePatterns) {
-    similarPatterns = await findSimilarPatterns(description)
+    similarPatterns = await findSimilarPatterns(description);
     if (similarPatterns.length > 0) {
-      console.log(`📚 Found ${similarPatterns.length} similar patterns to reference`)
+      console.log(`📚 Found ${similarPatterns.length} similar patterns to reference`);
     }
   }
 
   // Get recommended pattern for the category (uses Context7 MCP with fallback)
-  let recommendedPattern: string | null = null
+  let recommendedPattern: string | null = null;
   if (category) {
-    recommendedPattern = await getRecommendedPatterns(category)
+    recommendedPattern = await getRecommendedPatterns(category);
   }
 
   // Try Coding-Agent MCP for code generation if available
   // Note: MCP functions are called dynamically at runtime, not statically typed
-  let generatedCode: string | null = null
+  let generatedCode: string | null = null;
   try {
     // MCP function calls are handled at runtime via MCP server integration
     // This would be called via the MCP client, not directly in TypeScript
     // For now, we'll skip direct MCP calls and use pattern-based generation
-    const matches: Array<{ file: string; line: number; content: string }> = []
+    const matches: Array<{ file: string; line: number; content: string }> = [];
     if (matches.length > 0) {
       // Extract code from matches
-      generatedCode = matches.map((m: any) => m.context || m.line).join('\n')
+      generatedCode = matches.map((m: any) => m.context || m.line).join('\n');
     }
   } catch (error: any) {
     // Coding-Agent unavailable, will use pattern-based generation
     if (error.message !== 'Timeout') {
-      console.warn('Coding-Agent unavailable for code generation, using pattern-based approach')
+      console.warn('Coding-Agent unavailable for code generation, using pattern-based approach');
     }
   }
 
@@ -83,7 +79,7 @@ async function generateTestFromDescription(
 
   if (!validation.isValid) {
     console.log('⚠️  Validation issues found:');
-    validation.issues.forEach(issue => {
+    validation.issues.forEach((issue) => {
       console.log(`   Line ${issue.line}: ${issue.message}`);
       console.log(`   Suggestion: ${issue.suggestion}`);
     });
@@ -91,7 +87,7 @@ async function generateTestFromDescription(
 
   if (validation.suggestions.length > 0) {
     console.log('\n💡 Suggestions:');
-    validation.suggestions.forEach(suggestion => {
+    validation.suggestions.forEach((suggestion) => {
       console.log(`   - ${suggestion}`);
     });
   }
@@ -103,14 +99,14 @@ async function generateTestFromDescription(
  * Generate test code structure
  */
 function generateTestCode(options: {
-  description: string
-  testName: string
-  similarPatterns: any[]
-  recommendedPattern: string | null
-  tags: string[]
-  generatedCode?: string | null
+  description: string;
+  testName: string;
+  similarPatterns: any[];
+  recommendedPattern: string | null;
+  tags: string[];
+  generatedCode?: string | null;
 }): string {
-  const { description, testName, similarPatterns, recommendedPattern, generatedCode } = options
+  const { description, testName, similarPatterns, recommendedPattern, generatedCode } = options;
 
   // Extract key actions from description
   const actions = extractActions(description);
@@ -119,7 +115,13 @@ function generateTestCode(options: {
   const imports = generateImports(actions);
 
   // Generate test body
-  const testBody = generateTestBody(description, actions, similarPatterns, recommendedPattern, generatedCode)
+  const testBody = generateTestBody(
+    description,
+    actions,
+    similarPatterns,
+    recommendedPattern,
+    generatedCode
+  );
 
   // Generate test code
   const testCode = `
@@ -146,14 +148,30 @@ ${testBody}
  */
 function extractActions(description: string): string[] {
   const actionKeywords = [
-    'click', 'select', 'draw', 'type', 'fill', 'upload', 'clear', 'undo', 'redo',
-    'create', 'delete', 'toggle', 'move', 'resize', 'zoom', 'pan', 'save', 'load'
+    'click',
+    'select',
+    'draw',
+    'type',
+    'fill',
+    'upload',
+    'clear',
+    'undo',
+    'redo',
+    'create',
+    'delete',
+    'toggle',
+    'move',
+    'resize',
+    'zoom',
+    'pan',
+    'save',
+    'load',
   ];
 
   const actions: string[] = [];
   const lowerDesc = description.toLowerCase();
 
-  actionKeywords.forEach(keyword => {
+  actionKeywords.forEach((keyword) => {
     if (lowerDesc.includes(keyword)) {
       actions.push(keyword);
     }
@@ -168,7 +186,7 @@ function extractActions(description: string): string[] {
 function extractFeature(description: string): string {
   // Simple extraction - take first few words
   const words = description.split(' ').slice(0, 3);
-  return words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 /**
@@ -184,8 +202,9 @@ function generateTestName(description: string): string {
     .trim();
 
   // Capitalize first letter of each word
-  name = name.split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+  name = name
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
   return name;
@@ -225,27 +244,27 @@ function generateTestBody(
   recommendedPattern: string | null,
   generatedCode?: string | null
 ): string {
-  const lines: string[] = []
-  const indent = '    '
+  const lines: string[] = [];
+  const indent = '    ';
 
   // Use Coding-Agent generated code if available
   if (generatedCode) {
     const codeLines = generatedCode
       .split('\n')
-      .filter(line => line.trim())
-      .map(line => indent + line.trim())
-    lines.push(...codeLines)
-    return lines.join('\n')
+      .filter((line) => line.trim())
+      .map((line) => indent + line.trim());
+    lines.push(...codeLines);
+    return lines.join('\n');
   }
 
   // Use recommended pattern if available
   if (recommendedPattern) {
     const patternLines = recommendedPattern
       .split('\n')
-      .filter(line => line.trim() && !line.includes('// Recommended pattern'))
-      .map(line => indent + line.trim())
-    lines.push(...patternLines)
-    return lines.join('\n')
+      .filter((line) => line.trim() && !line.includes('// Recommended pattern'))
+      .map((line) => indent + line.trim());
+    lines.push(...patternLines);
+    return lines.join('\n');
   }
 
   // Use similar pattern if available
@@ -309,10 +328,7 @@ function extractExpected(description: string): string | null {
 /**
  * Save generated test to file
  */
-async function saveTestToFile(
-  testCode: string,
-  testFile: string
-): Promise<string> {
+async function saveTestToFile(testCode: string, testFile: string): Promise<string> {
   const filePath = join(process.cwd(), 'tests/e2e', testFile);
 
   // Check if file exists
@@ -367,7 +383,7 @@ async function saveTestToFile(
     } else if (arg === '--category' && args[i + 1]) {
       options.category = args[++i];
     } else if (arg === '--tags' && args[i + 1]) {
-      options.tags = args[++i].split(',').map(t => t.trim());
+      options.tags = args[++i].split(',').map((t) => t.trim());
     } else if (arg === '--use-patterns') {
       options.usePatterns = true;
     }
@@ -383,10 +399,7 @@ async function saveTestToFile(
 
     // Save if requested
     if (options.testFile) {
-      const filePath = await saveTestToFile(
-        testCode,
-        options.testFile
-      );
+      const filePath = await saveTestToFile(testCode, options.testFile);
       console.log(`✅ Test saved to: ${filePath}`);
     } else {
       console.log('💡 Use --save --file <path> to save the test');

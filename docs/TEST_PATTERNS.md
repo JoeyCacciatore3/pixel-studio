@@ -39,11 +39,11 @@ test.beforeEach(async ({ page }) => {
 
 ```typescript
 await waitForAppReady(page, {
-  maxWait: 30000,              // Maximum wait time (default: 30000ms)
-  waitForCanvas: true,        // Wait for canvas (default: true)
-  waitForStateManager: true,  // Wait for state manager (default: true)
-  waitForUI: true,            // Wait for UI components (default: true)
-  waitForNetworkIdle: true,   // Wait for network idle (default: true)
+  maxWait: 30000, // Maximum wait time (default: 30000ms)
+  waitForCanvas: true, // Wait for canvas (default: true)
+  waitForStateManager: true, // Wait for state manager (default: true)
+  waitForUI: true, // Wait for UI components (default: true)
+  waitForNetworkIdle: true, // Wait for network idle (default: true)
 });
 ```
 
@@ -58,6 +58,7 @@ Use `data-testid` attributes for reliable element selection. These attributes ar
 Format: `testid-{component}-{element}`
 
 Examples:
+
 - `testid-toolbar-pencil` - Pencil tool button in toolbar
 - `testid-history-undo` - Undo button in history controls
 - `testid-layer-toggle-visibility-{layerId}` - Layer visibility toggle
@@ -81,7 +82,8 @@ await undoButton.click();
 When data-testid might not be available, use CSS selectors as fallback:
 
 ```typescript
-const element = page.locator('[data-testid="testid-toolbar-pencil"]')
+const element = page
+  .locator('[data-testid="testid-toolbar-pencil"]')
   .or(page.locator('.tool-btn[data-tool="pencil"]').first());
 ```
 
@@ -103,7 +105,7 @@ expect(result.match).toBe(true);
 // Compare with custom tolerance (5% for rendering variations)
 const result = await compareCanvasStatesWithTolerance(page, state1, state2, {
   tolerance: 0.05,
-  maxDiffPixels: 1000,  // Optional: max absolute pixel difference
+  maxDiffPixels: 1000, // Optional: max absolute pixel difference
 });
 ```
 
@@ -142,10 +144,10 @@ import { waitForElementInteractive } from './helpers/element-helpers';
 const button = page.locator('#myButton');
 await waitForElementInteractive(button, {
   maxWait: 10000,
-  waitForVisible: true,      // Wait for visible (default: true)
-  waitForEnabled: true,      // Wait for enabled (default: true)
+  waitForVisible: true, // Wait for visible (default: true)
+  waitForEnabled: true, // Wait for enabled (default: true)
   waitForNotAnimating: true, // Wait for animations to complete (default: true)
-  waitForInViewport: true,   // Wait for in viewport (default: true)
+  waitForInViewport: true, // Wait for in viewport (default: true)
 });
 await button.click();
 ```
@@ -302,12 +304,14 @@ try {
 ### Migrating from CSS Selectors
 
 **Before:**
+
 ```typescript
 const button = page.locator('.tool-btn[data-tool="pencil"]').first();
 await button.click();
 ```
 
 **After:**
+
 ```typescript
 const button = await getByTestId(page, 'testid-toolbar-pencil');
 await waitForElementInteractive(button);
@@ -317,12 +321,14 @@ await button.click();
 ### Migrating from Strict Canvas Comparison
 
 **Before:**
+
 ```typescript
 const match = await compareCanvasStates(page, state1, state2);
 expect(match).toBe(true);
 ```
 
 **After:**
+
 ```typescript
 const result = await compareCanvasStatesWithTolerance(page, state1, state2, {
   tolerance: 0.01,

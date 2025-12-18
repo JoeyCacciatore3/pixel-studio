@@ -32,10 +32,7 @@ function closeGaps(imageData: ImageData, maxGapSize: number): ImageData {
 /**
  * Straighten lines by snapping to angles
  */
-function straightenLines(
-  imageData: ImageData,
-  snapAngles: number[]
-): ImageData {
+function straightenLines(imageData: ImageData, snapAngles: number[]): ImageData {
   const { width, height } = imageData;
   const edgeMap = detectEdges(imageData, 30, true);
   const contours = findAllContours(edgeMap, width, height);

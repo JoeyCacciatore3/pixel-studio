@@ -11,11 +11,7 @@ import {
   drawStroke,
   APP_URL,
 } from './helpers/canvas-helpers';
-import {
-  measurePerformance,
-  getCanvasImageData,
-  compareImages,
-} from './helpers/cleanup-helpers';
+import { measurePerformance, getCanvasImageData, compareImages } from './helpers/cleanup-helpers';
 
 test.describe('Advanced Tools - Comprehensive Testing', () => {
   test.beforeEach(async ({ page }) => {

@@ -62,7 +62,5 @@
     "unavailable": 5,
     "averageLatency": 0
   },
-  "recommendations": [
-    "5 MCP agent(s) are unavailable. Functional fallbacks will be used."
-  ]
+  "recommendations": ["5 MCP agent(s) are unavailable. Functional fallbacks will be used."]
 }

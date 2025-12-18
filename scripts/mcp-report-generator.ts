@@ -6,13 +6,11 @@
 
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import {
-  getTestStatistics,
-} from '../tests/e2e/helpers/mcp-playwright-helpers'
+import { getTestStatistics } from '../tests/e2e/helpers/mcp-playwright-helpers';
 import {
   getOptimizationRecommendations,
   getTestPatterns,
-} from '../tests/e2e/helpers/mcp-memory-helpers'
+} from '../tests/e2e/helpers/mcp-memory-helpers';
 // MCP helpers imported but used conditionally via fallbacks
 
 interface TestReport {
@@ -319,30 +317,44 @@ async function generateHTMLReport(report: TestReport): Promise<string> {
       </div>
     </div>
 
-    ${report.failures.length > 0 ? `
+    ${
+      report.failures.length > 0
+        ? `
     <div class="section">
       <h2>❌ Failures (${report.failures.length})</h2>
-      ${report.failures.map(failure => `
+      ${report.failures
+        .map(
+          (failure) => `
         <div class="failure-item">
           <h4>${failure.test}</h4>
           <p><strong>File:</strong> ${failure.file}</p>
           <p><strong>Duration:</strong> ${failure.duration.toFixed(2)}ms</p>
           <div class="error">${failure.error}</div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
-    ${report.statistics.flakyTests.length > 0 ? `
+    ${
+      report.statistics.flakyTests.length > 0
+        ? `
     <div class="section">
       <h2>⚠️ Flaky Tests (${report.statistics.flakyTests.length})</h2>
       <ul>
-        ${report.statistics.flakyTests.map(test => `<li>${test}</li>`).join('')}
+        ${report.statistics.flakyTests.map((test) => `<li>${test}</li>`).join('')}
       </ul>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
-    ${report.statistics.slowestTests.length > 0 ? `
+    ${
+      report.statistics.slowestTests.length > 0
+        ? `
     <div class="section">
       <h2>🐌 Slowest Tests</h2>
       <table>
@@ -353,32 +365,50 @@ async function generateHTMLReport(report: TestReport): Promise<string> {
           </tr>
         </thead>
         <tbody>
-          ${report.statistics.slowestTests.map(test => `
+          ${report.statistics.slowestTests
+            .map(
+              (test) => `
             <tr>
               <td>${test.name}</td>
               <td>${test.duration.toFixed(2)}ms</td>
             </tr>
-          `).join('')}
+          `
+            )
+            .join('')}
         </tbody>
       </table>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
-    ${report.insights.recommendations.length > 0 ? `
+    ${
+      report.insights.recommendations.length > 0
+        ? `
     <div class="section">
       <h2>💡 Optimization Recommendations</h2>
-      ${report.insights.recommendations.map(rec => `
+      ${report.insights.recommendations
+        .map(
+          (rec) => `
         <div class="recommendation">
           ${rec}
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
-    ${report.insights.patterns.length > 0 ? `
+    ${
+      report.insights.patterns.length > 0
+        ? `
     <div class="section">
       <h2>📚 Test Patterns</h2>
-      ${report.insights.patterns.map(pattern => `
+      ${report.insights.patterns
+        .map(
+          (pattern) => `
         <div class="pattern-item">
           <h4>${pattern.name}</h4>
           <p>${pattern.description}</p>
@@ -388,9 +418,13 @@ async function generateHTMLReport(report: TestReport): Promise<string> {
             Success Rate: ${(pattern.successRate * 100).toFixed(1)}%
           </div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
-    ` : ''}
+    `
+        : ''
+    }
   </div>
 </body>
 </html>

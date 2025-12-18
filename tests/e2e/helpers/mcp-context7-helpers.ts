@@ -3,18 +3,16 @@
  * Provides documentation lookup and best practices integration for testing
  */
 
-import { CachedDocumentation } from './mcp-fallbacks'
-import { join } from 'path'
+import { CachedDocumentation } from './mcp-fallbacks';
+import { join } from 'path';
 
 // Initialize cached documentation
-const cachedDocs = new CachedDocumentation(
-  join(process.cwd(), 'tests/e2e/.context7-cache.json')
-)
+const cachedDocs = new CachedDocumentation(join(process.cwd(), 'tests/e2e/.context7-cache.json'));
 
 // Load cache on module load
 cachedDocs.loadCache().catch(() => {
   // Cache load failed, will use fallback
-})
+});
 
 /**
  * Lookup Playwright best practices from Context7
@@ -24,26 +22,27 @@ export async function lookupPlaywrightBestPractices(topic: string): Promise<stri
     // Try Context7 MCP first
     try {
       // Check cache first
-      const cacheKey = `playwright-${topic}`
-      const cached = cachedDocs.get(cacheKey)
+      const cacheKey = `playwright-${topic}`;
+      const cached = cachedDocs.get(cacheKey);
       if (cached) {
-        return cached
+        return cached;
       }
 
       // MCP functions are accessed dynamically at runtime via MCP server
       // Using type assertion as MCP functions are injected at runtime
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mcpContext7 = (globalThis as any)
+      const mcpContext7 = globalThis as any;
 
-      if (mcpContext7.mcp_context7_resolve_library_id && mcpContext7.mcp_context7_get_library_docs) {
+      if (
+        mcpContext7.mcp_context7_resolve_library_id &&
+        mcpContext7.mcp_context7_get_library_docs
+      ) {
         const libraryIdResult = (await Promise.race([
           mcpContext7.mcp_context7_resolve_library_id({ libraryName: 'playwright' }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 5000)
-          ),
-        ])) as { libraries?: Array<{ id: string }> }
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000)),
+        ])) as { libraries?: Array<{ id: string }> };
 
-        const libraryId = libraryIdResult?.libraries?.[0]?.id || '/playwright/playwright'
+        const libraryId = libraryIdResult?.libraries?.[0]?.id || '/playwright/playwright';
 
         const docsResult = (await Promise.race([
           mcpContext7.mcp_context7_get_library_docs({
@@ -51,32 +50,30 @@ export async function lookupPlaywrightBestPractices(topic: string): Promise<stri
             topic: topic,
             mode: 'code',
           }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 5000)
-          ),
-        ])) as { content?: string } | string
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000)),
+        ])) as { content?: string } | string;
 
-        const docs = typeof docsResult === 'string' ? docsResult : docsResult?.content
+        const docs = typeof docsResult === 'string' ? docsResult : docsResult?.content;
         if (docs && typeof docs === 'string' && docs.length > 0) {
           // Cache the result
-          await cachedDocs.set(cacheKey, docs)
-          return docs
+          await cachedDocs.set(cacheKey, docs);
+          return docs;
         }
       }
     } catch (error: any) {
       // Context7 unavailable or timed out, use fallback
       if (error.message !== 'Timeout') {
-        console.warn('Context7 MCP unavailable, using fallback:', error.message)
+        console.warn('Context7 MCP unavailable, using fallback:', error.message);
       }
     }
 
     // Use enhanced fallback (real data, not placeholder)
-    const fallback = cachedDocs.getEnhancedBestPractices(topic)
-    return fallback || null
+    const fallback = cachedDocs.getEnhancedBestPractices(topic);
+    return fallback || null;
   } catch (error) {
-    console.error('Error looking up best practices:', error)
+    console.error('Error looking up best practices:', error);
     // Return enhanced fallback even on error
-    return cachedDocs.getEnhancedBestPractices(topic)
+    return cachedDocs.getEnhancedBestPractices(topic);
   }
 }
 
@@ -87,25 +84,26 @@ export async function getReactTestingPatterns(pattern: string): Promise<string |
   try {
     // Try Context7 MCP first
     try {
-      const cacheKey = `react-${pattern}`
-      const cached = cachedDocs.get(cacheKey)
+      const cacheKey = `react-${pattern}`;
+      const cached = cachedDocs.get(cacheKey);
       if (cached) {
-        return cached
+        return cached;
       }
 
       // MCP functions are accessed dynamically at runtime via MCP server
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mcpContext7 = (globalThis as any)
+      const mcpContext7 = globalThis as any;
 
-      if (mcpContext7.mcp_context7_resolve_library_id && mcpContext7.mcp_context7_get_library_docs) {
+      if (
+        mcpContext7.mcp_context7_resolve_library_id &&
+        mcpContext7.mcp_context7_get_library_docs
+      ) {
         const libraryIdResult = (await Promise.race([
           mcpContext7.mcp_context7_resolve_library_id({ libraryName: 'react' }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 5000)
-          ),
-        ])) as { libraries?: Array<{ id: string }> }
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000)),
+        ])) as { libraries?: Array<{ id: string }> };
 
-        const libraryId = libraryIdResult?.libraries?.[0]?.id || '/facebook/react'
+        const libraryId = libraryIdResult?.libraries?.[0]?.id || '/facebook/react';
 
         const docsResult = (await Promise.race([
           mcpContext7.mcp_context7_get_library_docs({
@@ -113,20 +111,18 @@ export async function getReactTestingPatterns(pattern: string): Promise<string |
             topic: pattern,
             mode: 'code',
           }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 5000)
-          ),
-        ])) as { content?: string } | string
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000)),
+        ])) as { content?: string } | string;
 
-        const docs = typeof docsResult === 'string' ? docsResult : docsResult?.content
+        const docs = typeof docsResult === 'string' ? docsResult : docsResult?.content;
         if (docs && typeof docs === 'string' && docs.length > 0) {
-          await cachedDocs.set(cacheKey, docs)
-          return docs
+          await cachedDocs.set(cacheKey, docs);
+          return docs;
         }
       }
     } catch (error: any) {
       if (error.message !== 'Timeout') {
-        console.warn('Context7 MCP unavailable for React patterns, using fallback')
+        console.warn('Context7 MCP unavailable for React patterns, using fallback');
       }
     }
 
@@ -152,7 +148,7 @@ export async function getReactTestingPatterns(pattern: string): Promise<string |
 - Test state transitions and side effects
 - Use fixtures for initial state`,
 
-      'routing': `Test Next.js routing:
+      routing: `Test Next.js routing:
 - Mock router when needed: const router = useRouter()
 - Test navigation: await page.click('a[href="/page"]')
 - Verify route changes: expect(page.url()).toContain('/page')
@@ -163,26 +159,26 @@ export async function getReactTestingPatterns(pattern: string): Promise<string |
 - Use MSW (Mock Service Worker) for comprehensive mocking
 - Mock responses match real API structure
 - Test error scenarios with failed requests`,
-    }
+    };
 
-    return enhancedPatterns[pattern.toLowerCase()] ||
+    return (
+      enhancedPatterns[pattern.toLowerCase()] ||
       `React/Next.js testing pattern for ${pattern}:
 - Follow React Testing Library best practices
 - Test user interactions, not implementation
 - Use proper async handling
 - Mock external dependencies appropriately`
+    );
   } catch (error) {
-    console.error('Error getting React testing patterns:', error)
-    return null
+    console.error('Error getting React testing patterns:', error);
+    return null;
   }
 }
 
 /**
  * Validate test against best practices
  */
-export async function validateTestAgainstBestPractices(
-  testCode: string
-): Promise<{
+export async function validateTestAgainstBestPractices(testCode: string): Promise<{
   isValid: boolean;
   issues: Array<{ line: number; message: string; suggestion: string }>;
   suggestions: string[];
@@ -219,7 +215,11 @@ export async function validateTestAgainstBestPractices(
     }
 
     // Check for proper waiting
-    if (line.includes('page.click') && !testCode.includes('waitFor') && !testCode.includes('toBeVisible')) {
+    if (
+      line.includes('page.click') &&
+      !testCode.includes('waitFor') &&
+      !testCode.includes('toBeVisible')
+    ) {
       suggestions.push('Ensure element is visible before clicking');
     }
   });
@@ -312,25 +312,26 @@ export async function getPlaywrightAPIReference(method: string): Promise<string 
   try {
     // Try Context7 MCP first
     try {
-      const cacheKey = `playwright-api-${method}`
-      const cached = cachedDocs.get(cacheKey)
+      const cacheKey = `playwright-api-${method}`;
+      const cached = cachedDocs.get(cacheKey);
       if (cached) {
-        return cached
+        return cached;
       }
 
       // MCP functions are accessed dynamically at runtime via MCP server
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mcpContext7 = (globalThis as any)
+      const mcpContext7 = globalThis as any;
 
-      if (mcpContext7.mcp_context7_resolve_library_id && mcpContext7.mcp_context7_get_library_docs) {
+      if (
+        mcpContext7.mcp_context7_resolve_library_id &&
+        mcpContext7.mcp_context7_get_library_docs
+      ) {
         const libraryIdResult = (await Promise.race([
           mcpContext7.mcp_context7_resolve_library_id({ libraryName: 'playwright' }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 5000)
-          ),
-        ])) as { libraries?: Array<{ id: string }> }
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000)),
+        ])) as { libraries?: Array<{ id: string }> };
 
-        const libraryId = libraryIdResult?.libraries?.[0]?.id || '/playwright/playwright'
+        const libraryId = libraryIdResult?.libraries?.[0]?.id || '/playwright/playwright';
 
         const docsResult = (await Promise.race([
           mcpContext7.mcp_context7_get_library_docs({
@@ -338,20 +339,18 @@ export async function getPlaywrightAPIReference(method: string): Promise<string 
             topic: method,
             mode: 'code',
           }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 5000)
-          ),
-        ])) as { content?: string } | string
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000)),
+        ])) as { content?: string } | string;
 
-        const docs = typeof docsResult === 'string' ? docsResult : docsResult?.content
+        const docs = typeof docsResult === 'string' ? docsResult : docsResult?.content;
         if (docs && typeof docs === 'string' && docs.length > 0) {
-          await cachedDocs.set(cacheKey, docs)
-          return docs
+          await cachedDocs.set(cacheKey, docs);
+          return docs;
         }
       }
     } catch (error: any) {
       if (error.message !== 'Timeout') {
-        console.warn('Context7 MCP unavailable for API reference, using fallback')
+        console.warn('Context7 MCP unavailable for API reference, using fallback');
       }
     }
 
@@ -399,15 +398,17 @@ Options:
 - path: Save path
 - fullPage: Capture full page
 Example: await page.screenshot({ path: 'screenshot.png' })`,
-    }
+    };
 
-    return enhancedApiDocs[method] ||
+    return (
+      enhancedApiDocs[method] ||
       `Playwright API reference for ${method}:
 - Check Playwright documentation: https://playwright.dev/docs/api
 - Use auto-waiting features when available
 - Set appropriate timeouts for operations`
+    );
   } catch (error) {
-    console.error('Error getting API reference:', error)
-    return null
+    console.error('Error getting API reference:', error);
+    return null;
   }
 }

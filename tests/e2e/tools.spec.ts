@@ -110,10 +110,8 @@ test.describe('Tool Initialization Tests', () => {
         await page.waitForTimeout(500); // Allow initialization
 
         // Check for errors (allow some non-critical errors)
-        const criticalErrors = errors.filter((e) =>
-          !e.includes('favicon') &&
-          !e.includes('service-worker') &&
-          !e.includes('manifest')
+        const criticalErrors = errors.filter(
+          (e) => !e.includes('favicon') && !e.includes('service-worker') && !e.includes('manifest')
         );
 
         if (criticalErrors.length > 0) {

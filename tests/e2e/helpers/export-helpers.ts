@@ -15,7 +15,9 @@ export async function triggerExport(page: Page): Promise<{ download: any; filena
   const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
 
   // Click export button
-  const exportBtn = page.locator('[data-testid="testid-export-btn"], #exportBtn, button[aria-label*="Export"]').first();
+  const exportBtn = page
+    .locator('[data-testid="testid-export-btn"], #exportBtn, button[aria-label*="Export"]')
+    .first();
   await expect(exportBtn).toBeVisible({ timeout: 10000 });
   await exportBtn.click();
 

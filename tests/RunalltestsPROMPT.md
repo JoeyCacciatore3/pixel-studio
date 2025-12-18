@@ -1,12 +1,15 @@
 # Run All E2E Tests and Generate Detailed Report with MCP Agents
 
 ## Project Context
+
 I'm working on Pixel Studio, a web-based pixel art editor with comprehensive Playwright e2e tests (316 tests across 19 spec files). The project has extensive MCP (Model Context Protocol) integration configured.
 
 ## Task
+
 Run all e2e tests and generate a comprehensive failure report using MCP agents for enhanced analysis and insights.
 
 ## Available MCP Agents
+
 1. **Playwright MCP**: Browser automation, test execution, debugging
 2. **Context7**: Documentation and best practices lookup
 3. **Memory MCP**: Test pattern storage and learning
@@ -19,16 +22,21 @@ Run all e2e tests and generate a comprehensive failure report using MCP agents f
 ## Execution Strategy
 
 ### Step 1: Run Tests with MCP Enhancement
+
 # Option A: Use MCP-enhanced test runner (recommended)
+
 tsx scripts/mcp-enhanced-test-runner.ts
 
 # Option B: Use npm script for chromium-only tests
+
 npm run test:e2e:chromium-only
 
 # Option C: Use standard runner with full report
+
 npm run test:e2e:full-report
 
 ### Step 2: Use MCP Agents for Analysis
+
 After tests complete, use MCP agents to:
 
 1. **Context7**: Look up best practices for common failure patterns
@@ -52,7 +60,9 @@ After tests complete, use MCP agents to:
    - "How should we fix configuration issues in test files?"
 
 ### Step 3: Generate Enhanced Report
+
 # Generate MCP-enhanced report with insights
+
 tsx scripts/mcp-report-generator.ts
 
 ## What I Need
@@ -81,6 +91,7 @@ tsx scripts/mcp-report-generator.ts
 ## Expected Output
 
 ### Enhanced Failure Report
+
 - Standard failure details (errors, stack traces, artifacts)
 - **MCP Insights**: Best practice recommendations from Context7
 - **Pattern Analysis**: Similar failures from Memory MCP
@@ -88,12 +99,14 @@ tsx scripts/mcp-report-generator.ts
 - **Action Plan**: Prioritized fix strategy from Sequential-Thinking
 
 ### MCP-Generated Artifacts
+
 - Test pattern storage in Memory MCP
 - Optimization recommendations
 - Code fixes ready to apply
 - Best practice documentation references
 
 ## Success Criteria
+
 - All tests execute with MCP-enhanced debugging
 - Failure patterns are analyzed using Sequential-Thinking
 - Best practices are looked up via Context7

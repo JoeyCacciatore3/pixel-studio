@@ -256,7 +256,6 @@ const StateManager = (function () {
     updateState({ selectionAntiAlias: antiAlias });
   }
 
-
   function setLayers(layers: AppState['layers']): void {
     // Validate layer structure
     if (!Array.isArray(layers)) {

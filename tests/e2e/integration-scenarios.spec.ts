@@ -11,10 +11,7 @@ import {
   drawStroke,
   clearCanvas,
 } from './helpers/canvas-helpers';
-import {
-  checkErrorRecoveryPossible,
-  triggerErrorRecovery,
-} from './helpers/error-helpers';
+import { checkErrorRecoveryPossible, triggerErrorRecovery } from './helpers/error-helpers';
 import { waitForStateManagerReady, checkStateConsistency } from './helpers/state-helpers';
 import { APP_URL } from './helpers/test-constants';
 
@@ -177,7 +174,7 @@ test.describe('Integration Scenarios Tests', () => {
   test('should handle import workflows with errors', async ({ page }) => {
     // Try to import image
     const fileInput = page.locator('input[type="file"]#imageUpload');
-    if (await fileInput.count() > 0) {
+    if ((await fileInput.count()) > 0) {
       // File input exists, test would require actual file
       // Just verify input is present
       await expect(fileInput).toHaveCount(1);

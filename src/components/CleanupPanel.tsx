@@ -9,10 +9,12 @@ import type {
   EdgeSmootherMode,
   LogoCleanerPreset,
 } from '@/types/cleanup';
+import ProgressIndicator from './ProgressIndicator';
 
 export default function CleanupPanel() {
   const state = useAppState();
   const activeTool = state.currentTool || '';
+  const [progress, setProgress] = useState({ visible: false, value: 0, stage: '' });
 
   // Only show panel for cleanup tools
   if (!activeTool.startsWith('cleanup-')) {
@@ -20,28 +22,51 @@ export default function CleanupPanel() {
   }
 
   return (
-    <div className="panel-section">
-      <h2 className="panel-title">Cleanup Options</h2>
-      {activeTool === 'cleanup-stray-pixels' && <StrayPixelOptions />}
-      {activeTool === 'cleanup-color-reduce' && <ColorReducerOptions />}
-      {activeTool === 'cleanup-edge-crisp' && <EdgeCrispenerOptions />}
-      {activeTool === 'cleanup-edge-smooth' && <EdgeSmootherOptions />}
-      {activeTool === 'cleanup-line-normalize' && <LineNormalizerOptions />}
-      {activeTool === 'cleanup-outline' && <OutlinePerfecterOptions />}
-      {activeTool === 'cleanup-logo' && <LogoCleanerOptions />}
-      {activeTool === 'cleanup-inspector' && <InspectorOptions />}
-    </div>
+    <>
+      <div className="panel-section">
+        <h2 className="panel-title">Cleanup Options</h2>
+        {activeTool === 'cleanup-stray-pixels' && (
+          <StrayPixelOptions
+            onProgress={(p, s) => setProgress({ visible: p > 0 && p < 100, value: p, stage: s })}
+          />
+        )}
+        {activeTool === 'cleanup-color-reduce' && (
+          <ColorReducerOptions
+            onProgress={(p, s) => setProgress({ visible: p > 0 && p < 100, value: p, stage: s })}
+          />
+        )}
+        {activeTool === 'cleanup-edge-crisp' && <EdgeCrispenerOptions />}
+        {activeTool === 'cleanup-edge-smooth' && <EdgeSmootherOptions />}
+        {activeTool === 'cleanup-line-normalize' && <LineNormalizerOptions />}
+        {activeTool === 'cleanup-outline' && <OutlinePerfecterOptions />}
+        {activeTool === 'cleanup-logo' && (
+          <LogoCleanerOptions
+            onProgress={(p, s) => setProgress({ visible: p > 0 && p < 100, value: p, stage: s })}
+          />
+        )}
+        {activeTool === 'cleanup-inspector' && <InspectorOptions />}
+      </div>
+      <ProgressIndicator
+        isVisible={progress.visible}
+        progress={progress.value}
+        operationName={progress.stage || 'Processing...'}
+      />
+    </>
   );
 }
 
-function StrayPixelOptions() {
+function StrayPixelOptions({
+  onProgress,
+}: {
+  onProgress?: (progress: number, stage: string) => void;
+}) {
   const [minSize, setMinSize] = useState(3);
   const [merge, setMerge] = useState(false);
 
   const handleApply = async () => {
     const tool = PixelStudio.getTool('cleanup-stray-pixels');
     if (tool && 'execute' in tool && typeof tool.execute === 'function') {
-      await tool.execute({ minSize, merge, useWorker: true });
+      await tool.execute({ minSize, merge, useWorker: true, onProgress });
     }
   };
 
@@ -73,7 +98,11 @@ function StrayPixelOptions() {
   );
 }
 
-function ColorReducerOptions() {
+function ColorReducerOptions({
+  onProgress,
+}: {
+  onProgress?: (progress: number, stage: string) => void;
+}) {
   const [mode, setMode] = useState<CleanupMode>('auto-clean');
   const [threshold, setThreshold] = useState(15);
   const [nColors, setNColors] = useState(16);
@@ -87,6 +116,7 @@ function ColorReducerOptions() {
         nColors,
         useWorker: true,
         useLab: true,
+        onProgress,
       });
     }
   };
@@ -95,10 +125,7 @@ function ColorReducerOptions() {
     <div className="cleanup-options">
       <div className="slider-group">
         <label>Mode</label>
-        <select
-          value={mode}
-          onChange={(e) => setMode(e.target.value as CleanupMode)}
-        >
+        <select value={mode} onChange={(e) => setMode(e.target.value as CleanupMode)}>
           <option value="auto-clean">Auto-clean</option>
           <option value="palette-lock">Palette Lock</option>
           <option value="quantize">Quantize</option>
@@ -162,10 +189,7 @@ function EdgeCrispenerOptions() {
     <div className="cleanup-options">
       <div className="slider-group">
         <label>Method</label>
-        <select
-          value={method}
-          onChange={(e) => setMethod(e.target.value as CleanupMethod)}
-        >
+        <select value={method} onChange={(e) => setMethod(e.target.value as CleanupMethod)}>
           <option value="threshold">Threshold</option>
           <option value="erode">Erode</option>
           <option value="decontaminate">Decontaminate</option>
@@ -228,10 +252,7 @@ function EdgeSmootherOptions() {
     <div className="cleanup-options">
       <div className="slider-group">
         <label>Mode</label>
-        <select
-          value={mode}
-          onChange={(e) => setMode(e.target.value as EdgeSmootherMode)}
-        >
+        <select value={mode} onChange={(e) => setMode(e.target.value as EdgeSmootherMode)}>
           <option value="subtle">Subtle</option>
           <option value="standard">Standard</option>
           <option value="smooth">Smooth</option>
@@ -316,7 +337,11 @@ function OutlinePerfecterOptions() {
     <div className="cleanup-options">
       <div className="checkbox-group">
         <label>
-          <input type="checkbox" checked={closeGaps} onChange={(e) => setCloseGaps(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={closeGaps}
+            onChange={(e) => setCloseGaps(e.target.checked)}
+          />
           Close Gaps
         </label>
       </div>
@@ -347,7 +372,11 @@ function OutlinePerfecterOptions() {
       </div>
       <div className="checkbox-group">
         <label>
-          <input type="checkbox" checked={smoothCurves} onChange={(e) => setSmoothCurves(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={smoothCurves}
+            onChange={(e) => setSmoothCurves(e.target.checked)}
+          />
           Smooth Curves
         </label>
       </div>
@@ -358,13 +387,17 @@ function OutlinePerfecterOptions() {
   );
 }
 
-function LogoCleanerOptions() {
+function LogoCleanerOptions({
+  onProgress,
+}: {
+  onProgress?: (progress: number, stage: string) => void;
+}) {
   const [preset, setPreset] = useState<LogoCleanerPreset>('logo-standard');
 
   const handleApply = async () => {
     const tool = PixelStudio.getTool('cleanup-logo');
     if (tool && 'execute' in tool && typeof tool.execute === 'function') {
-      await tool.execute({ preset });
+      await tool.execute({ preset, onProgress });
     }
   };
 
@@ -372,10 +405,7 @@ function LogoCleanerOptions() {
     <div className="cleanup-options">
       <div className="slider-group">
         <label>Preset</label>
-        <select
-          value={preset}
-          onChange={(e) => setPreset(e.target.value as LogoCleanerPreset)}
-        >
+        <select value={preset} onChange={(e) => setPreset(e.target.value as LogoCleanerPreset)}>
           <option value="logo-minimal">Logo - Minimal</option>
           <option value="logo-standard">Logo - Standard</option>
           <option value="logo-aggressive">Logo - Aggressive</option>
@@ -394,7 +424,9 @@ function LogoCleanerOptions() {
 function InspectorOptions() {
   return (
     <div className="cleanup-options">
-      <p>Click to cycle highlight modes: Stray pixels, Jaggies, Color noise, Fuzzy edges, Thickness</p>
+      <p>
+        Click to cycle highlight modes: Stray pixels, Jaggies, Color noise, Fuzzy edges, Thickness
+      </p>
       <p>Use keyboard shortcuts to toggle grid and comparison view.</p>
     </div>
   );

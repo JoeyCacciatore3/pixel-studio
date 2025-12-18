@@ -272,15 +272,10 @@ const History = (function () {
             try {
               // Try using history worker for compression (better for pixel art)
               if (WorkerManager.isHistoryWorkerAvailable()) {
-                arrayBuffer = await WorkerManager.compressImageDataAsync(
-                  cachedEntryData.imageData
-                );
+                arrayBuffer = await WorkerManager.compressImageDataAsync(cachedEntryData.imageData);
               } else {
                 // Fallback: use imageUtils if worker not available
-                arrayBuffer = await imageDataToArrayBuffer(
-                  cachedEntryData.imageData,
-                  'image/png'
-                );
+                arrayBuffer = await imageDataToArrayBuffer(cachedEntryData.imageData, 'image/png');
               }
             } catch (workerError) {
               // Fallback to imageUtils if worker fails

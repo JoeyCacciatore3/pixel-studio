@@ -1,39 +1,39 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import UI from '@/lib/ui'
-import { useAppState } from '@/hooks/useAppState'
-import StateManager from '@/lib/stateManager'
-import type { PressureCurveType } from '@/lib/types'
+import { useState, useEffect } from 'react';
+import UI from '@/lib/ui';
+import { useAppState } from '@/hooks/useAppState';
+import StateManager from '@/lib/stateManager';
+import type { PressureCurveType } from '@/lib/types';
 
 export default function BrushControlsPanel() {
-  const [isOpen, setIsOpen] = useState(false)
-  const state = useAppState()
+  const [isOpen, setIsOpen] = useState(false);
+  const state = useAppState();
 
-  const brushSize = state.brushSize
-  const brushHardness = state.brushHardness
-  const brushOpacity = state.brushOpacity
-  const brushFlow = state.brushFlow
-  const brushSpacing = state.brushSpacing
-  const brushJitter = state.brushJitter
-  const stabilizerStrength = state.stabilizerStrength
-  const pressureEnabled = state.pressureEnabled
-  const pressureSize = state.pressureSize
-  const pressureOpacity = state.pressureOpacity
-  const pressureFlow = state.pressureFlow
-  const pressureCurve = state.pressureCurve
-  const tolerance = state.tolerance
+  const brushSize = state.brushSize;
+  const brushHardness = state.brushHardness;
+  const brushOpacity = state.brushOpacity;
+  const brushFlow = state.brushFlow;
+  const brushSpacing = state.brushSpacing;
+  const brushJitter = state.brushJitter;
+  const stabilizerStrength = state.stabilizerStrength;
+  const pressureEnabled = state.pressureEnabled;
+  const pressureSize = state.pressureSize;
+  const pressureOpacity = state.pressureOpacity;
+  const pressureFlow = state.pressureFlow;
+  const pressureCurve = state.pressureCurve;
+  const tolerance = state.tolerance;
 
   useEffect(() => {
     // Setup UI controls once
     UI.setupSliders(
       (newSize) => {
-        StateManager.setBrushSize(newSize)
+        StateManager.setBrushSize(newSize);
       },
       (newTolerance) => {
-        StateManager.setTolerance(newTolerance)
+        StateManager.setTolerance(newTolerance);
       }
-    )
+    );
     UI.setupAdvancedBrushControls(
       (hardness) => StateManager.setBrushHardness(hardness),
       (opacity) => StateManager.setBrushOpacity(opacity),
@@ -46,8 +46,8 @@ export default function BrushControlsPanel() {
       (opacity) => StateManager.setPressureOpacity(opacity),
       (flow) => StateManager.setPressureFlow(flow),
       (curve) => StateManager.setPressureCurve(curve as PressureCurveType)
-    )
-  }, [])
+    );
+  }, []);
 
   return (
     <div className="brush-controls-panel">
@@ -80,7 +80,13 @@ export default function BrushControlsPanel() {
                   {brushHardness}%
                 </span>
               </div>
-              <input type="range" id="brushHardness" min={0} max={100} defaultValue={brushHardness} />
+              <input
+                type="range"
+                id="brushHardness"
+                min={0}
+                max={100}
+                defaultValue={brushHardness}
+              />
             </div>
             <div className="slider-group">
               <div className="slider-header">
@@ -107,7 +113,13 @@ export default function BrushControlsPanel() {
                   {brushSpacing}%
                 </span>
               </div>
-              <input type="range" id="brushSpacing" min={1} max={1000} defaultValue={brushSpacing} />
+              <input
+                type="range"
+                id="brushSpacing"
+                min={1}
+                max={1000}
+                defaultValue={brushSpacing}
+              />
             </div>
             <div className="slider-group">
               <div className="slider-header">
@@ -144,7 +156,7 @@ export default function BrushControlsPanel() {
                   id="pressureEnabled"
                   checked={pressureEnabled}
                   onChange={(e) => {
-                    StateManager.setPressureEnabled(e.target.checked)
+                    StateManager.setPressureEnabled(e.target.checked);
                   }}
                 />
                 Enable Pressure
@@ -159,7 +171,7 @@ export default function BrushControlsPanel() {
                       id="pressureSize"
                       checked={pressureSize}
                       onChange={(e) => {
-                        StateManager.setPressureSize(e.target.checked)
+                        StateManager.setPressureSize(e.target.checked);
                       }}
                     />
                     Size
@@ -172,7 +184,7 @@ export default function BrushControlsPanel() {
                       id="pressureOpacity"
                       checked={pressureOpacity}
                       onChange={(e) => {
-                        StateManager.setPressureOpacity(e.target.checked)
+                        StateManager.setPressureOpacity(e.target.checked);
                       }}
                     />
                     Opacity
@@ -185,7 +197,7 @@ export default function BrushControlsPanel() {
                       id="pressureFlow"
                       checked={pressureFlow}
                       onChange={(e) => {
-                        StateManager.setPressureFlow(e.target.checked)
+                        StateManager.setPressureFlow(e.target.checked);
                       }}
                     />
                     Flow
@@ -199,7 +211,7 @@ export default function BrushControlsPanel() {
                     id="pressureCurve"
                     value={pressureCurve}
                     onChange={(e) => {
-                      StateManager.setPressureCurve(e.target.value as PressureCurveType)
+                      StateManager.setPressureCurve(e.target.value as PressureCurveType);
                     }}
                   >
                     <option value="linear">Linear</option>
@@ -227,5 +239,5 @@ export default function BrushControlsPanel() {
         </div>
       )}
     </div>
-  )
+  );
 }

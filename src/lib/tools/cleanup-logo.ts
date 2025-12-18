@@ -50,7 +50,7 @@ import { logger } from '../utils/logger';
         preset: 'logo-standard',
       };
 
-      const finalOptions = options || defaultOptions;
+      const finalOptions = { ...defaultOptions, ...options };
 
       const result = await cleanLogo(imageData, finalOptions);
       Canvas.putImageData(result, 0, 0);

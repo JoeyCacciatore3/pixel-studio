@@ -3,7 +3,12 @@
  * Reduces color variations and enforces palettes
  */
 
-import { extractUniqueColors, findNearestPaletteColor, colorsSimilar, deltaE } from './utils/colorDistance';
+import {
+  extractUniqueColors,
+  findNearestPaletteColor,
+  colorsSimilar,
+  deltaE,
+} from './utils/colorDistance';
 import WorkerManager from '../workers/workerManager';
 import { logger } from '../utils/logger';
 
@@ -16,23 +21,21 @@ export interface ColorReducerOptions {
   palette?: Array<{ r: number; g: number; b: number }>; // For palette-lock: target palette
   useWorker?: boolean; // Use Web Worker for large images
   useLab?: boolean; // Use LAB color space for better perceptual accuracy
+  onProgress?: (progress: number, stage: string) => void; // Progress callback
 }
 
 /**
  * Auto-clean: Merge similar colors within threshold
  */
-function autoCleanColors(
-  imageData: ImageData,
-  threshold: number,
-  useLab: boolean
-): ImageData {
+function autoCleanColors(imageData: ImageData, threshold: number, useLab: boolean): ImageData {
   const { width, height, data } = imageData;
   const result = new ImageData(width, height);
   result.data.set(data);
 
   // Extract unique colors and group similar ones
   const uniqueColors = extractUniqueColors(imageData);
-  const colorGroups: Array<Array<{ r: number; g: number; b: number; a: number; count: number }>> = [];
+  const colorGroups: Array<Array<{ r: number; g: number; b: number; a: number; count: number }>> =
+    [];
   const colorToGroup = new Map<string, number>();
 
   for (const color of uniqueColors) {
@@ -44,8 +47,17 @@ function autoCleanColors(
       const representative = group[0]!;
 
       const similar = useLab
-        ? deltaE(color.r, color.g, color.b, representative.r, representative.g, representative.b) < threshold
-        : colorsSimilar(color.r, color.g, color.b, representative.r, representative.g, representative.b, threshold);
+        ? deltaE(color.r, color.g, color.b, representative.r, representative.g, representative.b) <
+          threshold
+        : colorsSimilar(
+            color.r,
+            color.g,
+            color.b,
+            representative.r,
+            representative.g,
+            representative.b,
+            threshold
+          );
 
       if (similar) {
         group.push(color);
@@ -143,12 +155,114 @@ function lockToPalette(
 }
 
 /**
+ * K-means clustering on main thread (fallback when worker unavailable)
+ * Uses LAB color space for perceptual accuracy
+ */
+function kmeansClusteringMainThread(
+  imageData: ImageData,
+  k: number,
+  maxIterations: number = 20
+): Array<{ r: number; g: number; b: number }> {
+  const { width, height, data } = imageData;
+  const pixels: Array<{ r: number; g: number; b: number; index: number }> = [];
+
+  // Extract all opaque pixels
+  for (let i = 0; i < data.length; i += 4) {
+    const a = data[i + 3]!;
+    if (a >= 128) {
+      pixels.push({
+        r: data[i]!,
+        g: data[i + 1]!,
+        b: data[i + 2]!,
+        index: i,
+      });
+    }
+  }
+
+  if (pixels.length === 0) return [];
+
+  // Initialize centroids randomly
+  const centroids: Array<{ r: number; g: number; b: number }> = [];
+  for (let i = 0; i < k; i++) {
+    const randomPixel = pixels[Math.floor(Math.random() * pixels.length)]!;
+    centroids.push({ r: randomPixel.r, g: randomPixel.g, b: randomPixel.b });
+  }
+
+  const assignments = new Array<number>(pixels.length);
+  const convergenceThreshold = 0.5; // As per G'MIC best practices
+
+  for (let iter = 0; iter < maxIterations; iter++) {
+    // Assign pixels to nearest centroid using LAB color space (Delta E)
+    for (let i = 0; i < pixels.length; i++) {
+      const pixel = pixels[i]!;
+      let minDist = Infinity;
+      let nearest = 0;
+
+      for (let j = 0; j < centroids.length; j++) {
+        const centroid = centroids[j]!;
+        // Use Delta E for perceptual color distance
+        const dist = deltaE(pixel.r, pixel.g, pixel.b, centroid.r, centroid.g, centroid.b);
+
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = j;
+        }
+      }
+
+      assignments[i] = nearest;
+    }
+
+    // Update centroids using weighted averages (pixel count weighting)
+    const newCentroids = centroids.map(() => ({ r: 0, g: 0, b: 0, count: 0 }));
+
+    for (let i = 0; i < pixels.length; i++) {
+      const pixel = pixels[i]!;
+      const cluster = assignments[i]!;
+      newCentroids[cluster]!.r += pixel.r;
+      newCentroids[cluster]!.g += pixel.g;
+      newCentroids[cluster]!.b += pixel.b;
+      newCentroids[cluster]!.count++;
+    }
+
+    // Calculate average difference for convergence check
+    let totalDiff = 0;
+    let converged = true;
+    for (let j = 0; j < centroids.length; j++) {
+      const newCentroid = newCentroids[j]!;
+      if (newCentroid.count > 0) {
+        const oldR = centroids[j]!.r;
+        const oldG = centroids[j]!.g;
+        const oldB = centroids[j]!.b;
+        centroids[j]!.r = Math.round(newCentroid.r / newCentroid.count);
+        centroids[j]!.g = Math.round(newCentroid.g / newCentroid.count);
+        centroids[j]!.b = Math.round(newCentroid.b / newCentroid.count);
+
+        // Calculate difference in LAB space for accurate convergence check
+        const diff = deltaE(oldR, oldG, oldB, centroids[j]!.r, centroids[j]!.g, centroids[j]!.b);
+        totalDiff += diff;
+
+        if (diff > convergenceThreshold) {
+          converged = false;
+        }
+      }
+    }
+
+    // Check average difference across all centroids
+    const avgDiff = totalDiff / centroids.length;
+    if (converged || avgDiff < convergenceThreshold) break;
+  }
+
+  return centroids;
+}
+
+/**
  * Quantize: Reduce to N colors using K-means
  */
 async function quantizeColors(
   imageData: ImageData,
   nColors: number,
-  useWorker: boolean
+  useWorker: boolean,
+  onProgress?: (progress: number, stage: string) => void
 ): Promise<ImageData> {
   if (useWorker && WorkerManager.isCleanupWorkerAvailable()) {
     try {
@@ -156,10 +270,14 @@ async function quantizeColors(
         WorkerManager.initCleanupWorker();
       }
 
-      const result = (await WorkerManager.executeCleanupOperation('quantize-colors', {
-        imageData,
-        nColors,
-      })) as ImageData;
+      const result = (await WorkerManager.executeCleanupOperation(
+        'quantize-colors',
+        {
+          imageData,
+          nColors,
+        },
+        onProgress
+      )) as ImageData;
 
       return result;
     } catch (error) {
@@ -168,18 +286,18 @@ async function quantizeColors(
     }
   }
 
-  // Simple main thread implementation (less efficient)
-  // For better results, use worker
+  // Main thread K-means implementation using LAB color space
   const uniqueColors = extractUniqueColors(imageData);
   if (uniqueColors.length <= nColors) {
     // Already has fewer colors than target
     return imageData;
   }
 
-  // Simple approach: take most common N colors
-  const topColors = uniqueColors.slice(0, nColors).map((c) => ({ r: c.r, g: c.g, b: c.b }));
+  // Use proper K-means clustering
+  const palette = kmeansClusteringMainThread(imageData, nColors, 20);
 
-  return lockToPalette(imageData, topColors, false);
+  // Assign pixels to nearest palette color using LAB color space
+  return lockToPalette(imageData, palette, true);
 }
 
 /**
@@ -189,7 +307,7 @@ export async function reduceColorNoise(
   imageData: ImageData,
   options: ColorReducerOptions
 ): Promise<ImageData> {
-  const { mode, threshold = 15, nColors = 16, palette, useWorker = true, useLab = true } = options;
+  const { mode, threshold = 15, nColors = 16, palette, useWorker = true, useLab = true, onProgress } = options;
 
   switch (mode) {
     case 'auto-clean':
@@ -202,7 +320,7 @@ export async function reduceColorNoise(
       return lockToPalette(imageData, palette, useLab);
 
     case 'quantize':
-      return quantizeColors(imageData, nColors, useWorker);
+      return quantizeColors(imageData, nColors, useWorker, onProgress);
 
     default:
       throw new Error(`Unknown color reducer mode: ${mode}`);

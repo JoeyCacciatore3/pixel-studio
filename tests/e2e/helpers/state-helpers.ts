@@ -16,15 +16,17 @@ export async function waitForStateManagerReady(page: Page, maxWait: number = 100
 
   while (Date.now() - startTime < maxWait && iterations < maxIterations) {
     try {
-      const isReady = await page.evaluate(() => {
-        try {
-          // Access StateManager through window or global scope
-          // This assumes StateManager is exposed for testing
-          return (window as any).PixelStudio?.getState() !== null;
-        } catch {
-          return false;
-        }
-      }).catch(() => false);
+      const isReady = await page
+        .evaluate(() => {
+          try {
+            // Access StateManager through window or global scope
+            // This assumes StateManager is exposed for testing
+            return (window as any).PixelStudio?.getState() !== null;
+          } catch {
+            return false;
+          }
+        })
+        .catch(() => false);
 
       if (isReady) {
         return;
@@ -168,10 +170,7 @@ export async function injectInvalidState(page: Page, invalidState: any): Promise
 /**
  * Monitor state changes
  */
-export async function monitorStateChanges(
-  page: Page,
-  duration: number = 5000
-): Promise<number> {
+export async function monitorStateChanges(page: Page, duration: number = 5000): Promise<number> {
   return await page.evaluate((duration) => {
     return new Promise<number>((resolve) => {
       let changeCount = 0;

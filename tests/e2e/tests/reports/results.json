@@ -60,9 +60,7 @@
           "**/__tests__/**",
           "**/*.test.*"
         ],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 60000
       },
       {
@@ -87,9 +85,7 @@
           "**/__tests__/**",
           "**/*.test.*"
         ],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 60000
       },
       {
@@ -114,9 +110,7 @@
           "**/__tests__/**",
           "**/*.test.*"
         ],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 60000
       },
       {
@@ -141,9 +135,7 @@
           "**/__tests__/**",
           "**/*.test.*"
         ],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 60000
       },
       {
@@ -168,9 +160,7 @@
           "**/__tests__/**",
           "**/*.test.*"
         ],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 60000
       },
       {
@@ -195,9 +185,7 @@
           "**/__tests__/**",
           "**/*.test.*"
         ],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 60000
       }
     ],

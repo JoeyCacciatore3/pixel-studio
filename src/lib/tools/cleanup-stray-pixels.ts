@@ -7,7 +7,11 @@ import type { Tool, AppState, CanvasElements } from '../types';
 import Canvas from '../canvas';
 import History from '../history';
 import PixelStudio from '../app';
-import { removeStrayPixels, previewStrayPixels, type StrayPixelOptions } from '../cleanup/strayPixels';
+import {
+  removeStrayPixels,
+  previewStrayPixels,
+  type StrayPixelOptions,
+} from '../cleanup/strayPixels';
 import { logger } from '../utils/logger';
 
 (function () {
@@ -92,12 +96,7 @@ import { logger } from '../utils/logger';
         useWorker: true,
       };
 
-      const finalOptions = options || defaultOptions;
-
-      // Show loading indicator if using worker
-      if (finalOptions.useWorker) {
-        // Could emit event for UI feedback
-      }
+      const finalOptions = { ...defaultOptions, ...options };
 
       const result = await removeStrayPixels(imageData, finalOptions);
       Canvas.putImageData(result, 0, 0);

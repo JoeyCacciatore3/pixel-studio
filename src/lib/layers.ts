@@ -44,7 +44,11 @@ const Layers = (function () {
    * Type guard: Check if context is valid CanvasRenderingContext2D
    */
   function isValid2DContext(ctx: unknown): ctx is CanvasRenderingContext2D {
-    return ctx !== null && ctx !== undefined && typeof (ctx as CanvasRenderingContext2D).clearRect === 'function';
+    return (
+      ctx !== null &&
+      ctx !== undefined &&
+      typeof (ctx as CanvasRenderingContext2D).clearRect === 'function'
+    );
   }
 
   /**
@@ -808,7 +812,9 @@ const Layers = (function () {
       mainCtx.save();
       mainCtx.globalAlpha = layer.opacity;
       mainCtx.globalCompositeOperation =
-        layer.blendMode === 'normal' ? 'source-over' : (layer.blendMode as GlobalCompositeOperation);
+        layer.blendMode === 'normal'
+          ? 'source-over'
+          : (layer.blendMode as GlobalCompositeOperation);
       mainCtx.drawImage(layer.canvas, 0, 0);
       mainCtx.restore();
     }
@@ -1099,7 +1105,10 @@ const Layers = (function () {
           dirtyRegions
         );
       } catch (transferError) {
-        logger.error('[Layers] doRenderLayers: Transfer failed, using fallback render', transferError);
+        logger.error(
+          '[Layers] doRenderLayers: Transfer failed, using fallback render',
+          transferError
+        );
         // Last resort: draw directly to mainCtx by re-rendering
         // This is inefficient but ensures the canvas displays
         fallbackRenderToMain(mainCtx, visibleLayers, width, height);
@@ -1126,7 +1135,12 @@ const Layers = (function () {
     // Final verification: check if main canvas has content
     if (mainCtx) {
       try {
-        const verifyImageData = mainCtx.getImageData(0, 0, Math.min(10, width), Math.min(10, height));
+        const verifyImageData = mainCtx.getImageData(
+          0,
+          0,
+          Math.min(10, width),
+          Math.min(10, height)
+        );
         let hasContent = false;
         let whitePixelCount = 0;
         for (let i = 0; i < verifyImageData.data.length; i += 4) {
@@ -1154,11 +1168,23 @@ const Layers = (function () {
 
         // Warn if no content was rendered but we expected some
         if (!hasContent && visibleLayers.length > 0) {
-          logger.warn('[Layers] doRenderLayers: WARNING - No content rendered despite visible layers', {
-            visibleLayers: visibleLayers.map(l => ({ name: l.name, hasBackground: !!l.backgroundColor })),
-            layersInViewport: layersInViewport.map(l => ({ name: l.name, hasBackground: !!l.backgroundColor })),
-            layersRendered: layersToRender.map(l => ({ name: l.name, hasBackground: !!l.backgroundColor })),
-          });
+          logger.warn(
+            '[Layers] doRenderLayers: WARNING - No content rendered despite visible layers',
+            {
+              visibleLayers: visibleLayers.map((l) => ({
+                name: l.name,
+                hasBackground: !!l.backgroundColor,
+              })),
+              layersInViewport: layersInViewport.map((l) => ({
+                name: l.name,
+                hasBackground: !!l.backgroundColor,
+              })),
+              layersRendered: layersToRender.map((l) => ({
+                name: l.name,
+                hasBackground: !!l.backgroundColor,
+              })),
+            }
+          );
         }
       } catch (verifyError) {
         logger.error('[Layers] doRenderLayers: Failed to verify render', verifyError);

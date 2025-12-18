@@ -11,6 +11,7 @@ export interface StrayPixelOptions {
   minSize: number; // Minimum cluster size (1-10 pixels)
   merge: boolean; // Merge small regions into nearest neighbor instead of deleting
   useWorker: boolean; // Use Web Worker for large images
+  onProgress?: (progress: number, stage: string) => void; // Progress callback
 }
 
 /**
@@ -20,7 +21,7 @@ export async function removeStrayPixels(
   imageData: ImageData,
   options: StrayPixelOptions
 ): Promise<ImageData> {
-  const { minSize, merge, useWorker } = options;
+  const { minSize, merge, useWorker, onProgress } = options;
 
   // Use worker for large images or if explicitly requested
   const shouldUseWorker =
@@ -34,11 +35,15 @@ export async function removeStrayPixels(
         WorkerManager.initCleanupWorker();
       }
 
-      const result = (await WorkerManager.executeCleanupOperation('remove-stray-pixels', {
-        imageData,
-        minSize,
-        merge,
-      })) as ImageData;
+      const result = (await WorkerManager.executeCleanupOperation(
+        'remove-stray-pixels',
+        {
+          imageData,
+          minSize,
+          merge,
+        },
+        onProgress
+      )) as ImageData;
 
       return result;
     } catch (error) {
@@ -107,9 +112,9 @@ export async function previewStrayPixels(
     if (component.size < minSize) {
       for (const { x, y } of component.pixels) {
         const index = (y * imageData.width + x) * 4;
-        result.data[index] = 255;     // R
-        result.data[index + 1] = 0;   // G
-        result.data[index + 2] = 0;   // B
+        result.data[index] = 255; // R
+        result.data[index + 1] = 0; // G
+        result.data[index + 2] = 0; // B
         result.data[index + 3] = 200; // A (semi-transparent)
       }
     }

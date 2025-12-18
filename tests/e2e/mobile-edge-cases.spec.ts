@@ -4,12 +4,7 @@
  */
 
 import { test, expect, devices } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  getCanvas,
-  selectTool,
-  drawStroke,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, getCanvas, selectTool, drawStroke } from './helpers/canvas-helpers';
 import { waitForStateManagerReady } from './helpers/state-helpers';
 import { APP_URL } from './helpers/test-constants';
 
@@ -17,7 +12,6 @@ import { APP_URL } from './helpers/test-constants';
 test.use({ hasTouch: true });
 
 test.describe('Mobile Edge Cases Tests', () => {
-
   test.beforeEach(async ({ page }) => {
     await page.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await waitForCanvasReady(page, 15000);
@@ -87,11 +81,7 @@ test.describe('Mobile Edge Cases Tests', () => {
     // Create many operations
     await selectTool(page, 'pencil');
     for (let i = 0; i < 20; i++) {
-      await drawStroke(
-        page,
-        { x: 100 + i * 5, y: 100 },
-        { x: 150 + i * 5, y: 150 }
-      );
+      await drawStroke(page, { x: 100 + i * 5, y: 100 }, { x: 150 + i * 5, y: 150 });
       await page.waitForTimeout(50);
     }
 

@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import LayerPanel from '@/components/LayerPanel'
+import { useState } from 'react';
+import LayerPanel from '@/components/LayerPanel';
 
 export default function LayersControlsPanel() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="layers-controls-panel">
@@ -23,5 +23,5 @@ export default function LayersControlsPanel() {
         </div>
       )}
     </div>
-  )
+  );
 }

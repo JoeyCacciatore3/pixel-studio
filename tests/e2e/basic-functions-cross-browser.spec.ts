@@ -14,9 +14,24 @@ import {
   testPinchZoom,
   resetZoom,
 } from './helpers/zoom-helpers';
-import { uploadTestImage, verifyImageLoaded, createTestImageFile, cleanupTestImage } from './helpers/upload-helpers';
-import { triggerExport, verifyExportDownloaded, getExportedImageData, verifyExportedImageValid } from './helpers/export-helpers';
-import { getCanvasDataURL, compareCanvasStatesWithTolerance, selectTool, drawStroke } from './helpers/canvas-helpers';
+import {
+  uploadTestImage,
+  verifyImageLoaded,
+  createTestImageFile,
+  cleanupTestImage,
+} from './helpers/upload-helpers';
+import {
+  triggerExport,
+  verifyExportDownloaded,
+  getExportedImageData,
+  verifyExportedImageValid,
+} from './helpers/export-helpers';
+import {
+  getCanvasDataURL,
+  compareCanvasStatesWithTolerance,
+  selectTool,
+  drawStroke,
+} from './helpers/canvas-helpers';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -64,7 +79,10 @@ test.describe('Basic Functions - Cross Browser', () => {
         await page.waitForTimeout(2000);
 
         // Should show error or handle gracefully
-        const hasError = await page.locator('.upload-error, [role="alert"]').isVisible().catch(() => false);
+        const hasError = await page
+          .locator('.upload-error, [role="alert"]')
+          .isVisible()
+          .catch(() => false);
         // Error handling is acceptable
         expect(true).toBe(true); // Test passes if no crash
       } finally {
@@ -148,9 +166,14 @@ test.describe('Basic Functions - Cross Browser', () => {
       // Check if canvas actually changed - if not, that's okay, we'll just test undo functionality
       let canvasChanged = false;
       if (initialState && afterDrawState) {
-        const comparison = await compareCanvasStatesWithTolerance(page, initialState, afterDrawState, {
-          tolerance: 0.01,
-        });
+        const comparison = await compareCanvasStatesWithTolerance(
+          page,
+          initialState,
+          afterDrawState,
+          {
+            tolerance: 0.01,
+          }
+        );
         canvasChanged = !comparison.match;
       }
 
@@ -172,9 +195,14 @@ test.describe('Basic Functions - Cross Browser', () => {
       // Verify undo button state changed (should be disabled if nothing to undo)
       // Or verify canvas returned to initial state if it changed
       if (canvasChanged && initialState && afterUndoState) {
-        const comparison = await compareCanvasStatesWithTolerance(page, initialState, afterUndoState, {
-          tolerance: 0.05, // Allow 5% difference for rendering variations
-        });
+        const comparison = await compareCanvasStatesWithTolerance(
+          page,
+          initialState,
+          afterUndoState,
+          {
+            tolerance: 0.05, // Allow 5% difference for rendering variations
+          }
+        );
         expect(comparison.match).toBe(true); // Should match (or be very close)
       } else {
         // At minimum, verify undo was called (button might be disabled now)
@@ -203,28 +231,36 @@ test.describe('Basic Functions - Cross Browser', () => {
 
       // Wait for history:undo event to complete
       await Promise.all([
-        page.waitForFunction(
-          () => {
-            const btn = document.querySelector('[data-testid="testid-history-undo"], #undoBtn') as HTMLButtonElement;
-            return btn && !btn.disabled;
-          },
-          { timeout: 5000 }
-        ).catch(() => {}), // Ignore if already enabled
+        page
+          .waitForFunction(
+            () => {
+              const btn = document.querySelector(
+                '[data-testid="testid-history-undo"], #undoBtn'
+              ) as HTMLButtonElement;
+              return btn && !btn.disabled;
+            },
+            { timeout: 5000 }
+          )
+          .catch(() => {}), // Ignore if already enabled
         undoBtn.click(),
       ]);
 
       // Wait for undo operation to complete (history:undo event)
-      await page.waitForFunction(
-        () => {
-          // Check if redo button is now enabled (indicates undo completed)
-          const redoBtn = document.querySelector('[data-testid="testid-history-redo"], #redoBtn') as HTMLButtonElement;
-          return redoBtn && !redoBtn.disabled;
-        },
-        { timeout: 10000 }
-      ).catch(() => {
-        // If wait fails, just wait a bit more
-        return page.waitForTimeout(1000);
-      });
+      await page
+        .waitForFunction(
+          () => {
+            // Check if redo button is now enabled (indicates undo completed)
+            const redoBtn = document.querySelector(
+              '[data-testid="testid-history-redo"], #redoBtn'
+            ) as HTMLButtonElement;
+            return redoBtn && !redoBtn.disabled;
+          },
+          { timeout: 10000 }
+        )
+        .catch(() => {
+          // If wait fails, just wait a bit more
+          return page.waitForTimeout(1000);
+        });
 
       // Redo - wait for redo to complete
       const redoBtn = page.locator('[data-testid="testid-history-redo"], #redoBtn').first();
@@ -232,47 +268,58 @@ test.describe('Basic Functions - Cross Browser', () => {
 
       // Wait for history:redo event to complete
       await Promise.all([
-        page.waitForFunction(
-          () => {
-            const btn = document.querySelector('[data-testid="testid-history-redo"], #redoBtn') as HTMLButtonElement;
-            return btn && !btn.disabled;
-          },
-          { timeout: 5000 }
-        ).catch(() => {}), // Ignore if already enabled
+        page
+          .waitForFunction(
+            () => {
+              const btn = document.querySelector(
+                '[data-testid="testid-history-redo"], #redoBtn'
+              ) as HTMLButtonElement;
+              return btn && !btn.disabled;
+            },
+            { timeout: 5000 }
+          )
+          .catch(() => {}), // Ignore if already enabled
         redoBtn.click(),
       ]);
 
       // Wait for redo operation to complete and canvas to update
-      await page.waitForFunction(
-        () => {
-          // Check if canvas has been updated (has content)
-          const canvasEl = document.getElementById('mainCanvas') as HTMLCanvasElement;
-          if (!canvasEl) return false;
-          const ctx = canvasEl.getContext('2d');
-          if (!ctx) return false;
-          // Sample a small area to check if content exists
-          const imageData = ctx.getImageData(150, 150, 10, 10);
-          for (let i = 3; i < imageData.data.length; i += 4) {
-            if (imageData.data[i]! > 0) {
-              return true; // Found non-transparent pixel
+      await page
+        .waitForFunction(
+          () => {
+            // Check if canvas has been updated (has content)
+            const canvasEl = document.getElementById('mainCanvas') as HTMLCanvasElement;
+            if (!canvasEl) return false;
+            const ctx = canvasEl.getContext('2d');
+            if (!ctx) return false;
+            // Sample a small area to check if content exists
+            const imageData = ctx.getImageData(150, 150, 10, 10);
+            for (let i = 3; i < imageData.data.length; i += 4) {
+              if (imageData.data[i]! > 0) {
+                return true; // Found non-transparent pixel
+              }
             }
-          }
-          return false;
-        },
-        { timeout: 10000 }
-      ).catch(() => {
-        // If wait fails, just wait a bit more for rendering
-        return page.waitForTimeout(1500);
-      });
+            return false;
+          },
+          { timeout: 10000 }
+        )
+        .catch(() => {
+          // If wait fails, just wait a bit more for rendering
+          return page.waitForTimeout(1500);
+        });
 
       // Verify canvas returned to drawn state
       const afterRedoState = await getCanvasDataURL(page);
       expect(afterRedoState).not.toBeNull();
 
       if (afterDrawState && afterRedoState) {
-        const comparison = await compareCanvasStatesWithTolerance(page, afterDrawState, afterRedoState, {
-          tolerance: 0.05,
-        });
+        const comparison = await compareCanvasStatesWithTolerance(
+          page,
+          afterDrawState,
+          afterRedoState,
+          {
+            tolerance: 0.05,
+          }
+        );
         expect(comparison.match).toBe(true);
       }
     });
@@ -287,7 +334,11 @@ test.describe('Basic Functions - Cross Browser', () => {
 
       // Perform multiple actions - wait for each to complete
       for (let i = 0; i < 3; i++) {
-        await drawStroke(page, { x: 100 + i * 10, y: 100 + i * 10 }, { x: 150 + i * 10, y: 150 + i * 10 });
+        await drawStroke(
+          page,
+          { x: 100 + i * 10, y: 100 + i * 10 },
+          { x: 150 + i * 10, y: 150 + i * 10 }
+        );
         // Wait for history to save after each stroke
         await expect(undoBtn).toBeEnabled({ timeout: 5000 });
         await page.waitForTimeout(300); // Small delay between actions
@@ -326,33 +377,42 @@ test.describe('Basic Functions - Cross Browser', () => {
       const beforeClear = await getCanvasDataURL(page);
 
       // Clear canvas
-      const clearBtn = page.locator('[data-testid="testid-clear-btn"], #clearBtn, button[aria-label*="Clear"]').first();
+      const clearBtn = page
+        .locator('[data-testid="testid-clear-btn"], #clearBtn, button[aria-label*="Clear"]')
+        .first();
       await expect(clearBtn).toBeVisible({ timeout: 10000 });
       await clearBtn.click();
 
       // Wait for clear to complete - canvas should be empty
-      await page.waitForFunction(
-        () => {
-          const canvas = document.getElementById('mainCanvas') as HTMLCanvasElement;
-          if (!canvas) return false;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return false;
-          // Check if canvas is mostly transparent (cleared)
-          const imageData = ctx.getImageData(0, 0, Math.min(canvas.width, 50), Math.min(canvas.height, 50));
-          let nonTransparentPixels = 0;
-          for (let i = 3; i < imageData.data.length; i += 4) {
-            if (imageData.data[i]! > 0) {
-              nonTransparentPixels++;
+      await page
+        .waitForFunction(
+          () => {
+            const canvas = document.getElementById('mainCanvas') as HTMLCanvasElement;
+            if (!canvas) return false;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return false;
+            // Check if canvas is mostly transparent (cleared)
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              Math.min(canvas.width, 50),
+              Math.min(canvas.height, 50)
+            );
+            let nonTransparentPixels = 0;
+            for (let i = 3; i < imageData.data.length; i += 4) {
+              if (imageData.data[i]! > 0) {
+                nonTransparentPixels++;
+              }
             }
-          }
-          // Canvas is cleared if less than 1% of pixels are non-transparent
-          return nonTransparentPixels / (imageData.data.length / 4) < 0.01;
-        },
-        { timeout: 5000 }
-      ).catch(() => {
-        // If check fails, wait a bit more
-        return page.waitForTimeout(1000);
-      });
+            // Canvas is cleared if less than 1% of pixels are non-transparent
+            return nonTransparentPixels / (imageData.data.length / 4) < 0.01;
+          },
+          { timeout: 5000 }
+        )
+        .catch(() => {
+          // If check fails, wait a bit more
+          return page.waitForTimeout(1000);
+        });
 
       const afterClear = await getCanvasDataURL(page);
 
@@ -482,16 +542,18 @@ test.describe('Basic Functions - Cross Browser', () => {
       await layersToggle.click({ force: false });
 
       // Wait for state to update
-      await page.waitForFunction(
-        (expectedState) => {
-          const toggle = document.querySelector('[data-testid="testid-layers-toggle"]');
-          return toggle && toggle.getAttribute('aria-expanded') !== expectedState;
-        },
-        initialExpanded || 'false',
-        { timeout: 5000 }
-      ).catch(() => {
-        // If waitForFunction fails, just wait a bit
-      });
+      await page
+        .waitForFunction(
+          (expectedState) => {
+            const toggle = document.querySelector('[data-testid="testid-layers-toggle"]');
+            return toggle && toggle.getAttribute('aria-expanded') !== expectedState;
+          },
+          initialExpanded || 'false',
+          { timeout: 5000 }
+        )
+        .catch(() => {
+          // If waitForFunction fails, just wait a bit
+        });
       await page.waitForTimeout(300);
 
       // Verify state changed
@@ -521,17 +583,19 @@ test.describe('Basic Functions - Cross Browser', () => {
       await brushToggle.click({ force: false });
 
       // Wait for state to update
-      await page.waitForFunction(
-        (expectedState) => {
-          const toggle = document.querySelector('[data-testid="testid-brush-toggle"]');
-          return toggle && toggle.getAttribute('aria-expanded') !== expectedState;
-        },
-        initialExpanded || 'false',
-        { timeout: 5000 }
-      ).catch(() => {
-        // If waitForFunction fails, just wait a bit for animation
-        return page.waitForTimeout(300);
-      });
+      await page
+        .waitForFunction(
+          (expectedState) => {
+            const toggle = document.querySelector('[data-testid="testid-brush-toggle"]');
+            return toggle && toggle.getAttribute('aria-expanded') !== expectedState;
+          },
+          initialExpanded || 'false',
+          { timeout: 5000 }
+        )
+        .catch(() => {
+          // If waitForFunction fails, just wait a bit for animation
+          return page.waitForTimeout(300);
+        });
 
       // Verify panel content visibility
       const panelContent = page.locator('.brush-controls-content');

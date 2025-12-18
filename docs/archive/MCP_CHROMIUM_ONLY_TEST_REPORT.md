@@ -8,12 +8,12 @@
 
 ## Executive Summary
 
-| Metric | Count | Percentage |
-|--------|-------|------------|
-| Total Tests | 316 | 100% |
-| Passed | 286 | 90.5% |
-| Failed | 30 | 9.5% |
-| Skipped | 0 | 0.0% |
+| Metric      | Count | Percentage |
+| ----------- | ----- | ---------- |
+| Total Tests | 316   | 100%       |
+| Passed      | 286   | 90.5%      |
+| Failed      | 30    | 9.5%       |
+| Skipped     | 0     | 0.0%       |
 
 **Pass Rate**: 90.5%
 
@@ -26,67 +26,73 @@
 #### Selector - selectors
 
 Use reliable selectors:
+
 - Prefer data-testid attributes: page.getByTestId('element-id')
 - Use getByRole, getByLabel, getByText when possible
 - Avoid CSS selectors that depend on styling
 - Ensure elements are visible before interacting: await expect(element).toBeVisible()
 - Use locator() for complex selectors with auto-waiting
 
-*Source: Context7 - Playwright Best Practices*
+_Source: Context7 - Playwright Best Practices_
 
 #### Assertion - assertions
 
 Use Playwright's built-in assertions:
+
 - expect() automatically waits for conditions
 - Use toBeVisible(), toBeEnabled(), toHaveText() for element state
 - Use toHaveScreenshot() for visual regression
 - Check element state before asserting: await expect(element).toBeVisible()
 
-*Source: Context7 - Playwright Best Practices*
+_Source: Context7 - Playwright Best Practices_
 
 #### Timeout - timeouts
 
 Use explicit waits instead of fixed timeouts:
+
 - page.waitForSelector() for element visibility
 - page.waitForLoadState() for page load states
 - page.waitForResponse() for network requests
-- Increase timeout in playwright.config.ts if needed: timeout: 60 * 1000
+- Increase timeout in playwright.config.ts if needed: timeout: 60 \* 1000
 - Use expect() assertions which auto-wait
 
-*Source: Context7 - Playwright Best Practices*
+_Source: Context7 - Playwright Best Practices_
 
 #### Other - general
 
 Best practices for general:
+
 - Review error messages carefully
 - Check test isolation (tests should be independent)
 - Ensure proper cleanup between tests
 - Use fixtures for shared setup
 - Add proper error handling
 
-*Source: Context7 - Playwright Best Practices*
+_Source: Context7 - Playwright Best Practices_
 
 #### Canvas - canvas
 
 Test canvas operations:
+
 - Wait for canvas to be ready: await page.waitForSelector('#mainCanvas')
 - Use requestAnimationFrame for canvas operations
 - Check canvas context initialization
 - Use boundingBox() to get canvas coordinates
 - Test drawing operations with explicit coordinates
 
-*Source: Context7 - Playwright Best Practices*
+_Source: Context7 - Playwright Best Practices_
 
 #### Visual - general
 
 Best practices for general:
+
 - Review error messages carefully
 - Check test isolation (tests should be independent)
 - Ensure proper cleanup between tests
 - Use fixtures for shared setup
 - Add proper error handling
 
-*Source: Context7 - Playwright Best Practices*
+_Source: Context7 - Playwright Best Practices_
 
 ### 🧠 Failure Patterns (Memory MCP)
 
@@ -116,9 +122,9 @@ Use data-testid or ensure element is visible
 
 ```typescript
 // Use reliable selector
-const element = page.getByTestId('element-name')
-await expect(element).toBeVisible()
-await element.click()
+const element = page.getByTestId('element-name');
+await expect(element).toBeVisible();
+await element.click();
 ```
 
 #### browser-compatibility.spec.ts: tests/e2e/browser-compatibility.spec.ts:300:7 › Accessibility Tests › should be keyboard navigable
@@ -127,9 +133,9 @@ Use data-testid or ensure element is visible
 
 ```typescript
 // Use reliable selector
-const element = page.getByTestId('element-name')
-await expect(element).toBeVisible()
-await element.click()
+const element = page.getByTestId('element-name');
+await expect(element).toBeVisible();
+await element.click();
 ```
 
 #### canvas-functions.spec.ts: tests/e2e/canvas-functions.spec.ts:89:7 › Canvas Undo/Redo Function Tests › should undo last drawing action
@@ -146,9 +152,9 @@ Use data-testid or ensure element is visible
 
 ```typescript
 // Use reliable selector
-const element = page.getByTestId('element-name')
-await expect(element).toBeVisible()
-await element.click()
+const element = page.getByTestId('element-name');
+await expect(element).toBeVisible();
+await element.click();
 ```
 
 #### canvas-functions.spec.ts: tests/e2e/canvas-functions.spec.ts:343:7 › Canvas Upload Function Tests › should handle large image files
@@ -161,9 +167,9 @@ Use data-testid or ensure element is visible
 
 ```typescript
 // Use reliable selector
-const element = page.getByTestId('element-name')
-await expect(element).toBeVisible()
-await element.click()
+const element = page.getByTestId('element-name');
+await expect(element).toBeVisible();
+await element.click();
 ```
 
 #### history-failures.spec.ts: tests/e2e/history-failures.spec.ts:74:7 › History Failures Tests › should handle redo with missing entry
@@ -172,9 +178,9 @@ Use data-testid or ensure element is visible
 
 ```typescript
 // Use reliable selector
-const element = page.getByTestId('element-name')
-await expect(element).toBeVisible()
-await element.click()
+const element = page.getByTestId('element-name');
+await expect(element).toBeVisible();
+await element.click();
 ```
 
 #### history-failures.spec.ts: tests/e2e/history-failures.spec.ts:116:7 › History Failures Tests › should handle history operations during load
@@ -183,9 +189,9 @@ Add explicit wait before assertion
 
 ```typescript
 // Wait for element to be visible
-await page.waitForSelector('[data-testid="element"]')
+await page.waitForSelector('[data-testid="element"]');
 // Or use expect which auto-waits
-await expect(page.getByTestId('element')).toBeVisible()
+await expect(page.getByTestId('element')).toBeVisible();
 ```
 
 #### initialization.spec.ts: tests/e2e/initialization.spec.ts:99:7 › Initialization Tests › should handle canvas context creation failure
@@ -194,38 +200,39 @@ Review error: Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m
 
 ### 🎯 Prioritized Action Plan (Sequential-Thinking)
 
-| Priority | Action | Reason |
-|----------|--------|--------|
-| High | Address timeout issues:
+| Priority | Action                  | Reason |
+| -------- | ----------------------- | ------ |
+| High     | Address timeout issues: |
+
 1. Increase timeout values in playwright.config.ts
 2. Use explicit waits instead of fixed delays
 3. Wait for elements to be visible before interacting
 4. Check if operations are too slow | 9 tests timing out |
-| Medium | Fix selector issues:
-1. Use data-testid attributes for reliable selectors
-2. Ensure elements exist and are visible
-3. Use getByRole, getByLabel when possible
-4. Wait for elements before interacting | 6 tests failing due to selector issues |
-| Medium | Address Assertion errors:
-1. Review error messages carefully
-2. Check test isolation
-3. Ensure proper cleanup
-4. Verify test data and fixtures | 9 tests failing with Assertion errors |
-| Low | Address Canvas errors:
-1. Review error messages carefully
-2. Check test isolation
-3. Ensure proper cleanup
-4. Verify test data and fixtures | 3 tests failing with Canvas errors |
-| Low | Address Visual errors:
-1. Review error messages carefully
-2. Check test isolation
-3. Ensure proper cleanup
-4. Verify test data and fixtures | 2 tests failing with Visual errors |
-| Low | Address Other errors:
-1. Review error messages carefully
-2. Check test isolation
-3. Ensure proper cleanup
-4. Verify test data and fixtures | 1 tests failing with Other errors |
+   | Medium | Fix selector issues:
+5. Use data-testid attributes for reliable selectors
+6. Ensure elements exist and are visible
+7. Use getByRole, getByLabel when possible
+8. Wait for elements before interacting | 6 tests failing due to selector issues |
+   | Medium | Address Assertion errors:
+9. Review error messages carefully
+10. Check test isolation
+11. Ensure proper cleanup
+12. Verify test data and fixtures | 9 tests failing with Assertion errors |
+    | Low | Address Canvas errors:
+13. Review error messages carefully
+14. Check test isolation
+15. Ensure proper cleanup
+16. Verify test data and fixtures | 3 tests failing with Canvas errors |
+    | Low | Address Visual errors:
+17. Review error messages carefully
+18. Check test isolation
+19. Ensure proper cleanup
+20. Verify test data and fixtures | 2 tests failing with Visual errors |
+    | Low | Address Other errors:
+21. Review error messages carefully
+22. Check test isolation
+23. Ensure proper cleanup
+24. Verify test data and fixtures | 1 tests failing with Other errors |
 
 ---
 

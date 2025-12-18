@@ -5,24 +5,32 @@ This document describes the safeguards in place to prevent infinite loops and ha
 ## Safeguards Implemented
 
 ### 1. Maximum Iteration Limits
+
 All while loops have maximum iteration limits based on their timeout duration:
+
 - `waitForStateManagerReady`: Max iterations = `(maxWait / 100) + 10`
 - `waitForStableState`: Max iterations = `(maxWait / checkInterval) + 10`
 - `trackPerformanceMetrics`: Max iterations = `(duration / interval) + 1`
 
 ### 2. Timeout Checks
+
 All loops check both:
+
 - Time elapsed: `Date.now() - startTime < maxWait`
 - Iteration count: `iterations < maxIterations`
 
 ### 3. Error Handling
+
 All loops wrap operations in try-catch blocks to prevent hanging on errors:
+
 - If evaluation fails, the loop breaks immediately
 - Errors are logged as warnings
 - Functions throw descriptive errors after timeout
 
 ### 4. Maximum Total Time Limits
+
 Functions with retries have maximum total time limits:
+
 - `selectTool`: Maximum 30 seconds total across all retries
 - Prevents infinite retry loops even if individual operations are fast
 
@@ -51,6 +59,7 @@ Functions with retries have maximum total time limits:
 ## Testing for Loops
 
 To verify loops don't hang:
+
 1. All loops have explicit exit conditions
 2. All loops have timeout checks
 3. All loops have maximum iteration limits

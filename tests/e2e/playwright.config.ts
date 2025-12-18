@@ -74,13 +74,15 @@ export default defineConfig({
     trace: process.env.MCP_TRACE_ENABLED === 'true' ? 'on' : 'on-first-retry',
 
     /* Screenshot on failure */
-    screenshot: process.env.MCP_SCREENSHOT_ON_FAILURE === 'true' ? 'only-on-failure' : 'only-on-failure',
+    screenshot:
+      process.env.MCP_SCREENSHOT_ON_FAILURE === 'true' ? 'only-on-failure' : 'only-on-failure',
 
     /* Video on failure */
     video: process.env.MCP_VIDEO_ON_FAILURE === 'true' ? 'retain-on-failure' : 'retain-on-failure',
 
     /* Visual regression baseline directory */
-    screenshotPathTemplate: '{testDir}/visual-baselines/{testFilePath}/{testName}-{projectName}{ext}',
+    screenshotPathTemplate:
+      '{testDir}/visual-baselines/{testFilePath}/{testName}-{projectName}{ext}',
   },
 
   /* Configure projects for major browsers */

@@ -5,7 +5,6 @@
  * Exports worker code as a string for use with Blob URL workers
  */
 
-
 /**
  * Returns the blend worker code as a string
  * This code will run in a Web Worker context

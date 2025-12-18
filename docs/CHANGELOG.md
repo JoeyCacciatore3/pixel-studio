@@ -5,10 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] - 2025-01
 
 ### Security
+
 - **CRITICAL**: Updated Next.js from 16.0.7 to 16.0.9 to fix security vulnerabilities (GHSA-w37m-7fhw-fmv9, GHSA-mwv6-3258-q52c)
 - Updated `@next/bundle-analyzer` and `eslint-config-next` to match Next.js version
 
 ### Fixed
+
 - Fixed all TypeScript errors in scripts and test helpers (35 errors resolved)
 - Replaced all `any` types with proper types:
   - Created `WindowWithPixelStudio` interface for window extensions
@@ -18,12 +20,14 @@ All notable changes to this project will be documented in this file.
 - Fixed MCP function call syntax errors in test helpers
 
 ### Changed
+
 - Updated dependencies:
   - `@testing-library/react`: 16.3.0 → 16.3.1
   - `@types/node`: 24.10.1 → 24.10.4
   - `@typescript-eslint/*`: 8.48.1 → 8.50.0
 
 ### Documentation
+
 - Consolidated testing documentation: merged `TEST_RUNNING_GUIDE.md` into `TESTING_GUIDE.md`
 - Consolidated MCP documentation: merged `MCP_IMPLEMENTATION_SUMMARY.md` into `MCP_AGENT_INTEGRATION.md`
 - Created comprehensive documentation index in `docs/README.md`
@@ -33,10 +37,12 @@ All notable changes to this project will be documented in this file.
   - `IMPLEMENTATION_SUMMARY.md`
 
 ### Removed
+
 - Removed duplicate assets from `assets/` directory (kept only in `public/` per Next.js convention)
 - Deleted redundant documentation files after consolidation
 
 ### Code Quality
+
 - Created type definition files:
   - `src/types/window.d.ts` - Window interface extensions
   - `src/types/cleanup.d.ts` - Cleanup tool type definitions

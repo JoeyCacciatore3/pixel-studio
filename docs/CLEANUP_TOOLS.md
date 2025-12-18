@@ -13,12 +13,14 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Automatically detects and removes isolated pixels that don't belong to the main artwork.
 
 **Algorithm**: Connected Component Analysis (CCA) with size filtering
+
 - Uses flood-fill algorithm to find connected regions
 - Counts pixels per region
 - Removes regions smaller than threshold (1-10 pixels)
 - Optional: Merge small regions into nearest neighbor color
 
 **Options**:
+
 - `minSize`: Minimum cluster size (1-10 pixels)
 - `merge`: Merge small regions instead of deleting
 
@@ -31,11 +33,13 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Eliminates unwanted color variations and forces artwork to use only specified palette colors.
 
 **Modes**:
+
 - **Auto-clean**: Merge similar colors within threshold (perceptual LAB distance)
 - **Palette Lock**: Force every pixel to nearest palette color
 - **Quantize**: K-means clustering to reduce to N colors
 
 **Options**:
+
 - `mode`: 'auto-clean' | 'palette-lock' | 'quantize'
 - `threshold`: Similarity threshold for auto-clean (0-255)
 - `nColors`: Target number of colors for quantize (2-256)
@@ -51,11 +55,13 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Removes fuzzy halos and semi-transparent edge pixels that appear when extracting sprites from backgrounds.
 
 **Methods**:
+
 - **Threshold**: Simple alpha threshold (pixels below threshold become transparent)
 - **Erode**: Morphological erosion of alpha channel
 - **Decontaminate**: Remove background color bleeding into edges
 
 **Options**:
+
 - `method`: 'threshold' | 'erode' | 'decontaminate'
 - `threshold`: Alpha threshold (0-255, default: 200)
 - `erodePixels`: Number of pixels to erode (1-5)
@@ -70,18 +76,21 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Detects jagged staircase patterns on edges and smooths them with proper anti-aliasing while maintaining crisp pixel art aesthetic.
 
 **Algorithm**: Pattern detection + anti-aliasing
+
 - Detects edge pixels using Sobel edge detection
 - Identifies staircase patterns (2+ pixel steps)
 - Adds intermediate-value pixels for smooth transitions
 - Preserves intentional hard edges
 
 **Modes**:
+
 - **Subtle**: Single intermediate shade (1-color AA)
 - **Standard**: Two intermediate shades (2-color AA)
 - **Smooth**: Three shades, very smooth (3-color AA)
 - **Pixel-Perfect**: Only fixes obvious jaggies
 
 **Options**:
+
 - `mode`: 'subtle' | 'standard' | 'smooth' | 'pixel-perfect'
 - `strength`: Smoothing strength (0-100, default: 50)
 - `preserveCorners`: Preserve hard corners (default: true)
@@ -95,12 +104,14 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Detects inconsistent line thickness and normalizes it to a uniform width throughout the artwork.
 
 **Algorithm**: Morphological operations + skeletonization
+
 - Skeletonize to find line centers
 - Calculate distance transform (thickness at each point)
 - Erode thick sections, dilate thin sections
 - Preserve intentional thick areas
 
 **Options**:
+
 - `targetWidth`: Target line width in pixels (1, 2, 3, etc.)
 
 **Usage**: Interactive tool
@@ -112,12 +123,14 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Detects the outline/lineart of artwork and perfects it - closing gaps, smoothing curves, and ensuring consistent clean edges.
 
 **Features**:
+
 - **Gap Closer**: Closes gaps up to N pixels wide
 - **Line Straightener**: Snaps nearly-straight lines to perfect angles (horizontal, vertical, 45°)
 - **Curve Smoother**: Smooths curves using moving average
 - **Corner Sharpener**: Detects and sharpens rounded corners
 
 **Options**:
+
 - `closeGaps`: Enable gap closing (default: true)
 - `maxGapSize`: Maximum gap size to close (1-5 pixels, default: 3)
 - `straightenLines`: Snap to angles (default: false)
@@ -136,6 +149,7 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Combines multiple cleanup operations into a single intelligent pass optimized for logo/icon preparation.
 
 **Pipeline Order**:
+
 1. Stray removal
 2. Color reduction
 3. Edge crispening
@@ -143,6 +157,7 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 5. Outline perfecting
 
 **Presets**:
+
 - **Logo - Minimal**: Light cleanup, preserve style
 - **Logo - Standard**: Balanced cleanup (default)
 - **Logo - Aggressive**: Maximum cleanup for rough sources
@@ -151,6 +166,7 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 - **Print Ready**: Highest quality, no artifacts
 
 **Options**:
+
 - `preset`: Preset name or custom options
 - Fine-tune sliders for each operation
 
@@ -163,6 +179,7 @@ The cleanup tools system provides 8 specialized tools designed to eliminate nois
 **Purpose**: Provides precision tools for manual cleanup with helpful visualization overlays.
 
 **Features**:
+
 - **Problem Highlighter**: Overlay modes that highlight issues:
   - Stray pixels (isolated) - Red
   - Jaggy edges (staircases) - Yellow
@@ -191,6 +208,7 @@ Located in `src/lib/cleanup/utils/`:
 ### Web Worker
 
 The cleanup worker (`src/lib/workers/cleanupWorker.ts`) handles CPU-intensive operations:
+
 - Connected component analysis
 - K-means clustering
 - Edge detection (Sobel)
@@ -201,6 +219,7 @@ Operations automatically use the worker for large images (>500x500px) or when ex
 ### Tool Integration
 
 All cleanup tools:
+
 - Integrate with History system (undo/redo support)
 - Work with layer system (active layer, respect locking)
 - Support selection (apply to selection if active, otherwise entire canvas/layer)
@@ -305,12 +324,3 @@ const logoCleaned = await cleanLogo(imageData, {
 - Real-time preview for all tools
 - Custom palette import/export
 - Dithering support for color reduction
-
-
-
-
-
-
-
-
-

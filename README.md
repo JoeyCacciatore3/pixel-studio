@@ -104,6 +104,7 @@ npm start
 Pixel Studio includes comprehensive E2E tests with MCP (Model Context Protocol) agent integration for enhanced testing capabilities.
 
 **Quick Start:**
+
 ```bash
 # Verify MCP agents are available
 npx tsx scripts/verify-mcp-agents.ts
@@ -116,6 +117,7 @@ npm run test:e2e:report:mcp
 ```
 
 **MCP Setup:**
+
 1. MCP servers should be configured in `~/.cursor/mcp.json`
 2. Optional environment variables:
    - `CONTEXT7_API_KEY` - For Context7 documentation lookup
@@ -125,6 +127,7 @@ npm run test:e2e:report:mcp
 **Note**: All MCP features work with functional fallbacks if MCP agents are unavailable. Tests will run successfully with or without MCP agents.
 
 **Documentation:**
+
 - [MCP Agent Integration Guide](docs/MCP_AGENT_INTEGRATION.md) - Detailed MCP integration documentation
 - [Test Running Guide](docs/TEST_RUNNING_GUIDE.md) - Step-by-step test execution guide
 - [MCP Testing Guide](docs/MCP_TESTING_GUIDE.md) - Comprehensive MCP testing documentation

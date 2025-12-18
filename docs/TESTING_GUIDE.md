@@ -78,6 +78,7 @@ npx tsx scripts/verify-mcp-agents.ts
 ```
 
 This will:
+
 - Test all MCP agents (Context7, Memory, Sequential-Thinking, Coding-Agent, Firecrawl)
 - Report which agents are available
 - Show latency for each agent
@@ -90,6 +91,7 @@ This will:
 ### Test Files
 
 **Core Test Suites:**
+
 - `tests/e2e/browser-compatibility.spec.ts` - Cross-browser compatibility tests
 - `tests/e2e/mobile-touch.spec.ts` - Mobile touch interaction tests
 - `tests/e2e/canvas-functions.spec.ts` - Canvas operations (clear, undo, redo, upload)
@@ -97,6 +99,7 @@ This will:
 - `tests/e2e/tools.spec.ts` - Tool functionality tests
 
 **Comprehensive Test Suites (State Management & Error Handling):**
+
 - `tests/e2e/initialization.spec.ts` - App initialization, error recovery, retry mechanisms, error boundaries
 - `tests/e2e/state-management.spec.ts` - State updates, persistence, concurrent modifications, invalid transitions
 - `tests/e2e/canvas-operations.spec.ts` - Canvas resize during operations, context loss, locked layers, invalid coordinates
@@ -111,10 +114,12 @@ This will:
 - `tests/e2e/integration-scenarios.spec.ts` - Complete workflows with errors, recovery scenarios, browser navigation
 
 **MCP-Enhanced Test Suites:**
+
 - `tests/e2e/visual-regression.spec.ts` - Automated visual regression testing
 - `tests/e2e/performance-monitoring.spec.ts` - Continuous performance monitoring
 
 **Test Helpers:**
+
 - `tests/e2e/helpers/canvas-helpers.ts` - Canvas operations, drawing, state management utilities
 - `tests/e2e/helpers/state-helpers.ts` - State management testing utilities
 - `tests/e2e/helpers/error-helpers.ts` - Error injection and detection utilities
@@ -124,17 +129,20 @@ This will:
 - `tests/e2e/helpers/test-constants.ts` - Shared constants (APP_URL, timeouts, delays)
 
 **MCP Integration Helpers:**
+
 - `tests/e2e/helpers/mcp-playwright-helpers.ts` - Playwright MCP integration for test execution and debugging
 - `tests/e2e/helpers/mcp-context7-helpers.ts` - Context7 integration for documentation and best practices
 - `tests/e2e/helpers/mcp-memory-helpers.ts` - Memory MCP integration for test pattern learning
 - `tests/e2e/helpers/visual-regression-helpers.ts` - Visual regression testing utilities
 
 **MCP Scripts:**
+
 - `scripts/mcp-test-runner.ts` - MCP-powered test execution with smart selection
 - `scripts/mcp-test-generator.ts` - AI-powered test generation from descriptions
 - `scripts/mcp-report-generator.ts` - Enhanced test reporting with insights
 
 **Configuration:**
+
 - `tests/e2e/playwright.config.ts` - Playwright configuration (MCP-enhanced)
 - `tests/e2e/mcp-config.json` - MCP tool configuration and settings
 
@@ -415,6 +423,7 @@ test('example test', async ({ page }) => {
 ### Available Helpers
 
 **Canvas Helpers** (`canvas-helpers.ts`):
+
 - `waitForCanvasReady()` - Wait for canvas to be initialized
 - `selectTool()` - Select a tool with retry logic
 - `drawStroke()` - Draw a stroke on the canvas
@@ -427,36 +436,42 @@ test('example test', async ({ page }) => {
 - `resizeCanvas()` - Resize canvas dimensions
 
 **State Helpers** (`state-helpers.ts`):
+
 - `waitForStateManagerReady()` - Wait for StateManager to be initialized
 - `getStateProperty()` - Get a state property value
 - `waitForStateChange()` - Wait for state property to change
 - `checkStateConsistency()` - Verify state consistency
 
 **Error Helpers** (`error-helpers.ts`):
+
 - `captureConsoleErrors()` - Capture browser console errors
 - `expectNoCriticalErrors()` - Assert no critical errors occurred
 - `expectErrorToContain()` - Assert error contains substring
 - `collectConsoleErrors()` - Collect console errors with filtering
 
 **Browser Helpers** (`browser-helpers.ts`):
+
 - `setOfflineMode()` - Set browser offline/online mode
 - `simulateStorageQuotaExceeded()` - Simulate storage quota errors
 - `clearAllStorage()` - Clear all browser storage
 - `reloadPageAndWaitForCanvas()` - Reload page and wait for canvas
 
 **Performance Helpers** (`performance-helpers.ts`):
+
 - `measureLoadTime()` - Measure page load time
 - `measureFCP()` - Measure First Contentful Paint
 - `measureMemoryUsage()` - Measure memory usage
 - `expectNoMemoryLeaks()` - Assert no memory leaks
 
 **Fail-Safes** (`fail-safes.ts`):
+
 - `withRetry()` - Retry operation with exponential backoff
 - `withTimeout()` - Execute operation with timeout
 - `verifyErrorRecovery()` - Verify error recovery mechanisms
 - `checkStateConsistency()` - Check state consistency after operations
 
 **Test Constants** (`test-constants.ts`):
+
 - `APP_URL` - Application URL (from env or default)
 - `TEST_TIMEOUTS` - Common timeout values
 - `WAIT_DELAYS` - Common wait delay values
@@ -467,12 +482,7 @@ test('example test', async ({ page }) => {
 
 ```typescript
 import { test, expect } from '@playwright/test';
-import {
-  waitForCanvasReady,
-  selectTool,
-  drawStroke,
-  APP_URL,
-} from './helpers/canvas-helpers';
+import { waitForCanvasReady, selectTool, drawStroke, APP_URL } from './helpers/canvas-helpers';
 import { waitForStateManagerReady } from './helpers/state-helpers';
 
 test.describe('Feature Name', () => {

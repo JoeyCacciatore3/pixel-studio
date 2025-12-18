@@ -48,7 +48,10 @@ export async function measureLoadTime(page: Page, url: string): Promise<number> 
 
   try {
     const currentUrl = page.url();
-    if (currentUrl === url || currentUrl.includes(url.replace('http://', '').replace('https://', ''))) {
+    if (
+      currentUrl === url ||
+      currentUrl.includes(url.replace('http://', '').replace('https://', ''))
+    ) {
       // Already on the page, reload to measure load time
       await page.reload({ waitUntil: 'load', timeout: 30000 });
     } else {
@@ -74,7 +77,7 @@ export async function measureFCP(page: Page): Promise<number | null> {
       try {
         // Check if FCP has already occurred
         const paintEntries = performance.getEntriesByType('paint') as PerformancePaintTiming[];
-        const existingFCP = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+        const existingFCP = paintEntries.find((entry) => entry.name === 'first-contentful-paint');
         if (existingFCP) {
           resolve(existingFCP.startTime);
           return;
@@ -173,31 +176,31 @@ export async function measureCanvasOperationPerformance(
   fps: number;
   frameCount: number;
 }> {
-  const startTime = Date.now()
+  const startTime = Date.now();
 
   // Monitor frame rate
   const frameMonitor = page.evaluate(() => {
     return new Promise<number>((resolve) => {
-      let frames = 0
-      const start = performance.now()
+      let frames = 0;
+      const start = performance.now();
 
       function countFrame() {
-        frames++
+        frames++;
         if (performance.now() - start < 1000) {
-          requestAnimationFrame(countFrame)
+          requestAnimationFrame(countFrame);
         } else {
-          resolve(frames)
+          resolve(frames);
         }
       }
 
-      requestAnimationFrame(countFrame)
-    })
-  })
+      requestAnimationFrame(countFrame);
+    });
+  });
 
-  await operation()
+  await operation();
 
-  const duration = Date.now() - startTime
-  const frameCount = await frameMonitor
+  const duration = Date.now() - startTime;
+  const frameCount = await frameMonitor;
   const fps = frameCount / (duration / 1000);
 
   return { duration, fps, frameCount };
@@ -299,8 +302,10 @@ export async function monitorPerformanceMetrics(
     }, duration);
   } catch (error: any) {
     // Handle navigation race condition
-    if (error.message?.includes('Execution context was destroyed') ||
-        error.message?.includes('navigation')) {
+    if (
+      error.message?.includes('Execution context was destroyed') ||
+      error.message?.includes('navigation')
+    ) {
       // Wait for navigation to complete and retry
       await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
       // Return default values if evaluation fails
@@ -534,7 +539,9 @@ export async function measureCoreWebVitals(page: Page): Promise<{
       clsObserver.observe({ entryTypes: ['layout-shift'] });
 
       // Measure TTFB
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
         vitals.ttfb = navigation.responseStart - navigation.requestStart;
       }
