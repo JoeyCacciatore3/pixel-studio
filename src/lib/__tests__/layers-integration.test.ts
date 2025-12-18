@@ -144,14 +144,15 @@ describe('Layer System Integration', () => {
     });
 
     it('should trigger layer rendering after putImageData', () => {
-      const renderSpy = vi.spyOn(Layers, 'renderLayers');
+      // Canvas.putImageData calls Layers.render() which is an alias for renderLayers()
+      const renderSpy = vi.spyOn(Layers, 'render');
       const layer = Layers.createLayer('Test Layer');
       Layers.setActiveLayer(layer.id);
 
       const imageData = new ImageData(512, 512);
       Canvas.putImageData(imageData);
 
-      // renderLayers should be called (it's called via putImageData)
+      // render should be called (it's called via putImageData)
       // Note: This tests the integration, actual render call happens internally
       expect(renderSpy).toHaveBeenCalled();
     });
@@ -209,12 +210,11 @@ describe('Layer System Integration', () => {
   describe('History Integration', () => {
     it('should save layer state in history', () => {
       // History is already initialized in beforeEach
-      // Save initial empty state first
-      History.save();
-
+      // Create a layer first (this automatically sets it as active)
       const layer = Layers.createLayer('Test Layer');
       Layers.setActiveLayer(layer.id);
 
+      // Now save - this should work because we have an active layer
       History.save();
 
       // History should contain layer state
@@ -224,15 +224,16 @@ describe('Layer System Integration', () => {
 
     it('should restore layer state on undo', () => {
       // History is already initialized in beforeEach
-      // Save initial empty state first
-      History.save();
-
+      // Create first layer and save
       const layer1 = Layers.createLayer('Layer 1');
+      Layers.setActiveLayer(layer1.id);
       History.save();
 
+      // Create second layer and save
       Layers.createLayer('Layer 2');
       History.save();
 
+      // Undo should restore to state with 1 layer
       History.undo();
 
       // Layer state should be restored to state with 1 layer
@@ -262,7 +263,7 @@ describe('Layer System Integration', () => {
   });
 
   describe('Canvas Operations Integration', () => {
-    it('should clear active layer when layers enabled', () => {
+    it('should clear active layer when layers enabled', async () => {
       const layer = Layers.createLayer('Test Layer');
       Layers.setActiveLayer(layer.id);
 
@@ -271,8 +272,8 @@ describe('Layer System Integration', () => {
       imageData.data.fill(255);
       Canvas.putImageData(imageData);
 
-      // Clear
-      Canvas.clear();
+      // Clear (async operation)
+      await Canvas.clear();
 
       // Layer should be cleared
       const cleared = Canvas.getImageData();
