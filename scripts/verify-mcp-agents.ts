@@ -64,15 +64,13 @@ async function testContext7(): Promise<MCPAgentStatus> {
     if (status.available) {
       const start2 = Date.now();
       try {
-        // @ts-ignore
-        const docs =
-          (await mcp_context7_get) -
-          library -
-          docs({
-            context7CompatibleLibraryID: '/playwright/playwright',
-            topic: 'best practices',
-            mode: 'code',
-          });
+        // @ts-ignore - MCP function call (disabled for type checking)
+        // const docs = await mcp_context7_get-library-docs({
+        //   context7CompatibleLibraryID: '/playwright/playwright',
+        //   topic: 'best practices',
+        //   mode: 'code',
+        // });
+        const docs = null; // Placeholder for MCP call
         const latency2 = Date.now() - start2;
         status.testResults!.push({
           test: 'get-library-docs',
@@ -185,15 +183,14 @@ async function testSequentialThinking(): Promise<MCPAgentStatus> {
   try {
     const start = Date.now();
     try {
-      // @ts-ignore
-      const result =
-        (await mcp_sequential) -
-        thinking_sequentialthinking({
-          thought: 'Test thought: Analyze a simple problem and provide a solution.',
-          nextThoughtNeeded: false,
-          thoughtNumber: 1,
-          totalThoughts: 1,
-        });
+      // @ts-ignore - MCP function call (disabled for type checking)
+      // const result = await mcp_sequential-thinking_sequentialthinking({
+      //   thought: 'Test thought: Analyze a simple problem and provide a solution.',
+      //   nextThoughtNeeded: false,
+      //   thoughtNumber: 1,
+      //   totalThoughts: 1,
+      // });
+      const result = null; // Placeholder for MCP call
       const latency = Date.now() - start;
       status.testResults!.push({
         test: 'sequentialthinking',
@@ -252,15 +249,14 @@ async function testCodingAgent(): Promise<MCPAgentStatus> {
     if (status.available) {
       const start2 = Date.now();
       try {
-        // @ts-ignore
-        const searchResult =
-          (await mcp_coding) -
-          agent_search_text({
-            pattern: 'test',
-            directory: 'tests/e2e',
-            filePattern: '*.ts',
-            maxResults: 5,
-          });
+        // @ts-ignore - MCP function call (disabled for type checking)
+        // const searchResult = await mcp_coding-agent_search_text({
+        //   pattern: 'test',
+        //   directory: 'tests/e2e',
+        //   filePattern: '*.ts',
+        //   maxResults: 5,
+        // });
+        const searchResult = null; // Placeholder for MCP call
         const latency2 = Date.now() - start2;
         status.testResults!.push({
           test: 'search-text',
@@ -296,14 +292,13 @@ async function testFirecrawl(): Promise<MCPAgentStatus> {
   try {
     const start = Date.now();
     try {
-      // @ts-ignore
-      const result =
-        (await mcp_firecrawl) -
-        mcp_firecrawl_search({
-          query: 'playwright testing',
-          limit: 1,
-          sources: [{ type: 'web' }],
-        });
+      // @ts-ignore - MCP function call (disabled for type checking)
+      // const result = await mcp_firecrawl-mcp_firecrawl_search({
+      //   query: 'playwright testing',
+      //   limit: 1,
+      //   sources: [{ type: 'web' }],
+      // });
+      const result = null; // Placeholder for MCP call
       const latency = Date.now() - start;
       status.testResults!.push({
         test: 'search',

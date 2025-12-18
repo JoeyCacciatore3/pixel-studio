@@ -166,7 +166,7 @@ export async function cleanLogo(
   let currentStage = 0;
 
   // Early exit: if image is very small, skip some operations
-  const isLargeImage = imageData.width * imageData.height > 1024 * 1024;
+  // const isLargeImage = imageData.width * imageData.height > 1024 * 1024;
 
   try {
     // Pipeline: Stray removal → Color reduction → Edge crispening → Edge smoothing → Outline perfecting

@@ -688,14 +688,16 @@ const WorkerManager = (function () {
         const callback =
           typeof callbackData === 'function'
             ? callbackData
-            : (
-                callbackData as {
-                  callback?: (
-                    result: ImageData | Float32Array | null,
-                    error: string | null
-                  ) => void;
-                }
-              )?.callback;
+            : callbackData && typeof callbackData === 'object'
+              ? (
+                  callbackData as {
+                    callback?: (
+                      result: ImageData | Float32Array | null,
+                      error: string | null
+                    ) => void;
+                  }
+                )?.callback
+              : undefined;
 
         if (callback) {
           pendingCleanupOps.delete(id);
@@ -768,7 +770,20 @@ const WorkerManager = (function () {
       };
 
       if (progressCallback) {
-        pendingCleanupOps.set(id, { callback, progressCallback });
+        const cleanupCallbackData = {
+          callback,
+          progressCallback,
+        };
+        pendingCleanupOps.set(
+          id,
+          cleanupCallbackData as unknown as (
+            result: ImageData | Float32Array | null,
+            error: string | null
+          ) => void | {
+            callback: (result: ImageData | Float32Array | null, error: string | null) => void;
+            progressCallback?: ProgressCallback;
+          }
+        );
       } else {
         pendingCleanupOps.set(id, callback);
       }

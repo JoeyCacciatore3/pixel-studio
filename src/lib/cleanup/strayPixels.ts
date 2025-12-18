@@ -11,7 +11,7 @@ export interface StrayPixelOptions {
   minSize: number; // Minimum cluster size (1-10 pixels)
   merge: boolean; // Merge small regions into nearest neighbor instead of deleting
   useWorker: boolean; // Use Web Worker for large images
-  onProgress?: (progress: number, stage: string) => void; // Progress callback
+  onProgress?: (progress: number, stage?: string) => void; // Progress callback
 }
 
 /**
