@@ -1,21 +1,41 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+// Ensure ImageData is available in test environment
+if (typeof ImageData === 'undefined') {
+  // @ts-ignore - Polyfill for Node.js test environment
+  global.ImageData = class ImageData {
+    data: Uint8ClampedArray;
+    width: number;
+    height: number;
+
+    constructor(widthOrData: number | Uint8ClampedArray, height?: number) {
+      if (typeof widthOrData === 'number') {
+        this.width = widthOrData;
+        this.height = height || widthOrData;
+        this.data = new Uint8ClampedArray(this.width * this.height * 4);
+      } else {
+        this.data = widthOrData;
+        this.width = height || 1;
+        this.height = widthOrData.length / (4 * (height || 1));
+      }
+    }
+  };
+}
+
 // Mock canvas for testing
 const mockContext = {
   fillRect: vi.fn(),
   clearRect: vi.fn(),
-  getImageData: vi.fn(() => ({
-    data: new Uint8ClampedArray(4),
-    width: 1,
-    height: 1,
-  })),
+  getImageData: vi.fn(() => {
+    const data = new Uint8ClampedArray(512 * 512 * 4);
+    return new ImageData(data, 512, 512);
+  }),
   putImageData: vi.fn(),
-  createImageData: vi.fn(() => ({
-    data: new Uint8ClampedArray(4),
-    width: 1,
-    height: 1,
-  })),
+  createImageData: vi.fn((width: number, height?: number) => {
+    const data = new Uint8ClampedArray((width || 1) * (height || width || 1) * 4);
+    return new ImageData(data, width || 1, height || width || 1);
+  }),
   setTransform: vi.fn(),
   drawImage: vi.fn(),
   save: vi.fn(),

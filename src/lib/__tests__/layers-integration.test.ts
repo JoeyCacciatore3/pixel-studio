@@ -6,8 +6,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import Layers from '../layers';
 import Canvas from '../canvas';
+import CanvasUtils from '../canvasUtils';
+import StateManager from '../stateManager';
 import PixelStudio from '../app';
 import History from '../history';
+import type { AppState } from '../types';
 
 describe('Layer System Integration', () => {
   let mockCanvas: HTMLCanvasElement;
@@ -19,6 +22,51 @@ describe('Layer System Integration', () => {
     mockCanvas.width = 512;
     mockCanvas.height = 512;
     mockContext = mockCanvas.getContext('2d')!;
+
+    // Initialize CanvasUtils first (required by Layers.init)
+    CanvasUtils.init(mockCanvas, 512, 512, 1);
+
+    // Initialize StateManager with minimal state
+    const initialState: AppState = {
+      currentTool: 'pencil',
+      currentColor: '#000000',
+      currentAlpha: 255,
+      brushSize: 10,
+      brushHardness: 100,
+      brushOpacity: 100,
+      brushFlow: 100,
+      brushSpacing: 25,
+      brushJitter: 0,
+      brushTexture: null,
+      brushScatter: 0,
+      brushAngle: 0,
+      brushRoundness: 100,
+      pressureEnabled: false,
+      pressureSize: false,
+      pressureOpacity: false,
+      pressureFlow: false,
+      pressureCurve: 'linear',
+      stabilizerStrength: 0,
+      tolerance: 32,
+      zoom: 1,
+      selection: null,
+      colorRangeSelection: null,
+      selectionMode: 'replace',
+      selectionFeather: 0,
+      selectionAntiAlias: true,
+      imageLayer: null,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      layers: [],
+      activeLayerId: null,
+    };
+    StateManager.init(initialState);
+
+    // Initialize Canvas module (required for Layers)
+    Canvas.init(mockCanvas, undefined, true);
+
+    // Initialize History module (required for some integration tests)
+    History.init(true);
 
     // Mock Canvas module methods
     vi.spyOn(Canvas, 'getWidth').mockReturnValue(512);
@@ -160,10 +208,13 @@ describe('Layer System Integration', () => {
 
   describe('History Integration', () => {
     it('should save layer state in history', () => {
+      // History is already initialized in beforeEach
+      // Save initial empty state first
+      History.save();
+
       const layer = Layers.createLayer('Test Layer');
       Layers.setActiveLayer(layer.id);
 
-      History.init(true); // Enable layers in history
       History.save();
 
       // History should contain layer state
@@ -172,8 +223,11 @@ describe('Layer System Integration', () => {
     });
 
     it('should restore layer state on undo', () => {
+      // History is already initialized in beforeEach
+      // Save initial empty state first
+      History.save();
+
       const layer1 = Layers.createLayer('Layer 1');
-      History.init(true);
       History.save();
 
       Layers.createLayer('Layer 2');
@@ -181,14 +235,18 @@ describe('Layer System Integration', () => {
 
       History.undo();
 
-      // Layer state should be restored
+      // Layer state should be restored to state with 1 layer
       const layers = Layers.getAllLayers();
       expect(layers.length).toBe(1);
+      expect(layers[0]?.name).toBe('Layer 1');
     });
 
     it('should restore layer state on redo', () => {
+      // History is already initialized in beforeEach
+      // Save initial empty state first
+      History.save();
+
       const layer1 = Layers.createLayer('Layer 1');
-      History.init(true);
       History.save();
 
       Layers.createLayer('Layer 2');
@@ -197,7 +255,7 @@ describe('Layer System Integration', () => {
       History.undo();
       History.redo();
 
-      // Layer state should be restored
+      // Layer state should be restored to state with 2 layers
       const layers = Layers.getAllLayers();
       expect(layers.length).toBe(2);
     });

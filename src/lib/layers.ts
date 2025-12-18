@@ -1556,6 +1556,8 @@ const Layers = (function () {
     off: EventEmitter.off.bind(EventEmitter),
     // OPTIMIZATION (Item 6): Expose bounds update function for drawing tools
     updateLayerBounds,
+    // Expose getActiveLayerId for testing
+    getActiveLayerId,
   };
 })();
 

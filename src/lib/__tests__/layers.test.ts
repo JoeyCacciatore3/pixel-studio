@@ -6,6 +6,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import Layers from '../layers';
 import Canvas from '../canvas';
+import CanvasUtils from '../canvasUtils';
+import StateManager from '../stateManager';
+import type { AppState } from '../types';
 
 describe('Layer System', () => {
   let mockCanvas: HTMLCanvasElement;
@@ -17,6 +20,48 @@ describe('Layer System', () => {
     mockCanvas.width = 512;
     mockCanvas.height = 512;
     mockContext = mockCanvas.getContext('2d')!;
+
+    // Initialize CanvasUtils first (required by Layers.init)
+    CanvasUtils.init(mockCanvas, 512, 512, 1);
+
+    // Initialize StateManager with minimal state
+    const initialState: AppState = {
+      currentTool: 'pencil',
+      currentColor: '#000000',
+      currentAlpha: 255,
+      brushSize: 10,
+      brushHardness: 100,
+      brushOpacity: 100,
+      brushFlow: 100,
+      brushSpacing: 25,
+      brushJitter: 0,
+      brushTexture: null,
+      brushScatter: 0,
+      brushAngle: 0,
+      brushRoundness: 100,
+      pressureEnabled: false,
+      pressureSize: false,
+      pressureOpacity: false,
+      pressureFlow: false,
+      pressureCurve: 'linear',
+      stabilizerStrength: 0,
+      tolerance: 32,
+      zoom: 1,
+      selection: null,
+      colorRangeSelection: null,
+      selectionMode: 'replace',
+      selectionFeather: 0,
+      selectionAntiAlias: true,
+      imageLayer: null,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      layers: [],
+      activeLayerId: null,
+    };
+    StateManager.init(initialState);
+
+    // Initialize Canvas module (required for Layers)
+    Canvas.init(mockCanvas, undefined, true);
 
     // Mock Canvas module methods
     vi.spyOn(Canvas, 'getWidth').mockReturnValue(512);
@@ -324,8 +369,9 @@ describe('Layer System', () => {
       // Opacity should be clamped by updateLayer or layer rendering
       Layers.updateLayer(layer.id, { opacity: 1.5 });
       const updated = Layers.getLayer(layer.id);
-      // Note: Actual clamping might be handled elsewhere
-      expect(updated?.opacity).toBe(1.5); // May need clamping in updateLayer
+      // Opacity should be clamped to valid range (0-1)
+      expect(updated?.opacity).toBeLessThanOrEqual(1);
+      expect(updated?.opacity).toBeGreaterThanOrEqual(0);
     });
   });
 });
