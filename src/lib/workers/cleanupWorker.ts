@@ -383,12 +383,12 @@ self.onmessage = async (e) => {
 
         // Report progress: 0% - Starting
         self.postMessage({ type: 'progress', progress: 0, stage: 'Analyzing components...', id });
-        
+
         const components = findConnectedComponents(imageData, isForeground, 8);
-        
+
         // Report progress: 50% - Processing
         self.postMessage({ type: 'progress', progress: 50, stage: 'Removing stray pixels...', id });
-        
+
         const result = new ImageData(imageData.width, imageData.height);
         result.data.set(imageData.data);
 
@@ -448,7 +448,7 @@ self.onmessage = async (e) => {
 
         // Report progress: 100% - Complete
         self.postMessage({ type: 'progress', progress: 100, stage: 'Complete', id });
-        
+
         self.postMessage(
           { type: 'success', data: { imageData: result }, id },
           [result.data.buffer]
@@ -458,10 +458,10 @@ self.onmessage = async (e) => {
 
       case 'quantize-colors': {
         const { imageData, nColors } = data;
-        
+
         // Report progress: 0% - Starting
         self.postMessage({ type: 'progress', progress: 0, stage: 'Initializing K-means...', id });
-        
+
         // Report progress: 25% - Clustering
         const palette = kmeansClustering(imageData, nColors, 20);
         self.postMessage({ type: 'progress', progress: 50, stage: 'Generating palette...', id });
@@ -494,7 +494,7 @@ self.onmessage = async (e) => {
           result.data[i] = nearest.r;
           result.data[i + 1] = nearest.g;
           result.data[i + 2] = nearest.b;
-          
+
           // Report progress: 50-95% - Assigning colors
           if ((i / 4) % Math.floor(totalPixels / 10) === 0) {
             const progress = 50 + Math.floor((i / imageData.data.length) * 45);
@@ -504,7 +504,7 @@ self.onmessage = async (e) => {
 
         // Report progress: 100% - Complete
         self.postMessage({ type: 'progress', progress: 100, stage: 'Complete', id });
-        
+
         self.postMessage(
           { type: 'success', data: { imageData: result, palette }, id },
           [result.data.buffer]
