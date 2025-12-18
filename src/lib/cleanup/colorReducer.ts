@@ -163,7 +163,7 @@ function kmeansClusteringMainThread(
   k: number,
   maxIterations: number = 20
 ): Array<{ r: number; g: number; b: number }> {
-  const { width, height, data } = imageData;
+  const { data } = imageData;
   const pixels: Array<{ r: number; g: number; b: number; index: number }> = [];
 
   // Extract all opaque pixels
@@ -270,13 +270,17 @@ async function quantizeColors(
         WorkerManager.initCleanupWorker();
       }
 
+      const progressCallback: ((progress: number, stage?: string) => void) | undefined = onProgress
+        ? (progress: number, stage?: string) => onProgress(progress, stage || '')
+        : undefined;
+
       const result = (await WorkerManager.executeCleanupOperation(
         'quantize-colors',
         {
           imageData,
           nColors,
         },
-        onProgress
+        progressCallback
       )) as ImageData;
 
       return result;
@@ -307,7 +311,15 @@ export async function reduceColorNoise(
   imageData: ImageData,
   options: ColorReducerOptions
 ): Promise<ImageData> {
-  const { mode, threshold = 15, nColors = 16, palette, useWorker = true, useLab = true, onProgress } = options;
+  const {
+    mode,
+    threshold = 15,
+    nColors = 16,
+    palette,
+    useWorker = true,
+    useLab = true,
+    onProgress,
+  } = options;
 
   switch (mode) {
     case 'auto-clean':
